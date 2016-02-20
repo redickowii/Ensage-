@@ -493,7 +493,6 @@ namespace NagaSharp
                                     JungleCamps.Find(x => x.id == illusionCamps.id).stacking = false;
                                     JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).illusion = illusion;
                                     JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).stacking = true;
-                                    Game.PrintMessage("WARNING",MessageType.LogMessage);
                                 }
                                 else if (seconds >= illusionCamps.starttime - 2)
                                 {
@@ -562,9 +561,10 @@ namespace NagaSharp
                         {
                             illusion.Move(illusionCamps.position);
                         }
-                        else if (menuValue.IsEnabled(E.Name) && E.CanBeCasted() && Creepcountall(ERadius) >= Creepcountall(600) / 2)
+                        else
                         {
-                            E.UseAbility();
+                            if (E.CanBeCasted() && menuValue.IsEnabled(E.Name) && Creepcountall(ERadius) >= Creepcountall(600) / 2)
+                                E.UseAbility();
                             illusion.Attack(GetNearestCreepToPull(illusionCamps.illusion, 500));
                         }
                     }
