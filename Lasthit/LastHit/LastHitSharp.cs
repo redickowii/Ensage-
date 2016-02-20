@@ -182,23 +182,30 @@ namespace LastHit
                     {
                         creepTarget = GetLowestHPCreep(me, null);
                         creepTarget = KillableCreep(false, creepTarget,ref wait);
-                        if (creepTarget.Distance2D(me) > me.AttackRange && creepTarget != null)
+                        if (creepTarget != null)
                         {
-                            me.Move(creepTarget.Position);
+                            if (creepTarget.Distance2D(me) > me.AttackRange && creepTarget != null)
+                            {
+                                me.Move(creepTarget.Position);
+                            }
+                            else if ((creepTarget.Health) < GetPhysDamageOnUnit(creepTarget, 0)*3 &&
+                                     (creepTarget.Health) >= GetPhysDamageOnUnit(creepTarget, 0) && creepTarget != null &&
+                                     Utils.SleepCheck("stop"))
+                            {
+                                Utils.Sleep(aPoint + Game.Ping, "stop");
+                                me.Attack(creepTarget);
+                                me.Hold();
+                            }
+                            else if ((creepTarget.Health) < GetPhysDamageOnUnit(creepTarget, 0) &&
+                                     creepTarget != null)
+                            {
+                                me.Attack(creepTarget);
+                            }
                         }
-                        else if ((creepTarget.Health) < GetPhysDamageOnUnit(creepTarget, 0)*3 && (creepTarget.Health) >= GetPhysDamageOnUnit(creepTarget, 0) && creepTarget!=null && Utils.SleepCheck("stop"))
+                        else
                         {
-                            Utils.Sleep(aPoint + Game.Ping, "stop");
-                            me.Attack(creepTarget);
-                            me.Hold();
-                        }
-                        else if ((creepTarget.Health) < GetPhysDamageOnUnit(creepTarget, 0)  && creepTarget != null)
-                        {
-                            me.Attack(creepTarget);
-                        }
-                        /*else if (creepTarget == null)
-                        {
-                            if (target != null && !target.IsVisible)
+                            me.Move(Game.MousePosition);
+                            /*if (target != null && !target.IsVisible)
                             {
                                 var closestToMouse = me.ClosestToMouseTarget(500);
                                 if (closestToMouse != null)
@@ -208,8 +215,8 @@ namespace LastHit
                                 target = me.BestAATarget();
                             else
                                 target = null; 
-                            Orbwalking.Orbwalk(target, 500);
-                        }*/
+                            Orbwalking.Orbwalk(target, 500);*/
+                        }
                     }
                 }
             }
