@@ -156,11 +156,10 @@ namespace LastHit
             }
             var canCancel = Orbwalking.CanCancelAnimation();
             bool wait = false;
-
-            aPoint = ((UnitDatabase.GetAttackPoint(me) * 100) / (1 + me.AttackSpeedValue)) * 1000;
+            var rnd = new Random();
+            aPoint = me.SecondsPerAttack * rnd.Next(100,600);
             aRange = me.AttackRange;
             outrange = Menu.Item("outrange").GetValue<Slider>().Value;
-           
             if (canCancel)
             {
                 if (target != null && !target.IsVisible && !Orbwalking.AttackOnCooldown(target))
@@ -190,7 +189,7 @@ namespace LastHit
                             }
                             else if ((creepTarget.Health) < GetPhysDamageOnUnit(creepTarget, 0)*3 &&
                                      (creepTarget.Health) >= GetPhysDamageOnUnit(creepTarget, 0) && creepTarget != null &&
-                                     Utils.SleepCheck("stop"))
+                                     creepTarget.Team != me.Team && Utils.SleepCheck("stop"))
                             {
                                 Utils.Sleep(aPoint + Game.Ping, "stop");
                                 me.Attack(creepTarget);
