@@ -105,7 +105,7 @@ namespace NagaSharp
 
             JungleCamps.Add(new JungleCamps { position = new Vector3(-1708, -4284, 256), stackPosition = new Vector3(-2776, -3144, 256), waitPosition = new Vector3(-1971, -3949, 256), team = 2, id = 1, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 55 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(-266, -3176, 256), stackPosition = new Vector3(-522, -1351, 256), waitPosition = new Vector3(-325, -2699, 256), team = 2, id = 2, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 55 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(1656, -3714, 384), stackPosition = new Vector3(1263, -6041, 384), waitPosition = new Vector3(1612, -4277, 384), team = 2, id = 3, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
+            JungleCamps.Add(new JungleCamps { position = new Vector3(1656, -3714, 384), stackPosition = new Vector3(1263, -6041, 384), waitPosition = new Vector3(1612, -4277, 384), team = 2, id = 3, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 54 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(3016, -4692, 384), stackPosition = new Vector3(4777, -4954, 384), waitPosition = new Vector3(3074, -4955, 384), team = 2, id = 4, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(4474, -3598, 384), stackPosition = new Vector3(2755, -4001, 384), waitPosition = new Vector3(4121, -3902, 384), team = 2, id = 5, farming = false, empty = false, lvlReq = 1, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(-3617, 805, 384), stackPosition = new Vector3(-5268, 1400, 384), waitPosition = new Vector3(-3835, 643, 384), team = 2, id = 6, farming = false, empty = false, lvlReq = 12, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
@@ -113,7 +113,7 @@ namespace NagaSharp
             JungleCamps.Add(new JungleCamps { position = new Vector3(-2981, 4591, 384), stackPosition = new Vector3(-3248, 5993, 384), waitPosition = new Vector3(-3055, 4837, 384), team = 3, id = 8, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(-392, 3652, 384), stackPosition = new Vector3(-224, 5088, 384), waitPosition = new Vector3(-503, 3955, 384), team = 3, id = 9, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 55 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(-1524, 2641, 256), stackPosition = new Vector3(-1266, 4273, 384), waitPosition = new Vector3(-1465, 2908, 256), team = 3, id = 10, farming = false, empty = false, lvlReq = 1, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(1098, 3338, 384), stackPosition = new Vector3(-1266, 4273, 384), waitPosition = new Vector3(975, 3586, 384), team = 3, id = 11, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
+            JungleCamps.Add(new JungleCamps { position = new Vector3(1098, 3338, 384), stackPosition = new Vector3(910, 5003, 384), waitPosition = new Vector3(975, 3586, 384), team = 3, id = 11, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
             JungleCamps.Add(new JungleCamps { position = new Vector3(4141, 554, 384), stackPosition = new Vector3(2987, -2, 384), waitPosition = new Vector3(3876, 506, 384), team = 3, id = 12, farming = false, empty = false, lvlReq = 12, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
 
             JungleCamps.Add(new JungleCamps { position = new Vector3(9999, 9999, 9999), id = 13 }); 
@@ -494,17 +494,11 @@ namespace NagaSharp
                                     JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).illusion = illusion;
                                     JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).stacking = true;
                                 }
-                                else if (seconds >= illusionCamps.starttime - 2)
+                                else if (seconds >= illusionCamps.starttime - 5)
                                 {
                                     closestNeutral = GetNearestCreepToPull(illusionCamps.illusion, 800);
                                     stackPosition = illusionCamps.stackPosition;
-                                    var stackDuration = Math.Min((GetDistance2D(closestNeutral.Position, illusionCamps.stackPosition) + (creepscount * 45))/Math.Min(closestNeutral.MovementSpeed, movementspeed),9);
-                                    if (closestNeutral.IsRanged && creepscount <= 4)
-                                        stackDuration = Math.Min((GetDistance2D(closestNeutral.Position, illusionCamps.stackPosition) + closestNeutral.AttackRange + (creepscount * 45))/Math.Min(closestNeutral.MovementSpeed, movementspeed), 9);
-                                    var moveTime = illusionCamps.starttime -(GetDistance2D(illusionCamps.illusion.Position,closestNeutral.Position) + 50)/movementspeed;
-                                    if (stackDuration > 0)
-                                        moveTime = illusionCamps.starttime - stackDuration - (GetDistance2D(illusionCamps.illusion.Position,closestNeutral.Position) + closestNeutral.RingRadius)/Math.Min(closestNeutral.MovementSpeed, movementspeed);
-                                    //Game.PrintMessage(illusionCamps.starttime + " - " + stackDuration + " - " +(GetDistance2D(illusionCamps.illusion.Position,closestNeutral.Position) + closestNeutral.RingRadius)/Math.Min(closestNeutral.MovementSpeed, movementspeed), MessageType.LogMessage);
+                                    var moveTime = illusionCamps.starttime - (GetDistance2D(illusionCamps.illusion.Position,closestNeutral.Position) + (closestNeutral.IsRanged ? closestNeutral.AttackRange : closestNeutral.RingRadius) ) / movementspeed;
                                     illusionCamps.AttackTime = (int) moveTime;
                                     illusionCamps.State = 2;
                                 }
