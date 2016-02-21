@@ -57,7 +57,7 @@ namespace LastHit
          {
              var attackRange = me.GetAttackRange();
              var enemies =
-                 ObjectMgr.GetEntities<Unit>()
+                 ObjectManager.GetEntities<Unit>()
                      .Where(
                          x =>
                          (x.ClassID == ClassID.CDOTA_BaseNPC_Tower || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
@@ -123,7 +123,7 @@ namespace LastHit
         {
             if (!isloaded)
             {
-                me = ObjectMgr.LocalHero;
+                me = ObjectManager.LocalHero;
                 if (!Game.IsInGame || me == null)
                 {
                     return;
@@ -135,7 +135,7 @@ namespace LastHit
             if (me == null || !me.IsValid)
             {
                 isloaded = false;
-                me = ObjectMgr.LocalHero;
+                me = ObjectManager.LocalHero;
                 target = null;
                 return;
             }
@@ -217,33 +217,32 @@ namespace LastHit
                         }
                     }
                 }
-            }
-
-            if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key))
-            {
-                if (creepTarget == null || !creepTarget.IsValid || !creepTarget.IsVisible || !creepTarget.IsAlive || creepTarget.Health <= 0 || !Orbwalking.AttackOnCooldown(creepTarget))
+                if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key))
                 {
-                    creepTarget = GetLowestHPCreep(me, null);
-                    creepTarget = KillableCreep(true, creepTarget, ref wait);
+                    if (creepTarget == null || !creepTarget.IsValid || !creepTarget.IsVisible || !creepTarget.IsAlive || creepTarget.Health <= 0 || !Orbwalking.AttackOnCooldown(creepTarget))
+                    {
+                        creepTarget = GetLowestHPCreep(me, null);
+                        creepTarget = KillableCreep(true, creepTarget, ref wait);
+                    }
+                    if (creepTarget != null)
+                    {
+                        Orbwalking.Orbwalk(creepTarget, 500);
+                    }
                 }
-                else if (creepTarget != null)
+
+                if (Game.IsKeyDown(Menu.Item("combatkey").GetValue<KeyBind>().Key))
                 {
-                    Orbwalking.Orbwalk(creepTarget);
+                    Orbwalking.Orbwalk(target, attackmodifiers: true);
                 }
-            }
 
-            if (Game.IsKeyDown(Menu.Item("combatkey").GetValue<KeyBind>().Key))
-            {
-                Orbwalking.Orbwalk(target, attackmodifiers: true);
-            }
-
-            if (Game.IsKeyDown(Menu.Item("kitekey").GetValue<KeyBind>().Key))
-            {
-                Orbwalking.Orbwalk(
-                    target,
-                    attackmodifiers: true,
-                    bonusWindupMs: Menu.Item("bonusWindup").GetValue<Slider>().Value);
-            }
+                if (Game.IsKeyDown(Menu.Item("kitekey").GetValue<KeyBind>().Key))
+                {
+                    Orbwalking.Orbwalk(
+                        target,
+                        attackmodifiers: true,
+                        bonusWindupMs: Menu.Item("bonusWindup").GetValue<Slider>().Value);
+                }
+            } 
         }
 
         #endregion
@@ -256,7 +255,7 @@ namespace LastHit
             {
                 var attackRange = source.GetAttackRange();
                 var lowestHp =
-                    ObjectMgr.GetEntities<Unit>()
+                    ObjectManager.GetEntities<Unit>()
                         .Where(
                             x =>
                             (x.ClassID == ClassID.CDOTA_BaseNPC_Tower || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
@@ -285,7 +284,7 @@ namespace LastHit
             {
                 var attackRange = source.GetAttackRange();
                 var lowestHp =
-                    ObjectMgr.GetEntities<Unit>()
+                    ObjectManager.GetEntities<Unit>()
                         .Where(
                             x =>
                             (x.ClassID == ClassID.CDOTA_BaseNPC_Tower || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
@@ -310,12 +309,9 @@ namespace LastHit
         }
         private static Unit KillableCreep(bool islaneclear, Unit minion,ref bool wait)
         {
-
             double test = 0;
             if (minion != null)
             {
-
-
                 var missilespeed = GetProjectileSpeed(me);
                 var time = me.IsRanged == false ? 0 : UnitDatabase.GetAttackBackswing(me) + (me.Distance2D(minion) / missilespeed);
                 if (time >= minion.AttackSpeedValue)
@@ -323,20 +319,21 @@ namespace LastHit
                     test = time * minion.AttacksPerSecond * minion.MinimumDamage;
                 }
 
-                if (minion != null && (minion.Health) < GetPhysDamageOnUnit(creepTarget, 0) * 1.5)
+                if (minion.Health < GetPhysDamageOnUnit(creepTarget, 0)*1.5)
                 {
-
                     if (me.CanAttack())
-                    {
                         return minion;
-                    }
+                }
+                if (islaneclear)
+                {
+                    return minion;
                 }
 
                 if (Menu.Item("denied").GetValue<bool>())
                 {
                     Unit minion2 = GetAllLowestHPCreep(me);
                     test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                    if (minion2 != null && (minion2.Health) < GetPhysDamageOnUnit(minion2, test) * 1.5 && minion2.Team == me.Team)
+                    if (minion2.Health < GetPhysDamageOnUnit(minion2, test) * 1.5 && minion2.Team == me.Team)
                     {
                         if (me.CanAttack())
                             return minion2;
@@ -354,17 +351,8 @@ namespace LastHit
                             return minion2;
                     }
                 }
-
-
-                if (minion != null && (minion.Health) >= GetPhysDamageOnUnit(minion, test) && (minion.Health) <= (GetPhysDamageOnUnit(minion, test) + me.MinimumDamage * 2))
-                {
-                    {
-                        return null;
-                    }
-                }
             }
-            //Console.WriteLine("test " + test );
-            return islaneclear == true ? minion : null;
+            return null;
         }
         private static double GetPhysDamageOnUnit(Unit unit, double bonusdamage)
         {
