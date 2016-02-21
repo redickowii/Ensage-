@@ -204,8 +204,7 @@ namespace LastHit
                         }
                         else
                         {
-                            me.Move(Game.MousePosition);
-                            /*if (target != null && !target.IsVisible)
+                            if (target != null && !target.IsVisible)
                             {
                                 var closestToMouse = me.ClosestToMouseTarget(500);
                                 if (closestToMouse != null)
@@ -215,7 +214,7 @@ namespace LastHit
                                 target = me.BestAATarget();
                             else
                                 target = null; 
-                            Orbwalking.Orbwalk(target, 500);*/
+                            Orbwalking.Orbwalk(target, 500);
                         }
                     }
                 }
