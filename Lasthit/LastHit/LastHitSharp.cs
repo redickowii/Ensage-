@@ -18,6 +18,7 @@ namespace LastHit
         {
             public string ClassId { get; set; }
             public int[] Dmgint { get; set; }
+            public int Cooldown { get; set; }
         }
 
         private static readonly Menu Menu = new Menu("LastHit", "lasthit", true);
@@ -30,10 +31,6 @@ namespace LastHit
         private static bool isloaded;
         private static uint aRange;
         private static List<Damage> Dmg = new List<Damage>(); 
-
-        private static readonly string[] Herospell = {
-                            "CDOTA_Unit_Hero_Zuus",
-                            "CDOTA_Unit_Hero_Bristleback"};
 
         #endregion
 
@@ -52,8 +49,9 @@ namespace LastHit
             Menu.AddItem(new MenuItem("outrange", "Bonus range").SetValue(new Slider(100, 100, 500)));
             Menu.AddToMainMenu();
 
-            Dmg.Add(new Damage { ClassId = "CDOTA_Unit_Hero_Zuus", Dmgint = new int[4] {85, 100, 115, 145 } });
-            Dmg.Add(new Damage { ClassId = "CDOTA_Unit_Hero_Bristleback", Dmgint = new int[4] { 20, 40, 60, 80 } });
+            Dmg.Add(new Damage { ClassId = "CDOTA_Unit_Hero_Zuus", Dmgint = new int[4] {85, 100, 115, 145 }, Cooldown = 1750});
+            Dmg.Add(new Damage { ClassId = "CDOTA_Unit_Hero_Bristleback", Dmgint = new int[4] { 20, 40, 60, 80 }, Cooldown = 3000 });
+            Dmg.Add(new Damage { ClassId = "CDOTA_Unit_Hero_PhantomAssassin", Dmgint = new int[4] { 60, 100, 140, 180 }, Cooldown = 6000 });
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -171,23 +169,22 @@ namespace LastHit
 
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
             {
-                if ((_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || _creepTarget.Health <= 0 || !Orbwalking.AttackOnCooldown(_creepTarget)))
+                if ((_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || _creepTarget.IsAlive || !Orbwalking.AttackOnCooldown(_creepTarget)) && Utils.SleepCheck("cast"))
                 {
                     _creepTarget = GetLowestHpCreep(_me, null);
                     _creepTarget = KillableCreep(false, _creepTarget,ref wait);
                     if (_creepTarget != null)
                     {
-                        if (Menu.Item("usespell").GetValue<bool>() &&
-                        Spellkill(_me, _creepTarget) > _creepTarget.Health && _creepTarget.Team != _me.Team && Utils.SleepCheck("wait"))
+                        //Game.PrintMessage(" ", MessageType.LogMessage );
+                        if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Utils.SleepCheck("wait"))
                         {
                             if (Spell(_me).CanBeCasted())
                             {
-                                if (Spell(_me).TargetType == TargetType.None)
-                                    Spell(_me).UseAbility();
-                                else
-                                    Spell(_me).UseAbility(_creepTarget);
+                                Spell(_me).UseAbility();
+                                Spell(_me).UseAbility(Spellkill(_me));
                             }
-                            Utils.Sleep(Spell(_me).Cooldown, "wait");
+                            Utils.Sleep(100,"cast");
+                            Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
                         }
                         else if (!(_creepTarget.Distance2D(_me) > _me.AttackRange) || _creepTarget == null)
                         {
@@ -264,40 +261,85 @@ namespace LastHit
                     return me.Spellbook.Spell1;
                 case ClassID.CDOTA_Unit_Hero_Bristleback:
                     return me.Spellbook.Spell2;
+                case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
+                    return me.Spellbook.Spell1;
             }
             return null;
         }
 
-        private static float Spellkill(Hero me, Unit target)
+        private static Unit Spellkill(Hero me)
         {
-            switch (me.ClassID)
+            try
             {
-                case ClassID.CDOTA_Unit_Hero_Zuus:
-                    return Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1];
-                case ClassID.CDOTA_Unit_Hero_Bristleback:
-                    float quillSprayDmg = 0;
-                    try
+                var attackRange = me.GetAttackRange();
+                var targetlist =
+                    ObjectManager.GetEntities<Unit>()
+                        .Where(
+                            x =>
+                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Creep
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Additive
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Building
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
+                                && x.Team != me.Team && x.Distance2D(me) < attackRange + outrange)
+                        .OrderByDescending(creep => creep.Health);
+                foreach (var target in targetlist)
+                {
+                    switch (me.ClassID)
                     {
-                        if (
-                            target.Modifiers.Find(
-                                x =>
-                                    x.Name == "modifier_bristleback_quill_spray_stack" ||
-                                    x.Name == "modifier_bristleback_quill_spray").IsDebuff)
-                            quillSprayDmg =
-                                target.Modifiers.Find(
-                                    x =>
-                                        x.Name == "modifier_bristleback_quill_spray_stack" ||
-                                        x.Name == "modifier_bristleback_quill_spray").StackCount*30 +
-                                (me.Spellbook.Spell2.Level - 1)*2;
+                        case ClassID.CDOTA_Unit_Hero_Zuus:
+                            if (
+                                Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1] >
+                                target.Health)
+                                return target;
+                            break;
+                        case ClassID.CDOTA_Unit_Hero_Bristleback:
+                            float quillSprayDmg = 0;
+                            try
+                            {
+                                if (
+                                    target.Modifiers.Find(
+                                        x =>
+                                            x.Name == "modifier_bristleback_quill_spray_stack" ||
+                                            x.Name == "modifier_bristleback_quill_spray").IsDebuff)
+                                    quillSprayDmg =
+                                        target.Modifiers.Find(
+                                            x =>
+                                                x.Name == "modifier_bristleback_quill_spray_stack" ||
+                                                x.Name == "modifier_bristleback_quill_spray").StackCount*30 +
+                                        (me.Spellbook.Spell2.Level - 1)*2;
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                            }
+                            if (
+                                (Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell2.Level - 1] +
+                                 quillSprayDmg)*(float) (1 - 0.06*target.Armor/(1 + 0.06*target.Armor)) > target.Health)
+                                return target;
+                            break;
+                        case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
+                            float BonusDamage = 0;
+                            var time = UnitDatabase.GetAttackBackswing(me) +
+                                       me.Distance2D(target)/me.Spellbook.Spell1.GetProjectileSpeed();
+                            if (time >= target.AttackSpeedValue)
+                                BonusDamage = (float) (time*target.AttacksPerSecond*target.MinimumDamage);
+                            if (
+                                Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1] +
+                                BonusDamage > target.Health)
+                                return target;
+                            break;
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
-                    return (Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell2.Level - 1] +
-                            quillSprayDmg)*(float) (1 - 0.06*target.Armor/(1 + 0.06*target.Armor));
+                }
             }
-            return 0;
+            catch (Exception)
+            {
+            }
+            return null;
         }
 
         public static Unit GetAllLowestHpCreep(Hero source)
