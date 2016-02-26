@@ -169,10 +169,11 @@ namespace LastHit
 
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
             {
-                if ((_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || _creepTarget.IsAlive || !Orbwalking.AttackOnCooldown(_creepTarget)) && Utils.SleepCheck("cast"))
+                if ((_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || _creepTarget.IsAlive ||
+                     !Orbwalking.AttackOnCooldown(_creepTarget)) && Utils.SleepCheck("cast"))
                 {
                     _creepTarget = GetLowestHpCreep(_me, null);
-                    _creepTarget = KillableCreep(false, _creepTarget,ref wait);
+                    _creepTarget = KillableCreep(false, _creepTarget, ref wait);
                     if (_creepTarget != null)
                     {
                         //Game.PrintMessage(" ", MessageType.LogMessage );
@@ -183,22 +184,21 @@ namespace LastHit
                                 Spell(_me).UseAbility();
                                 Spell(_me).UseAbility(Spellkill(_me));
                             }
-                            Utils.Sleep(100,"cast");
+                            Utils.Sleep(100, "cast");
                             Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
                         }
-                        else if (!(_creepTarget.Distance2D(_me) > _me.AttackRange) || _creepTarget == null)
+                        else if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
                         {
-                            if ((_creepTarget.Health) < GetPhysDamageOnUnit(_creepTarget, 0)*3 &&
-                                     (_creepTarget.Health) >= GetPhysDamageOnUnit(_creepTarget, 0) &&
-                                     _creepTarget != null &&
-                                     _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
+                            if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0)*3 &&
+                                _creepTarget.Health >= GetPhysDamageOnUnit(_creepTarget, 0) &&
+                                _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                             {
                                 Utils.Sleep(_aPoint + Game.Ping, "stop");
                                 _me.Attack(_creepTarget);
                                 _me.Hold();
                             }
-                            else if ((_creepTarget.Health) < GetPhysDamageOnUnit(_creepTarget, 0) &&
-                                     _creepTarget != null)
+                            if ((_creepTarget.Health) < GetPhysDamageOnUnit(_creepTarget, 0) ||
+                                (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
                             {
                                 _me.Attack(_creepTarget);
                             }
@@ -219,7 +219,7 @@ namespace LastHit
                         else if (Menu.Item("harassheroes").GetValue<bool>())
                             _target = _me.BestAATarget();
                         else
-                            _target = null; 
+                            _target = null;
                         Orbwalking.Orbwalk(_target, 500);
                     }
                 }
@@ -231,7 +231,17 @@ namespace LastHit
                     _creepTarget = GetLowestHpCreep(_me, null);
                     _creepTarget = KillableCreep(true, _creepTarget, ref wait);
                 }
-                if (_creepTarget != null)
+                if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Utils.SleepCheck("wait"))
+                {
+                    if (Spell(_me).CanBeCasted())
+                    {
+                        Spell(_me).UseAbility();
+                        Spell(_me).UseAbility(Spellkill(_me));
+                    }
+                    Utils.Sleep(100, "cast");
+                    Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
+                }
+                if (_creepTarget != null && Utils.SleepCheck("cast"))
                 {
                     Orbwalking.Orbwalk(_creepTarget, 500);
                 }
@@ -285,7 +295,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                && x.Team != me.Team && x.Distance2D(me) < attackRange + outrange)
+                                && x.Team != me.Team && x.Distance2D(me) < Spell(me).CastRange + outrange)
                         .OrderByDescending(creep => creep.Health);
                 foreach (var target in targetlist)
                 {
