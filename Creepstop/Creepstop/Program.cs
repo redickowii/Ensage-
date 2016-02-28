@@ -44,7 +44,7 @@ namespace Creepstop
 
             if (_me.Team == Team.Radiant)
             {
-                startingpoint = new Vector3(-4740, -3986, 384);
+                startingpoint = new Vector3(-4781, -3969, 261);
                 startingpoint2 = new Vector3(-4250, -3983, 273);
                 endingpoint = new Vector3(-1159, -725, 132);
                 starttime = 0.48;
