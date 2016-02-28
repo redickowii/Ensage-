@@ -63,7 +63,7 @@ namespace Creepstop
                         (starttime - Game.Ping/1000 -
                          GetDistance2D(startingpoint, startingpoint2)/_me.MovementSpeed)/10)
                     {
-                        if (_me.Distance2D(startingpoint2) < 10)
+                        if (_me.Distance2D(startingpoint2) < 10 || _me.Distance2D(endingpoint) < 4000)
                         {
                             _firstmove = true;
                         }
