@@ -96,7 +96,7 @@ namespace Creepstop
                                     (float)(closestCreep.Position.X + Math.Max(_me.Distance2D(closestCreep) / closestCreep.MovementSpeed * 1000, 100) * Math.Cos(creeprotR)),
                                     (float)(closestCreep.Position.Y + Math.Max(_me.Distance2D(closestCreep) / closestCreep.MovementSpeed * 1000, 100) * Math.Sin(creeprotR)),
                                     closestCreep.Position.Z);
-                            Game.PrintMessage("Go " + p.X + " " + p.Y, MessageType.ChatMessage);
+                            //Game.PrintMessage("Go " + p.X + " " + p.Y, MessageType.ChatMessage);
                             _me.Move(p);
                             if (_me.Distance2D(endingpoint) < 4600 &&
                                 _me.Distance2D(closestCreep) > (25 + Game.Ping/1000) &&
@@ -104,7 +104,7 @@ namespace Creepstop
                                 Utils.SleepCheck("stop"))
                                 {
                                     var stop = _me.Distance2D(closestCreep)/closestCreep.MovementSpeed*1000 + Game.Ping;
-                                    Game.PrintMessage("Stop " + (int)stop + " CreeprotR " + creeprotR, MessageType.ChatMessage);
+                                    //Game.PrintMessage("Stop " + (int)stop + " CreeprotR " + creeprotR, MessageType.ChatMessage);
                                     _me.Stop();
                                     Utils.Sleep(stop, "stop");
                                 }
