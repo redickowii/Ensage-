@@ -116,6 +116,11 @@ namespace Creepstop
                         _me.Move(startingpoint);
                         Utils.Sleep(1000, "move");
                     }
+                else if (_me.Distance2D(startingpoint) < 10 && Utils.SleepCheck("Rot") && _me.Team == Team.Radiant)
+                {
+                    _me.Move(new Vector3(-4782, -3970, 261));
+                    Utils.Sleep(1000, "Rot");
+                }
             }
         }
         private static float GetDistance2D(Vector3 p1, Vector3 p2)

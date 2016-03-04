@@ -70,14 +70,14 @@ namespace NagaSharp
                 new Vector3(4382, 3601, 2562)};
         private static readonly Vector3[] Bot =
         {
-                new Vector3 (-4077, -6160, 268),
-                new Vector3 (-1875, -6125, 127),
-                new Vector3 (325, -6217, 256),
-                new Vector3 (2532, -6215, 256),
+                new Vector3(-4077, -6160, 268),
+                new Vector3(-1875, -6125, 127),
+                new Vector3(325, -6217, 256),
+                new Vector3(2532, -6215, 256),
                 new Vector3(5197, -5968, 384),
-                new Vector3 (6090, -4318, 256),
-                new Vector3 (6180, -2117, 256),
-                new Vector3 (6242, 84, 256),
+                new Vector3(6090, -4318, 256),
+                new Vector3(6180, -2117, 256),
+                new Vector3(6242, 84, 256),
                 new Vector3(6307, 2286, 141),
                 new Vector3(6254, 3680, 256)};
         private static readonly Vector3[] Top =
@@ -192,275 +192,264 @@ namespace NagaSharp
                 bot = Bot;
                 top = Top;
 
-                    if (me.Team == myteam)
+                if (me.Team == Team.Radiant)
                 {
-                    foreach (Hero v in illusions)
+                    foreach (Hero v in illusions.Where(v => v.Distance2D(me) > 700))
                     {
-                        if (v.Distance2D(me) > 700)
+                        /******************************************MID******************************************/
+                        if (v.Distance2D(mid[0]) <= 2300 && v.Distance2D(mid[1]) >= 2190 && Utils.SleepCheck(v.Handle.ToString()))
                         {
-                            /******************************************MID******************************************/
-                            if (v.Distance2D(mid[0]) <= 2300 && v.Distance2D(mid[1]) >= 2190 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[1]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[1]) <= 2400 && v.Distance2D(mid[2]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[2]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[2]) <= 2640 && v.Distance2D(mid[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[3]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[3]) <= 2340 && v.Distance2D(mid[4]) >= 1900 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[4]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[4]) <= 2400 && v.Distance2D(mid[5]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[5]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[5]) <= 2400 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[6]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-
-                            /******************************************MID******************************************/
-                            /******************************************BOT******************************************/
-
-
-                            if (v.Distance2D(bot[0]) <= 2400 && v.Distance2D(bot[1]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[1]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[1]) <= 2440 && v.Distance2D(bot[2]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[2]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[2]) <= 2640 && v.Distance2D(bot[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[3]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[3]) <= 2340 && v.Distance2D(bot[4]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[4]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[4]) <= 2380 && v.Distance2D(bot[5]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[5]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[5]) <= 2380 && v.Distance2D(bot[6]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[6]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[6]) <= 2630 && v.Distance2D(bot[7]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[7]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[7]) <= 2630 && v.Distance2D(bot[8]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[8]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[8]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[9]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            /******************************************BOT******************************************/
-                            /******************************************TOP******************************************/
-                            if (v.Distance2D(top[0]) <= 1900 && v.Distance2D(top[1]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[1]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[1]) <= 2640 && v.Distance2D(top[2]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[2]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[2]) <= 2640 && v.Distance2D(top[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[3]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[3]) <= 2340 && v.Distance2D(top[4]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[4]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[4]) <= 2380 && v.Distance2D(top[5]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[5]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[5]) <= 2380 && v.Distance2D(top[6]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[6]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[6]) <= 2630 && v.Distance2D(top[7]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[7]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[7]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[8]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-
-
-                            /******************************************TOP******************************************/
-
+                            v.Attack(mid[1]);
+                            Utils.Sleep(3700, v.Handle.ToString());
                         }
+                        if (v.Distance2D(mid[1]) <= 2400 && v.Distance2D(mid[2]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[2]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[2]) <= 2640 && v.Distance2D(mid[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[3]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[3]) <= 2340 && v.Distance2D(mid[4]) >= 1900 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[4]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[4]) <= 2400 && v.Distance2D(mid[5]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[5]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[5]) <= 2400 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[6]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+
+                        /******************************************MID******************************************/
+                        /******************************************BOT******************************************/
+
+
+                        if (v.Distance2D(bot[0]) <= 2400 && v.Distance2D(bot[1]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[1]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[1]) <= 2440 && v.Distance2D(bot[2]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[2]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[2]) <= 2640 && v.Distance2D(bot[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[3]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[3]) <= 2340 && v.Distance2D(bot[4]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[4]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[4]) <= 2380 && v.Distance2D(bot[5]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[5]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[5]) <= 2380 && v.Distance2D(bot[6]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[6]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[6]) <= 2630 && v.Distance2D(bot[7]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[7]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[7]) <= 2630 && v.Distance2D(bot[8]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[8]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[8]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[9]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        /******************************************BOT******************************************/
+                        /******************************************TOP******************************************/
+                        if (v.Distance2D(top[0]) <= 1900 && v.Distance2D(top[1]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[1]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[1]) <= 2640 && v.Distance2D(top[2]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[2]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[2]) <= 2640 && v.Distance2D(top[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[3]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[3]) <= 2340 && v.Distance2D(top[4]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[4]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[4]) <= 2380 && v.Distance2D(top[5]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[5]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[5]) <= 2380 && v.Distance2D(top[6]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[6]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[6]) <= 2630 && v.Distance2D(top[7]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[7]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[7]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[8]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+
+                        /******************************************TOP******************************************/
                     }
                 }
-                if (me.Team == enemyTeam)
+                if (me.Team != Team.Dire) return;
                 {
-                    foreach (Hero v in illusions)
+                    foreach (Hero v in illusions.Where(v => v.Distance2D(me) > 700))
                     {
-                        if (v.Distance2D(me) > 700)
+                        /******************************************MID******************************************/
+                        if (v.Distance2D(mid[6]) <= 2300 && v.Distance2D(mid[5]) >= 2190 && Utils.SleepCheck(v.Handle.ToString()))
                         {
-                            /******************************************MID******************************************/
-                            if (v.Distance2D(mid[6]) <= 2300 && v.Distance2D(mid[5]) >= 2190 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[5]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[5]) <= 2400 && v.Distance2D(mid[4]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[4]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[4]) <= 2640 && v.Distance2D(mid[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[3]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[3]) <= 2340 && v.Distance2D(mid[2]) >= 1900 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[2]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[2]) <= 2400 && v.Distance2D(mid[1]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[1]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(mid[1]) <= 2400 && v.Distance2D(mid[2]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(mid[0]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-
-                            /******************************************MID******************************************/
-                            /******************************************BOT******************************************/
-
-
-                            if (v.Distance2D(bot[9]) <= 2400 && v.Distance2D(bot[8]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[8]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[8]) <= 2440 && v.Distance2D(bot[7]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[7]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[7]) <= 2640 && v.Distance2D(bot[6]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[6]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[6]) <= 2340 && v.Distance2D(bot[5]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[5]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[5]) <= 2380 && v.Distance2D(bot[4]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[4]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[4]) <= 500 && v.Distance2D(bot[3]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[3]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[3]) <= 2630 && v.Distance2D(bot[2]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[2]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[2]) <= 2630 && v.Distance2D(bot[1]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[1]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(bot[1]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(bot[0]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            /******************************************BOT******************************************/
-                            /******************************************TOP******************************************/
-                            if (v.Distance2D(top[7]) <= 1900 && v.Distance2D(top[6]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[6]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[6]) <= 2640 && v.Distance2D(top[5]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[5]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[5]) <= 2640 && v.Distance2D(top[4]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[4]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[4]) <= 2340 && v.Distance2D(top[3]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[3]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[3]) <= 2380 && v.Distance2D(top[2]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[2]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[2]) <= 2600 && v.Distance2D(top[1]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[1]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-                            if (v.Distance2D(top[1]) <= 3500 && Utils.SleepCheck(v.Handle.ToString()))
-                            {
-                                v.Attack(top[8]);
-                                Utils.Sleep(3700, v.Handle.ToString());
-                            }
-
-
-                            /******************************************TOP******************************************/
-
+                            v.Attack(mid[5]);
+                            Utils.Sleep(3700, v.Handle.ToString());
                         }
+                        if (v.Distance2D(mid[5]) <= 2400 && v.Distance2D(mid[4]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[4]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[4]) <= 2640 && v.Distance2D(mid[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[3]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[3]) <= 2340 && v.Distance2D(mid[2]) >= 1900 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[2]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[2]) <= 2400 && v.Distance2D(mid[1]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[1]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(mid[1]) <= 2400 && v.Distance2D(mid[2]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(mid[0]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+
+                        /******************************************MID******************************************/
+                        /******************************************BOT******************************************/
+
+                        if (v.Distance2D(bot[9]) <= 2400 && v.Distance2D(bot[8]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[8]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[8]) <= 2440 && v.Distance2D(bot[7]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[7]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[7]) <= 2640 && v.Distance2D(bot[6]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[6]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[6]) <= 2340 && v.Distance2D(bot[5]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[5]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[5]) <= 2380 && v.Distance2D(bot[4]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[4]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[4]) <= 500 && v.Distance2D(bot[3]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[3]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[3]) <= 2630 && v.Distance2D(bot[2]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[2]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[2]) <= 2630 && v.Distance2D(bot[1]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[1]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(bot[1]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(bot[0]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        /******************************************BOT******************************************/
+                        /******************************************TOP******************************************/
+                        if (v.Distance2D(top[7]) <= 1900 && v.Distance2D(top[6]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[6]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[6]) <= 2640 && v.Distance2D(top[5]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[5]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[5]) <= 2640 && v.Distance2D(top[4]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[4]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[4]) <= 2340 && v.Distance2D(top[3]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[3]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[3]) <= 2380 && v.Distance2D(top[2]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[2]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[2]) <= 2600 && v.Distance2D(top[1]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[1]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+                        if (v.Distance2D(top[1]) <= 3500 && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(top[8]);
+                            Utils.Sleep(3700, v.Handle.ToString());
+                        }
+
+                        /******************************************TOP******************************************/
                     }
                 }
             }
-                #endregion linepush
+            #endregion linepush
 
             #region Stack
             else if (StackKey && illusions.Count > 0 && Utils.SleepCheck("wait"))
@@ -570,66 +559,52 @@ namespace NagaSharp
 
         public static void Game_OnWndProc(WndEventArgs args)
         {
-            if (!Game.IsChatOpen)
+            if (Game.IsChatOpen) return;
+            if (Game.IsKeyDown(Menu.Item("Stack").GetValue<KeyBind>().Key))
             {
-                if (Game.IsKeyDown(Menu.Item("Stack").GetValue<KeyBind>().Key))
-                {
-                    Menu.Item("LinePush").SetValue(new KeyBind(Menu.Item("LinePush").GetValue<KeyBind>().Key, KeyBindType.Toggle));
-                    Menu.Item("FarmJ").SetValue(new KeyBind(Menu.Item("FarmJ").GetValue<KeyBind>().Key, KeyBindType.Toggle));
-                }
-                if (Game.IsKeyDown(Menu.Item("LinePush").GetValue<KeyBind>().Key))
-                {
-                    Menu.Item("Stack").SetValue(new KeyBind(Menu.Item("Stack").GetValue<KeyBind>().Key, KeyBindType.Toggle));
-                    Menu.Item("FarmJ").SetValue(new KeyBind(Menu.Item("FarmJ").GetValue<KeyBind>().Key, KeyBindType.Toggle));
-                }
-                if (Game.IsKeyDown(Menu.Item("FarmJ").GetValue<KeyBind>().Key))
-                {
-                    Menu.Item("Stack").SetValue(new KeyBind(Menu.Item("Stack").GetValue<KeyBind>().Key, KeyBindType.Toggle));
-                    Menu.Item("LinePush").SetValue(new KeyBind(Menu.Item("LinePush").GetValue<KeyBind>().Key, KeyBindType.Toggle));
-                }
+                Menu.Item("LinePush").SetValue(new KeyBind(Menu.Item("LinePush").GetValue<KeyBind>().Key, KeyBindType.Toggle));
+                Menu.Item("FarmJ").SetValue(new KeyBind(Menu.Item("FarmJ").GetValue<KeyBind>().Key, KeyBindType.Toggle));
+            }
+            if (Game.IsKeyDown(Menu.Item("LinePush").GetValue<KeyBind>().Key))
+            {
+                Menu.Item("Stack").SetValue(new KeyBind(Menu.Item("Stack").GetValue<KeyBind>().Key, KeyBindType.Toggle));
+                Menu.Item("FarmJ").SetValue(new KeyBind(Menu.Item("FarmJ").GetValue<KeyBind>().Key, KeyBindType.Toggle));
+            }
+            if (Game.IsKeyDown(Menu.Item("FarmJ").GetValue<KeyBind>().Key))
+            {
+                Menu.Item("Stack").SetValue(new KeyBind(Menu.Item("Stack").GetValue<KeyBind>().Key, KeyBindType.Toggle));
+                Menu.Item("LinePush").SetValue(new KeyBind(Menu.Item("LinePush").GetValue<KeyBind>().Key, KeyBindType.Toggle));
             }
         }
 
         private static JungleCamps GetClosestCamp(Hero illusion,bool stack, bool any)
         {
             var closest = JungleCamps[12];
-            foreach (var x in JungleCamps)
+            foreach (var x in JungleCamps.Where(x => illusion.Distance2D(x.position) < illusion.Distance2D(closest.position) && !x.farming && !x.stacking && !x.empty))
             {
-                if (illusion.Distance2D(x.position) < illusion.Distance2D(closest.position) && !x.farming && !x.stacking && !x.empty)
-                    closest = x;
+                closest = x;
             }
             return closest;
         }
 
         private static JungleCamps Checkillusion(Hero illu)
         {
-            var a = new JungleCamps(); 
-            foreach (var x in JungleCamps)
-            {
-                if (x.illusion != null)
-                    a = (x.illusion.Handle == illu.Handle ? x : a);
-            }
-            return a;
+            var a = new JungleCamps();
+            return JungleCamps.Where(x => x.illusion != null).Aggregate(a, (current, x) => (x.illusion.Handle == illu.Handle ? x : current));
         }
         
         private static bool Check(Hero illu)
         {
-            var a = false;
-            foreach (var x in JungleCamps)
-            {
-                if (x.illusion != null)
-                    a = (x.illusion.Handle == illu.Handle ? true : a);
-            }
-            return a;
+            return JungleCamps.Where(x => x.illusion != null).Aggregate(false, (current, x) => (x.illusion.Handle == illu.Handle || current));
         }
 
         private static int Creepcountall(float radius)
         {
             var a = 0;
-            foreach (var Illusoin in illusions)
+            foreach (var illusoin in illusions)
             {
                 neutrals = ObjectManager.GetEntities<Unit>()
-                        .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && Illusoin.Distance2D(x) <= radius)
+                        .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && illusoin.Distance2D(x) <= radius)
                         .ToList();
                 a = a + neutrals.Count;
             }
