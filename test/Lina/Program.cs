@@ -80,7 +80,6 @@ namespace Lina
             if (!_targetActive)
             {
                 _target = _me.ClosestToMouseTarget(300);
-                Game.PrintMessage("!!!" + _target.ClassID, MessageType.ChatMessage);
                 _targetActive = true;
             }
             else
