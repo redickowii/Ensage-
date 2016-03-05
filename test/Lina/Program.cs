@@ -99,7 +99,7 @@ namespace Lina
                     Blink.UseAbility(PositionCalc(_me, _target, _slider));
                     Utils.Sleep(150 + Game.Ping, "blink");
                 }
-                else if (Eul != null && Eul.CanBeCasted() && Utils.SleepCheck("eul") && _menuValue.IsEnabled("item_cyclone"))
+                else if (Eul != null && Eul.CanBeCasted() && Utils.SleepCheck("eul") && _menuValue.IsEnabled("item_cyclone") && Utils.SleepCheck("blink"))
                 {
                     Eul.UseAbility(_target);
                     Utils.Sleep(4000 + Game.Ping, "eul");
