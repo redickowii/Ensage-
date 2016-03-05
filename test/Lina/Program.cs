@@ -94,7 +94,7 @@ namespace Lina
 
                 if (_target == null || !_target.IsAlive || _target.IsIllusion || _target.IsMagicImmune()) return;
 
-                if (Blink != null && Blink.CanBeCasted() && _me.Distance2D(_target) > _slider && _menuValue.IsEnabled("item_blink") && Utils.SleepCheck("blink"))
+                if (Blink != null && Blink.CanBeCasted() && _me.Distance2D(_target) > _slider + 100 && _menuValue.IsEnabled("item_blink") && Utils.SleepCheck("blink"))
                 {
                     Blink.UseAbility(PositionCalc(_me, _target, _slider));
                     Utils.Sleep(150 + Game.Ping, "blink");
