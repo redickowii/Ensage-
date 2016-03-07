@@ -248,23 +248,38 @@ namespace Stack
         }
         private static void Game_OnWndProc(WndEventArgs args)
         {
-            if (args.Msg != (ulong) Utils.WindowsMessages.WM_LBUTTONDOWN)
+            if (args.Msg == (ulong) Utils.WindowsMessages.WM_LBUTTONDOWN)
             {
-                return;
+                foreach (var camp in from camp in Camps
+                    let position = Drawing.WorldToScreen(camp.Position)
+                    where Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40)
+                    select camp)
+                {
+                    camp.Stacked = (camp.Stacked == false) ? true : false;
+                    camp.Unit = null;
+                }
             }
-            foreach (var camp in from camp in Camps let position = Drawing.WorldToScreen(camp.Position) where Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40) select camp)
-            {
-                camp.Stacked = (camp.Stacked == false) ? true : false;
-                camp.Unit = null;
-            }
+            //else if(args.Msg == (ulong) Utils.WindowsMessages.WM_RBUTTONDOWN)
+            //{
+            //    foreach (var camp in from camp in Camps
+            //                         let position = Drawing.WorldToScreen(camp.Position)
+            //                         where Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40)
+            //                         select camp)
+            //    {
+            //        if (!camp.Stacked) return;
+            //        camp.Unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.IsAlive && x.);
+                    
+            //    }
+            //}
         }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             //try
             //{
             //    var pos = Drawing.WorldToScreen(Game.MousePosition);
-            //    var unit = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && x.Distance2D(Game.MousePosition) < 50).DefaultIfEmpty(null).FirstOrDefault();
-            //    Drawing.DrawText(unit.Position.X + " " + unit.Position.Y, "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.IsAlive && x.Distance2D(Game.MousePosition) < 50);
+            //    Drawing.DrawText(unit. + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
             //}
             //catch (Exception)
             //{
