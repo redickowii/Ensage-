@@ -38,7 +38,7 @@ namespace Stack
         }
 
         private static Ability Q, W, E, R;
-        private static Item Dagon, Hex, Ethereal, Veil, Orchid, Shiva, Eul;
+        private static Item Manta;
         private static Hero _me;
         private static bool _stackKey, _load;
         private static readonly Menu Menu = new Menu("Stack", "Stack", true, "item_helm_of_the_dominator", true);
@@ -50,7 +50,7 @@ namespace Stack
         {
             Camps.Add(new JungleCamps { Position = new Vector3(-1708, -4284, 256), StackPosition = new Vector3(-2776, -3144, 256), WaitPosition = new Vector3(-1971, -3949, 256), Team = 2, Id = 1, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 55 });
             Camps.Add(new JungleCamps { Position = new Vector3(-266, -3176, 256), StackPosition = new Vector3(-522, -1351, 256), WaitPosition = new Vector3(-325, -2699, 256), Team = 2, Id = 2, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 55 });
-            Camps.Add(new JungleCamps { Position = new Vector3(3016, -4692, 384), StackPosition = new Vector3(4777, -4954, 384), WaitPosition = new Vector3(3074, -4955, 384), Team = 2, Id = 4, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = true, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(3016, -4692, 384), StackPosition = new Vector3(4777, -4954, 384), WaitPosition = new Vector3(3132, -5000, 384), Team = 2, Id = 4, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
             Camps.Add(new JungleCamps { Position = new Vector3(1656, -3714, 384), StackPosition = new Vector3(1263, -6041, 384), WaitPosition = new Vector3(1612, -4277, 384), Team = 2, Id = 3, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 54 });
             Camps.Add(new JungleCamps { Position = new Vector3(4474, -3598, 384), StackPosition = new Vector3(2755, -4001, 384), WaitPosition = new Vector3(4121, -3902, 384), Team = 2, Id = 5, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
             Camps.Add(new JungleCamps { Position = new Vector3(-3617, 805, 384), StackPosition = new Vector3(-5268, 1400, 384), WaitPosition = new Vector3(-3835, 643, 384), Team = 2, Id = 6, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
@@ -143,7 +143,7 @@ namespace Stack
                             var moveTime = camp.Starttime -
                                            (unit.Distance2D(closestNeutral) -
                                             (closestNeutral.IsRanged
-                                                ? Math.Max(closestNeutral.AttackRange, unit.AttackRange) 
+                                                ? Math.Max(closestNeutral.AttackRange, unit.AttackRange)-100 
                                                 : closestNeutral.RingRadius))/Math.Min(unit.MovementSpeed, closestNeutral.MovementSpeed);
                             camp.AttackTime = (int) moveTime;
                             camp.State = 2;
@@ -161,7 +161,7 @@ namespace Stack
                             var tWait =
                                 (int) (((unit.Distance2D(closestNeutral) -
                                             (closestNeutral.IsRanged
-                                                ? Math.Max(closestNeutral.AttackRange, unit.AttackRange)
+                                                ? Math.Max(closestNeutral.AttackRange, unit.AttackRange) - 100
                                                 : closestNeutral.RingRadius)) / Math.Max(unit.MovementSpeed, closestNeutral.MovementSpeed)) *1000 + Game.Ping);
                             Utils.Sleep(tWait, "" + unit.Handle);
                         }
@@ -189,7 +189,7 @@ namespace Stack
         }
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (!Game.IsInGame || _me == null || Game.IsPaused || Game.IsChatOpen)
+            if (!Game.IsInGame || _me == null || Game.IsPaused || Game.IsChatOpen || !Menu.Item("Stack").GetValue<KeyBind>().Active && Utils.SleepCheck("wait"))
             {
                 return;
             }
@@ -199,23 +199,10 @@ namespace Stack
             E = _me.Spellbook.Spell3;
             R = _me.Spellbook.Spell4;
 
-            Ethereal = _me.FindItem("item_ethereal_blade");
-            Veil = _me.FindItem("item_veil_of_discord");
-            if (!Menu.Item("Stack").GetValue<KeyBind>().Active && Utils.SleepCheck("wait")) return;
+            Manta = _me.FindItem("item_manta");
+
             switch (_me.ClassID)
             {
-                case ClassID.CDOTA_Unit_Hero_Chen:
-                    Console.WriteLine("CDOTA_Unit_Hero_Chen");
-                    break;
-                case ClassID.CDOTA_Unit_Hero_Meepo:
-                    if (!_load)
-                    {
-                        Console.WriteLine("CDOTA_Unit_Hero_Meepo");
-                        _load = true;
-                    }
-                    if (_me.Level < 3) return;
-
-                    break;
                 case ClassID.CDOTA_Unit_Hero_Lycan:
                     if (!_load)
                     {
@@ -224,7 +211,7 @@ namespace Stack
                             {"lycan_summon_wolves", true}
                         };
                         _subMenu0 =
-                            Menu.AddItem(new MenuItem("enabledAbilities", "    ").SetValue(new AbilityToggler(dict)));
+                            Menu.AddItem(new MenuItem("enabledAbilities", "Autouse? ").SetValue(new AbilityToggler(dict)));
                         _load = true;
                     }
                     var enabledAbilities = _subMenu0.GetValue<AbilityToggler>().IsEnabled("lycan_summon_wolves");
@@ -246,8 +233,15 @@ namespace Stack
             var baseNpcCreeps = ObjectManager.GetEntities<Unit>()
                         .Where(
                             x =>
-                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral && x.IsSpawned && x.IsVisible &&
-                                x.IsAlive && x.Team == _me.Team)
+                                (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege || 
+                                 x.IsIllusion || 
+                                 (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level>0)
+                                 )
+                                && x.IsSpawned && x.IsVisible &&
+                                x.IsAlive && x.Team == _me.Team && x.IsControllable )
                         .ToList();
             UnitsS(baseNpcCreeps);
         }
@@ -269,7 +263,7 @@ namespace Stack
             {
                 var pos = Drawing.WorldToScreen(Game.MousePosition);
                 var unit = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && x.Distance2D(Game.MousePosition) < 50).DefaultIfEmpty(null).FirstOrDefault();
-                Drawing.DrawText(unit.ClassID + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+                Drawing.DrawText(unit.Position.X + " " + unit.Position.Y, "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
             }
             catch (Exception)
             {
