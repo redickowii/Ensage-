@@ -168,7 +168,8 @@ namespace Stack
                         break;
                     case 3:
                         //Game.PrintMessage("case 3", MessageType.LogMessage);
-                        if (Utils.SleepCheck("" + unit.Handle))
+                        var closest = GetNearestCreepToPull(unit, 800);
+                        if (Utils.SleepCheck("" + unit.Handle) || closest.IsMoving)
                         {
                             unit.Move(camp.StackPosition);
                             camp.State = 4;
@@ -259,22 +260,22 @@ namespace Stack
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
-            try
-            {
-                var pos = Drawing.WorldToScreen(Game.MousePosition);
-                var unit = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && x.Distance2D(Game.MousePosition) < 50).DefaultIfEmpty(null).FirstOrDefault();
-                Drawing.DrawText(unit.Position.X + " " + unit.Position.Y, "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
-            }
-            catch (Exception)
-            {
+            //try
+            //{
+            //    var pos = Drawing.WorldToScreen(Game.MousePosition);
+            //    var unit = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && x.Distance2D(Game.MousePosition) < 50).DefaultIfEmpty(null).FirstOrDefault();
+            //    Drawing.DrawText(unit.Position.X + " " + unit.Position.Y, "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //}
+            //catch (Exception)
+            //{
 
-            }
+            //}
 
             foreach (var camp in Camps)
             {
                 var position = Drawing.WorldToScreen(camp.Position);
                 var alpha3 = Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40) ? 100 : 0;
-                RoundedRectangle(position.X, position.Y, 70, 40, 10, new Color(100, 100, 100 + alpha3));
+                RoundedRectangle(position.X, position.Y, 40, 40, 10, new Color(100, 100, 100 + alpha3));
                 var text = "✖";
                 var unittext = "Null";
                 var color = Color.DarkRed;
@@ -290,7 +291,7 @@ namespace Stack
                 }
                 
                 Drawing.DrawText(text, "", new Vector2(position.X + 8, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
-                Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X +38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
+                //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X +38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
             }
         }
         private static void OnLoadMessage()
@@ -303,16 +304,12 @@ namespace Stack
             {
                 new JungleCamps {WaitPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)}
             };
-            try
+
+            foreach (var camp in Camps)
             {
-                foreach (var camp in Camps.Where(camp => camp.Unit == null && !camp.Empty && camp.Stacked).Where(camp => h.Distance2D(camp.WaitPosition) < h.Distance2D(closest[0].WaitPosition)))
-                {
+                if (camp.Unit != null || camp.Empty || !camp.Stacked) continue;
+                if (h.Distance2D(camp.WaitPosition) < h.Distance2D(closest[0].WaitPosition))
                     closest[0] = camp;
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("3 Error");
             }
 
             if (closest[0].Id == 0)
