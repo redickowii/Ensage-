@@ -233,7 +233,7 @@ namespace Stack
                              x.IsIllusion ||
                              (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level > 0)))
                     .ToList();
-            UnitsS(baseNpcCreeps);
+            GetClosestCamp(baseNpcCreeps);
 
             switch (_me.ClassID)
             {
@@ -343,10 +343,10 @@ namespace Stack
                 {
                     unittext = camp.Unit.Handle.ToString();
                     Drawing.DrawLine(position, Drawing.WorldToScreen(camp.Unit.Position),Color.Black);
+                    Drawing.DrawText(camp.Unit.ClassID.ToString(), "", new Vector2(position.X + 38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
                 }
                 
                 Drawing.DrawText(text, "", new Vector2(position.X + 8, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
-                //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X +38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
             }
         }
 
@@ -355,42 +355,6 @@ namespace Stack
             Game.PrintMessage("<font face='verdana' color='#00FF00'>Stack loaded !</font>", MessageType.LogMessage);
         }
 
-        private static JungleCamps GetClosestCamp(Unit h)
-        {
-            JungleCamps[] closest =
-            {
-                new JungleCamps {WaitPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)}
-            };
-
-            foreach (var camp in Camps)
-            {
-                if (camp.Empty || !camp.Stacked) continue;
-                if (h.Distance2D(camp.WaitPosition) < h.Distance2D(closest[0].WaitPosition))
-                    closest[0] = camp;
-            }
-
-            //if (closest[0].Id == 0)
-            //    return null;
-
-            //foreach (var camp in Camps)
-            //{
-            //    if (camp.Unit != null && camp.Unit.Handle == h.Handle)
-            //    {
-            //        if (h.Distance2D(camp.WaitPosition) - 10 > h.Distance2D(closest[0].WaitPosition) && camp.State < 3)
-            //        {
-            //            camp.Unit = null;
-            //            camp.State = 0;
-            //            return closest[0];
-            //        }
-            //        else
-            //        {
-            //            return null;
-            //        }
-            //    }
-            //}
-
-            return closest[0];
-        }
         private static JungleCamps GetFurtherCamp(Unit h)
         {
             JungleCamps[] further = {new JungleCamps {WaitPosition = h.Position}};
@@ -402,32 +366,22 @@ namespace Stack
             }
             return further[0].Id != 0 ? further[0] : null;
         }
-        private static void UnitsS(List<Unit> h)
+        private static void GetClosestCamp(List<Unit> h)
         {
-            foreach (var baseNpcCreep in h)
+            foreach (var camp in Camps.Where(x=> x.Stacked && x.State ==0))
             {
-                //if (GetClosestCamp(baseNpcCreep) == null) continue;
-                foreach (var camp in Camps)
+                var minDis = float.MaxValue;
+                Unit unit = null;
+                foreach (var baseNpcCreep in h)
                 {
-                    if (camp.Id != GetClosestCamp(baseNpcCreep).Id) continue;
-                    if (camp.Unit == null)
+                    if (minDis > baseNpcCreep.Distance2D(camp.WaitPosition))
                     {
-                        foreach(var camp2 in Camps)
-                        {
-                            if(camp2.Unit != null && camp.Id != camp2.Id && camp.State == 0)
-                                if (baseNpcCreep.Handle == camp2.Unit.Handle)
-                                    camp2.Unit = null;
-                        }
-                        camp.Unit = baseNpcCreep;
-                        camp.State = 0;
-                    }
-                    else if (baseNpcCreep.Handle != camp.Unit.Handle && camp.State == 0)
-                    {
-                        camp.Unit = baseNpcCreep.Distance2D(camp.WaitPosition) < camp.Unit.Distance2D(camp.WaitPosition)
-                            ? baseNpcCreep
-                            : camp.Unit;
+                        minDis = baseNpcCreep.Distance2D(camp.WaitPosition);
+                        unit = baseNpcCreep;
                     }
                 }
+                h.Remove(unit);
+                camp.Unit = unit;
             }
         }
         private static int CreepCount(Unit h, float radius)
