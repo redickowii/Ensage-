@@ -37,10 +37,12 @@ namespace Stack
             public int Starttime { get; set; }
         }
 
+        private static readonly List<ParticleEffect> Effects = new List<ParticleEffect>();
         private static Ability Q, W, E, R;
-        private static Item Manta;
+        private static Item _manta;
         private static Hero _me;
-        private static bool _stackKey, _load;
+        private static Unit closestNeutral;
+        private static bool _stackKey, _load, _enable;
         private static readonly Menu Menu = new Menu("Stack", "Stack", true, "item_helm_of_the_dominator", true);
         private static MenuItem _subMenu1, _subMenu0;
         private static List<JungleCamps> Camps = new List<JungleCamps>();
@@ -88,29 +90,21 @@ namespace Stack
             OnLoadMessage();
             _me = ObjectManager.LocalHero;
         }
+
         private static void Game_Stack(EventArgs args)
         {
-            if (!Menu.Item("Stack").GetValue<KeyBind>().Active ||
-                !Game.IsInGame || _me == null || Game.IsPaused || Game.IsChatOpen
-                )
-                return;
+            if (!Menu.Item("Stack").GetValue<KeyBind>().Active || !Game.IsInGame || _me == null || Game.IsPaused ||
+                Game.IsChatOpen || !Utils.SleepCheck("wait")) return;
 
-            if (!Utils.SleepCheck("wait")) return;
+            foreach (var camp in Camps)
+            {
+                if (_seconds == 0) camp.Empty = false;
+                if (camp.Unit == null) continue;
+                if (camp.Unit.IsAlive) continue;
+                camp.Unit = null;
+                camp.State = 0;
+            }
 
-            try
-            {
-                foreach (var camp in Camps)
-                {
-                    if (camp.Unit == null) continue;
-                    if (camp.Unit.IsAlive) continue;
-                    camp.Unit = null;
-                    camp.State = 0;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("1 "+e);
-            }
             foreach (var camp in Camps.Where(camp => camp.Stacked && camp.Unit != null))
             {
                 var unit = camp.Unit;
@@ -118,62 +112,57 @@ namespace Stack
                 switch (camp.State)
                 {
                     case 0:
-                        if (_seconds < time) continue;
-                        //Game.PrintMessage("case 0", MessageType.LogMessage);
-                        if (unit.Distance2D(camp.WaitPosition) < 5)
+                        if (unit.Distance2D(camp.WaitPosition) < 10)
                             camp.State = 1;
-                        else
-                            unit.Move(camp.WaitPosition);
+                        if (_seconds < time) continue;
+                        unit.Move(camp.WaitPosition);
                         Utils.Sleep(500, "wait");
                         break;
                     case 1:
-                        if (_seconds < time) continue;
-                        //Game.PrintMessage("case 1", MessageType.LogMessage);
                         var creepscount = CreepCount(unit, 800);
-                        if (creepscount == 0)
+                        if (creepscount == 0 && unit.Distance2D(camp.WaitPosition) < 10)
                         {
                             camp.Empty = true;
                             camp.Unit = null;
                             camp.State = 0;
                             return;
                         }
-                        else if (_seconds >= camp.Starttime - 5)
+                        if (_seconds < time) continue;
+                        if (_seconds >= camp.Starttime - 5)
                         {
-                            var closestNeutral = GetNearestCreepToPull(unit, 800);
-                            var moveTime = camp.Starttime -
-                                           (unit.Distance2D(closestNeutral) -
-                                            (closestNeutral.IsRanged
-                                                ? Math.Max(closestNeutral.AttackRange, unit.AttackRange)-100 
-                                                : closestNeutral.RingRadius))/Math.Min(unit.MovementSpeed, closestNeutral.MovementSpeed);
-                            camp.AttackTime = (int) moveTime;
+                            closestNeutral = GetNearestCreepToPull(unit, 800);
+                            camp.AttackTime = (int) (camp.Starttime -
+                                                     (unit.Distance2D(closestNeutral) -
+                                                      (closestNeutral.IsRanged
+                                                          ? Math.Max(closestNeutral.AttackRange, unit.AttackRange) - 100
+                                                          : closestNeutral.RingRadius))/GetCreepStackMs(unit, 800));
                             camp.State = 2;
                         }
                         Utils.Sleep(500, "wait");
                         break;
                     case 2:
                         if (_seconds < time) continue;
-                        //Game.PrintMessage("case 2", MessageType.LogMessage);
                         if (_seconds >= camp.AttackTime)
                         {
-                            var closestNeutral = GetNearestCreepToPull(unit, 800);
+                            closestNeutral = GetNearestCreepToPull(unit, 800);
                             unit.Attack(closestNeutral);
-                            camp.State = 3;
                             var tWait =
                                 (int) (((unit.Distance2D(closestNeutral) -
-                                            (closestNeutral.IsRanged
-                                                ? Math.Max(closestNeutral.AttackRange, unit.AttackRange) - 100
-                                                : closestNeutral.RingRadius)) / Math.Max(unit.MovementSpeed, closestNeutral.MovementSpeed)) *1000 + Game.Ping);
+                                         (closestNeutral.IsRanged
+                                             ? Math.Max(closestNeutral.AttackRange, unit.AttackRange) - 100
+                                             : closestNeutral.RingRadius))/GetCreepStackMs(unit, 800))*1000 + Game.Ping);
                             Utils.Sleep(tWait, "" + unit.Handle);
+                            camp.State = 3;
                         }
                         break;
                     case 3:
-                        //Game.PrintMessage("case 3", MessageType.LogMessage);
-                        var closest = GetNearestCreepToPull(unit, 800);
-                        if (Utils.SleepCheck("" + unit.Handle) || closest.IsMoving)
+                        closestNeutral = GetNearestCreepToPull(unit, 800);
+                        if (Utils.SleepCheck("" + unit.Handle) || closestNeutral.IsMoving ||
+                            closestNeutral.IsAttacking())
                         {
                             unit.Move(camp.StackPosition);
                             camp.State = 4;
-                        }   
+                        }
                         break;
                     case 4:
                         if (_seconds == 0)
@@ -190,61 +179,114 @@ namespace Stack
         }
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (!Game.IsInGame || _me == null || Game.IsPaused || Game.IsChatOpen || !Menu.Item("Stack").GetValue<KeyBind>().Active && Utils.SleepCheck("wait"))
+            if (!Game.IsInGame || _me == null || Game.IsPaused || Game.IsChatOpen ||
+                !Menu.Item("Stack").GetValue<KeyBind>().Active && Utils.SleepCheck("wait"))
             {
                 return;
             }
+
             _seconds = ((int) Game.GameTime)%60;
+
             Q = _me.Spellbook.Spell1;
             W = _me.Spellbook.Spell2;
             E = _me.Spellbook.Spell3;
             R = _me.Spellbook.Spell4;
 
-            Manta = _me.FindItem("item_manta");
+            _manta = _me.FindItem("item_manta");
+            if (_manta != null)
+            {
+                if (_subMenu1 == null)
+                {
+                    _subMenu1 = Menu.AddItem(
+                                new MenuItem("item", "Autouse? ").SetValue(
+                                    new AbilityToggler(new Dictionary<string, bool> { { "item_manta", true } })));
+                }
+                _enable = _subMenu1.GetValue<AbilityToggler>().IsEnabled("item_manta");
+                if (GetFurtherCamp(_me) != null)
+                {
+                    var time =
+                        (int)
+                            (GetFurtherCamp(_me).Starttime -
+                             (_me.Distance2D(GetFurtherCamp(_me).WaitPosition) / _me.MovementSpeed) - 5 +
+                             Game.Ping / 1000);
+                    if (_enable && _manta.CanBeCasted() && Utils.SleepCheck("manta") && time < _seconds && time + 20 > 60)
+                    {
+                        _manta.UseAbility();
+                        Utils.Sleep(150 + Game.Ping, "manta");
+                    }
+                }
+            }
+
+            var baseNpcCreeps =
+                ObjectManager.GetEntities<Unit>()
+                    .Where(
+                        x =>
+                            x.IsAlive && x.Team == _me.Team && x.IsControllable &&
+                            (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                             x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                             x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                             x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
+                             x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
+                             x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
+                             x.ClassID == ClassID.CDOTA_BaseNPC_Invoker_Forged_Spirit ||
+                             x.ClassID == ClassID.CDOTA_Unit_Broodmother_Spiderling ||
+                             x.IsIllusion ||
+                             (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level > 0)))
+                    .ToList();
+            UnitsS(baseNpcCreeps);
 
             switch (_me.ClassID)
             {
                 case ClassID.CDOTA_Unit_Hero_Lycan:
                     if (!_load)
                     {
-                        var dict = new Dictionary<string, bool>
-                        {
-                            {"lycan_summon_wolves", true}
-                        };
                         _subMenu0 =
-                            Menu.AddItem(new MenuItem("enabledAbilities", "Autouse? ").SetValue(new AbilityToggler(dict)));
+                            Menu.AddItem(
+                                new MenuItem("enable", "Autouse? ").SetValue(
+                                    new AbilityToggler(new Dictionary<string, bool> { {"lycan_summon_wolves", true} })));
                         _load = true;
                     }
-                    var enabledAbilities = _subMenu0.GetValue<AbilityToggler>().IsEnabled("lycan_summon_wolves");
+                    _enable = _subMenu0.GetValue<AbilityToggler>().IsEnabled("lycan_summon_wolves");
                     if (GetFurtherCamp(_me) != null)
                     {
                         var time =
                             (int)
                                 (GetFurtherCamp(_me).Starttime - (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/440) -
                                  5 + Game.Ping/1000);
-                        
-                        if (enabledAbilities && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds)
+
+                        if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds)
                         {
                             Q.UseAbility();
-                            Utils.Sleep(4000 + Game.Ping, "Q");
+                            Utils.Sleep(150 + Game.Ping, "Q");
+                        }
+                    }
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Naga_Siren:
+                    if (!_load)
+                    {
+                        _subMenu0 =
+                            Menu.AddItem(
+                                new MenuItem("enable", "Autouse? ").SetValue(
+                                    new AbilityToggler(new Dictionary<string, bool> { {"naga_siren_mirror_image", true} })));
+                        _load = true;
+                    }
+                    _enable = _subMenu0.GetValue<AbilityToggler>().IsEnabled("naga_siren_mirror_image");
+                    if (GetFurtherCamp(_me) != null)
+                    {
+                        var time =
+                            (int)
+                                (GetFurtherCamp(_me).Starttime -
+                                 (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/_me.MovementSpeed) - 5 +
+                                 Game.Ping/1000);
+
+                        if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds)
+                        {
+                            Q.UseAbility();
+                            Utils.Sleep(150 + Game.Ping, "Q");
                         }
                     }
                     break;
             }
-            var baseNpcCreeps = ObjectManager.GetEntities<Unit>()
-                        .Where(
-                            x =>
-                                (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege || 
-                                 x.IsIllusion || 
-                                 (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level>0)
-                                 )
-                                && x.IsSpawned && x.IsVisible &&
-                                x.IsAlive && x.Team == _me.Team && x.IsControllable )
-                        .ToList();
-            UnitsS(baseNpcCreeps);
         }
         private static void Game_OnWndProc(WndEventArgs args)
         {
@@ -272,20 +314,18 @@ namespace Stack
             //    }
             //}
         }
-
         private static void Drawing_OnDraw(EventArgs args)
         {
             //try
             //{
             //    var pos = Drawing.WorldToScreen(Game.MousePosition);
-            //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.IsAlive && x.Distance2D(Game.MousePosition) < 50);
-            //    Drawing.DrawText(unit. + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
+            //    if (unit != null )
+            //       Drawing.DrawText(unit.ClassID + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
             //}
             //catch (Exception)
             //{
-
             //}
-
             foreach (var camp in Camps)
             {
                 var position = Drawing.WorldToScreen(camp.Position);
@@ -299,7 +339,7 @@ namespace Stack
                     text = "✔";
                     color = Color.DarkGreen;
                 }
-                if (camp.Unit !=null && Menu.Item("drawline").GetValue<bool>())
+                if (camp.Unit !=null && Menu.Item("drawline").GetValue<bool>() )
                 {
                     unittext = camp.Unit.Handle.ToString();
                     Drawing.DrawLine(position, Drawing.WorldToScreen(camp.Unit.Position),Color.Black);
@@ -309,96 +349,84 @@ namespace Stack
                 //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X +38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
             }
         }
+
         private static void OnLoadMessage()
         {
             Game.PrintMessage("<font face='verdana' color='#00FF00'>Stack loaded !</font>", MessageType.LogMessage);
         }
+
         private static JungleCamps GetClosestCamp(Unit h)
         {
-            JungleCamps[] closest = 
+            JungleCamps[] closest =
             {
                 new JungleCamps {WaitPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)}
             };
 
             foreach (var camp in Camps)
             {
-                if (camp.Unit != null || camp.Empty || !camp.Stacked) continue;
+                if (camp.Empty || !camp.Stacked) continue;
                 if (h.Distance2D(camp.WaitPosition) < h.Distance2D(closest[0].WaitPosition))
                     closest[0] = camp;
             }
 
-            if (closest[0].Id == 0)
-                return null;
+            //if (closest[0].Id == 0)
+            //    return null;
 
-            foreach (var camp in Camps)
-            {
-                if (camp.Unit != null && camp.Unit.Handle == h.Handle)
-                {
-                    if (h.Distance2D(camp.WaitPosition) - 10 > h.Distance2D(closest[0].WaitPosition) && camp.State < 3)
-                    {
-                        camp.Unit = null;
-                        camp.State = 0;
-                        return closest[0];
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-            }
+            //foreach (var camp in Camps)
+            //{
+            //    if (camp.Unit != null && camp.Unit.Handle == h.Handle)
+            //    {
+            //        if (h.Distance2D(camp.WaitPosition) - 10 > h.Distance2D(closest[0].WaitPosition) && camp.State < 3)
+            //        {
+            //            camp.Unit = null;
+            //            camp.State = 0;
+            //            return closest[0];
+            //        }
+            //        else
+            //        {
+            //            return null;
+            //        }
+            //    }
+            //}
 
             return closest[0];
         }
         private static JungleCamps GetFurtherCamp(Unit h)
         {
-            JungleCamps[] further =
-            {
-                new JungleCamps {WaitPosition = h.Position}
-            };
-            try
-            {
-                foreach (var camp in Camps.Where(camp => camp.Unit == null && !camp.Empty && camp.Stacked).Where(camp => h.Distance2D(camp.WaitPosition) > h.Distance2D(further[0].WaitPosition)))
-                {
-                    further[0] = camp;
-                }
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("3 Error");
-            }
-            if (further[0].Id == 0)
-                return null;
-                
-
+            JungleCamps[] further = {new JungleCamps {WaitPosition = h.Position}};
             foreach (var camp in Camps)
             {
-                if (camp.Unit != null && camp.Unit.Handle == h.Handle)
-                {
-                    if (h.Distance2D(camp.WaitPosition) + 10 < h.Distance2D(further[0].WaitPosition) && camp.State < 3)
-                    {
-                        camp.Unit = null;
-                        camp.State = 0;
-                        return further[0];
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
+                if (camp.Empty || !camp.Stacked || camp.Unit != null) continue;
+                if (h.Distance2D(camp.WaitPosition) > h.Distance2D(further[0].WaitPosition))
+                    further[0] = camp;
             }
-            return further[0];
+            return further[0].Id != 0 ? further[0] : null;
         }
-
         private static void UnitsS(List<Unit> h)
         {
             foreach (var baseNpcCreep in h)
             {
-                if (GetClosestCamp(baseNpcCreep) == null) continue;
+                //if (GetClosestCamp(baseNpcCreep) == null) continue;
                 foreach (var camp in Camps)
                 {
                     if (camp.Id != GetClosestCamp(baseNpcCreep).Id) continue;
-                    camp.State = 0;
-                    camp.Unit = baseNpcCreep;
+                    if (camp.Unit == null)
+                    {
+                        foreach(var camp2 in Camps)
+                        {
+                            if(camp2.Unit != null && camp.Id != camp2.Id && camp.State == 0)
+                                if (baseNpcCreep.Handle == camp2.Unit.Handle)
+                                    camp2.Unit = null;
+                        }
+                        camp.Unit = baseNpcCreep;
+                        camp.State = 0;
+                    }
+                    else if (baseNpcCreep.Handle != camp.Unit.Handle && camp.State == 0)
+                    {
+                        camp.Unit = baseNpcCreep.Distance2D(camp.WaitPosition) < camp.Unit.Distance2D(camp.WaitPosition)
+                            ? baseNpcCreep
+                            : camp.Unit;
+                    }
                 }
             }
         }
@@ -420,6 +448,16 @@ namespace Stack
                 bestCreep = neutral;
             }
             return bestCreep;
+        }
+        private static int GetCreepStackMs(Unit h, float radius)
+        {
+            var neutrals = ObjectManager.GetEntities<Unit>().Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && h.Distance2D(x) <= radius).ToList();
+            int[] ms = {int.MaxValue};
+            foreach (var neutral in neutrals.Where(neutral => neutral.MovementSpeed < ms[0]))
+            {
+                ms[0] = neutral.MovementSpeed;
+            }
+            return ms[0];
         }
         public static void RoundedRectangle(float x, float y, float w, float h, int iSmooth, Color color)
         {
