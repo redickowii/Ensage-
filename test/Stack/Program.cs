@@ -11,6 +11,7 @@ using System.Net.Configuration;
 using System.Reflection;
 using System.Text;
 using SharpDX.Direct3D9;
+using SharpDX.Win32;
 
 
 namespace Stack
@@ -25,9 +26,6 @@ namespace Stack
             public Vector3 WaitPosition { get; set; }
             public int Team { get; set; }
             public int Id { get; set; }
-            public bool Farming { get; set; }
-            public bool Visible { get; set; }
-            public bool Stacking { get; set; }
             public bool Stacked { get; set; }
             public bool Ancients { get; set; }
             public bool Empty { get; set; }
@@ -50,20 +48,20 @@ namespace Stack
 
         private static void Main(string[] args)
         {
-            Camps.Add(new JungleCamps { Position = new Vector3(-1708, -4284, 256), StackPosition = new Vector3(-2776, -3144, 256), WaitPosition = new Vector3(-1971, -3949, 256), Team = 2, Id = 1, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 55 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-266, -3176, 256), StackPosition = new Vector3(-522, -1351, 256), WaitPosition = new Vector3(-325, -2699, 256), Team = 2, Id = 2, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 55 });
-            Camps.Add(new JungleCamps { Position = new Vector3(3016, -4692, 384), StackPosition = new Vector3(4777, -4954, 384), WaitPosition = new Vector3(3132, -5000, 384), Team = 2, Id = 4, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(1656, -3714, 384), StackPosition = new Vector3(1263, -6041, 384), WaitPosition = new Vector3(1612, -4277, 384), Team = 2, Id = 3, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 54 });
-            Camps.Add(new JungleCamps { Position = new Vector3(4474, -3598, 384), StackPosition = new Vector3(2755, -4001, 384), WaitPosition = new Vector3(4121, -3902, 384), Team = 2, Id = 5, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-3617, 805, 384), StackPosition = new Vector3(-5268, 1400, 384), WaitPosition = new Vector3(-3835, 643, 384), Team = 2, Id = 6, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-4446, 3541, 384), StackPosition = new Vector3(-3953, 4954, 384), WaitPosition = new Vector3(-4251, 3760, 384), Team = 3, Id = 7, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-2981, 4591, 384), StackPosition = new Vector3(-3248, 5993, 384), WaitPosition = new Vector3(-3055, 4837, 384), Team = 3, Id = 8, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-392, 3652, 384), StackPosition = new Vector3(-224, 5088, 384), WaitPosition = new Vector3(-503, 3955, 384), Team = 3, Id = 9, Farming = false, Empty = false, Visible = false,  Stacking = false, Stacked = false, Starttime = 55 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-1524, 2641, 256), StackPosition = new Vector3(-1266, 4273, 384), WaitPosition = new Vector3(-1465, 2908, 256), Team = 3, Id = 10, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(1098, 3338, 384), StackPosition = new Vector3(910, 5003, 384), WaitPosition = new Vector3(975, 3586, 384), Team = 3, Id = 11, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(4141, 554, 384), StackPosition = new Vector3(2987, -2, 384), WaitPosition = new Vector3(3876, 506, 384), Team = 3, Id = 12, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-2960, -126, 384), StackPosition = new Vector3(-3850, -1491, 384), WaitPosition = new Vector3(-2777, -230, 384), Team = 2, Id = 11, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(4000, -700, 256), StackPosition = new Vector3(1713, -134, 256), WaitPosition = new Vector3(3649, -721, 256), Team = 3, Id = 12, Farming = false, Empty = false, Visible = false, Stacking = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-1708, -4284, 256), StackPosition = new Vector3(-2776, -3144, 256), WaitPosition = new Vector3(-1971, -3949, 256), Team = 2, Id = 1, Empty = false, Stacked = false, Starttime = 55 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-266, -3176, 256), StackPosition = new Vector3(-522, -1351, 256), WaitPosition = new Vector3(-325, -2699, 256), Team = 2, Id = 2, Empty = false, Stacked = false, Starttime = 55 });
+            Camps.Add(new JungleCamps { Position = new Vector3(3016, -4692, 384), StackPosition = new Vector3(4777, -4954, 384), WaitPosition = new Vector3(3132, -5000, 384), Team = 2, Id = 4, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(1656, -3714, 384), StackPosition = new Vector3(1263, -6041, 384), WaitPosition = new Vector3(1612, -4277, 384), Team = 2, Id = 3, Empty = false, Stacked = false, Starttime = 54 });
+            Camps.Add(new JungleCamps { Position = new Vector3(4474, -3598, 384), StackPosition = new Vector3(2755, -4001, 384), WaitPosition = new Vector3(4121, -3902, 384), Team = 2, Id = 5, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-3617, 805, 384), StackPosition = new Vector3(-5268, 1400, 384), WaitPosition = new Vector3(-3835, 643, 384), Team = 2, Id = 6, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-4446, 3541, 384), StackPosition = new Vector3(-3953, 4954, 384), WaitPosition = new Vector3(-4251, 3760, 384), Team = 3, Id = 7, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-2981, 4591, 384), StackPosition = new Vector3(-3248, 5993, 384), WaitPosition = new Vector3(-3055, 4837, 384), Team = 3, Id = 8, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-392, 3652, 384), StackPosition = new Vector3(-224, 5088, 384), WaitPosition = new Vector3(-503, 3955, 384), Team = 3, Id = 9, Empty = false,  Stacked = false, Starttime = 55 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-1524, 2641, 256), StackPosition = new Vector3(-1266, 4273, 384), WaitPosition = new Vector3(-1465, 2908, 256), Team = 3, Id = 10, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(1098, 3338, 384), StackPosition = new Vector3(910, 5003, 384), WaitPosition = new Vector3(975, 3586, 384), Team = 3, Id = 11, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(4141, 554, 384), StackPosition = new Vector3(2987, -2, 384), WaitPosition = new Vector3(3876, 506, 384), Team = 3, Id = 12, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-2960, -126, 384), StackPosition = new Vector3(-3850, -1491, 384), WaitPosition = new Vector3(-2777, -230, 384), Team = 2, Id = 11, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(4000, -700, 256), StackPosition = new Vector3(1713, -134, 256), WaitPosition = new Vector3(3649, -721, 256), Team = 3, Id = 12, Empty = false, Stacked = false, Starttime = 53 });
 
             Events.OnLoad += Events_OnLoad;
             Events.OnClose += Events_OnClose;
@@ -99,6 +97,8 @@ namespace Stack
             foreach (var camp in Camps)
             {
                 if (_seconds == 0) camp.Empty = false;
+                if (_seconds > 47 && camp.Unit == null) camp.State = 5;
+                if (_seconds < 10 ) camp.State = 0;
                 if (camp.Unit == null) continue;
                 if (camp.Unit.IsAlive) continue;
                 camp.Unit = null;
@@ -112,9 +112,9 @@ namespace Stack
                 switch (camp.State)
                 {
                     case 0:
+                        if (_seconds < time) continue;
                         if (unit.Distance2D(camp.WaitPosition) < 10)
                             camp.State = 1;
-                        if (_seconds < time) continue;
                         unit.Move(camp.WaitPosition);
                         Utils.Sleep(500, "wait");
                         break;
@@ -171,9 +171,6 @@ namespace Stack
                             camp.State = 0;
                         Utils.Sleep(1000, "wait");
                         break;
-                    default:
-                        camp.State = 0;
-                        break;
                 }
             }
         }
@@ -202,38 +199,41 @@ namespace Stack
                                     new AbilityToggler(new Dictionary<string, bool> { { "item_manta", true } })));
                 }
                 _enable = _subMenu1.GetValue<AbilityToggler>().IsEnabled("item_manta");
-                if (GetFurtherCamp(_me) != null)
+                if (GetFurtherCamp(_me).Id != 0)
                 {
                     var time =
                         (int)
                             (GetFurtherCamp(_me).Starttime -
                              (_me.Distance2D(GetFurtherCamp(_me).WaitPosition) / _me.MovementSpeed) - 5 +
                              Game.Ping / 1000);
-                    if (_enable && _manta.CanBeCasted() && Utils.SleepCheck("manta") && time < _seconds && time + 20 > 60)
+                    if (_enable && _manta.CanBeCasted() && Utils.SleepCheck("manta") && time < _seconds && time > 40 && _seconds < time + 5)
                     {
                         _manta.UseAbility();
                         Utils.Sleep(150 + Game.Ping, "manta");
                     }
                 }
             }
-
-            var baseNpcCreeps =
-                ObjectManager.GetEntities<Unit>()
-                    .Where(
-                        x =>
-                            x.IsAlive && x.Team == _me.Team && x.IsControllable &&
-                            (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                             x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                             x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                             x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
-                             x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
-                             x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
-                             x.ClassID == ClassID.CDOTA_BaseNPC_Invoker_Forged_Spirit ||
-                             x.ClassID == ClassID.CDOTA_Unit_Broodmother_Spiderling ||
-                             x.IsIllusion ||
-                             (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level > 0)))
-                    .ToList();
-            GetClosestCamp(baseNpcCreeps);
+            if (Utils.SleepCheck("Cooldown"))
+            {
+                var baseNpcCreeps =
+                    ObjectManager.GetEntities<Unit>()
+                        .Where(
+                            x =>
+                                x.IsAlive && x.Team == _me.Team && x.IsControllable &&
+                                (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
+                                 x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
+                                 x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Invoker_Forged_Spirit ||
+                                 x.ClassID == ClassID.CDOTA_Unit_Broodmother_Spiderling ||
+                                 x.IsIllusion ||
+                                 (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level > 0)))
+                        .ToList();
+                GetClosestCamp(baseNpcCreeps);
+                Utils.Sleep(2000, "Cooldown");
+            }
 
             switch (_me.ClassID)
             {
@@ -247,14 +247,14 @@ namespace Stack
                         _load = true;
                     }
                     _enable = _subMenu0.GetValue<AbilityToggler>().IsEnabled("lycan_summon_wolves");
-                    if (GetFurtherCamp(_me) != null)
+                    if (GetFurtherCamp(_me).Id != 0)
                     {
                         var time =
                             (int)
                                 (GetFurtherCamp(_me).Starttime - (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/440) -
                                  5 + Game.Ping/1000);
 
-                        if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds)
+                        if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds && time > 5 && _seconds < time + 5)
                         {
                             Q.UseAbility();
                             Utils.Sleep(150 + Game.Ping, "Q");
@@ -271,7 +271,7 @@ namespace Stack
                         _load = true;
                     }
                     _enable = _subMenu0.GetValue<AbilityToggler>().IsEnabled("naga_siren_mirror_image");
-                    if (GetFurtherCamp(_me) != null)
+                    if (GetFurtherCamp(_me).Id != 0)
                     {
                         var time =
                             (int)
@@ -279,7 +279,7 @@ namespace Stack
                                  (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/_me.MovementSpeed) - 5 +
                                  Game.Ping/1000);
 
-                        if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds)
+                        if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds && time > 30 && _seconds < time + 5)
                         {
                             Q.UseAbility();
                             Utils.Sleep(150 + Game.Ping, "Q");
@@ -343,10 +343,10 @@ namespace Stack
                 {
                     unittext = camp.Unit.Handle.ToString();
                     Drawing.DrawLine(position, Drawing.WorldToScreen(camp.Unit.Position),Color.Black);
-                    Drawing.DrawText(camp.Unit.ClassID.ToString(), "", new Vector2(position.X + 38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
+                    //Drawing.DrawText(camp.Unit.ClassID.ToString(), "", new Vector2(position.X + 38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
                 }
-                
                 Drawing.DrawText(text, "", new Vector2(position.X + 8, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
+                //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X -20, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
             }
         }
 
@@ -354,34 +354,139 @@ namespace Stack
         {
             Game.PrintMessage("<font face='verdana' color='#00FF00'>Stack loaded !</font>", MessageType.LogMessage);
         }
-
-        private static JungleCamps GetFurtherCamp(Unit h)
+        private static JungleCamps GetFurtherCamp(Hero h)
         {
-            JungleCamps[] further = {new JungleCamps {WaitPosition = h.Position}};
+            JungleCamps[] further = {new JungleCamps {WaitPosition = h.Position, Id = 0}};
             foreach (var camp in Camps)
             {
                 if (camp.Empty || !camp.Stacked || camp.Unit != null) continue;
                 if (h.Distance2D(camp.WaitPosition) > h.Distance2D(further[0].WaitPosition))
                     further[0] = camp;
             }
-            return further[0].Id != 0 ? further[0] : null;
+            return further[0];
+        }
+        private static bool Unittrue(Unit h)
+        {
+            foreach (var camp in Camps)
+            {
+                if (camp.Unit != null)
+                {
+                    if (camp.Unit.Handle == h.Handle)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        private static JungleCamps GetClosestCampu(Unit h, int n)
+        {
+            JungleCamps[] closest =
+            {
+                new JungleCamps {WaitPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue), Id = 0}
+            };
+            foreach (var camp in Camps.Where(x => x.State == 0 && x.Stacked))
+            {
+                if (h.Distance2D(closest[0].WaitPosition) > h.Distance2D(camp.WaitPosition))
+                    {
+                    switch (n)
+                    {
+                        case 1:
+                            if (camp.Unit == null)
+                            {
+                                closest[0] = camp;
+                            }
+                            break;
+                        case 2:
+
+                            if (camp.Unit != null)
+                            {
+                                if (camp.Unit.Handle != h.Handle)
+                                {
+                                    closest[0] = camp;
+                                }
+                            }
+
+                            break;
+                        case 3:
+
+                            if (camp.Unit != null)
+                            {
+                                if (camp.Unit.Handle != h.Handle)
+                                {
+                                    closest[0] = camp;
+                                }
+                            }
+                            else if (camp.Unit == null)
+                            {
+                                closest[0] = camp;
+                            }
+
+                            break;
+                    }
+                }
+            }
+            return closest[0];
         }
         private static void GetClosestCamp(List<Unit> h)
         {
-            foreach (var camp in Camps.Where(x=> x.Stacked && x.State ==0))
+            foreach (var baseNpcCreep in h)
             {
-                var minDis = float.MaxValue;
-                Unit unit = null;
-                foreach (var baseNpcCreep in h)
+                var num1 = Camps.Count(x => x.Stacked && x.State == 0);
+                var num3 = h.Count;
+                var num2 = Camps.Count(x => x.Stacked && x.State == 0 && x.Unit == null);
+
+                //Game.PrintMessage(" " + num1 + " " + num2 + " " + num3, MessageType.ChatMessage);
+
+                if (num1 == num2)
                 {
-                    if (minDis > baseNpcCreep.Distance2D(camp.WaitPosition))
+                    Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
+                }
+                else if (num2 > 0 && num1 - num2 < num3)
+                {
+                    if (!Unittrue(baseNpcCreep)) continue;
+                    Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
+                }
+                else if (num1 <= num3 && num2 == 0 && GetClosestCampu(baseNpcCreep, 2).Id != 0)
+                {
+                    //foreach (var camp in Camps.Where(x => x.State == 0 && x.Stacked))
+                    //{
+                    //    if (camp.Unit != null)
+                    //    {
+                    //        if (camp.Unit.Handle == baseNpcCreep.Handle)
+                    //        {
+                    //            camp.Unit = GetClosestCampu(baseNpcCreep, 2).Unit;
+                    //        }
+                    //    }
+                    //    if (GetClosestCampu(baseNpcCreep, 2).Id == camp.Id)
+                    //    {
+                    //        camp.Unit = baseNpcCreep;
+                    //    }
+                    //}
+                    try
                     {
-                        minDis = baseNpcCreep.Distance2D(camp.WaitPosition);
-                        unit = baseNpcCreep;
+                        //Game.PrintMessage("3 ", MessageType.ChatMessage);
+                        Camps.First(x => x.Unit.Handle == baseNpcCreep.Handle).Unit = GetClosestCampu(baseNpcCreep, 2).Unit;
+                        Camps.First(x => GetClosestCampu(baseNpcCreep, 2).Id == x.Id).Unit = baseNpcCreep;
+                    }
+                    catch (Exception)
+                    {
+                        //
                     }
                 }
-                h.Remove(unit);
-                camp.Unit = unit;
+                else if (num1 - num2 == num3 && num2 > 0 && GetClosestCampu(baseNpcCreep, 3).Id != 0)
+                {
+                    //Game.PrintMessage("4 ", MessageType.ChatMessage);
+                    try
+                    {
+                        Camps.First(x => x.Unit.Handle == baseNpcCreep.Handle).Unit = GetClosestCampu(baseNpcCreep, 3).Unit;
+                        Camps.First(x => GetClosestCampu(baseNpcCreep, 3).Id == x.Id).Unit = baseNpcCreep;
+                    }
+                    catch (Exception)
+                    {
+                        //
+                    }
+                }
             }
         }
         private static int CreepCount(Unit h, float radius)
