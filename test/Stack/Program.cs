@@ -60,8 +60,8 @@ namespace Stack
             Camps.Add(new JungleCamps { Position = new Vector3(-1524, 2641, 256), StackPosition = new Vector3(-1266, 4273, 384), WaitPosition = new Vector3(-1465, 2908, 256), Team = 3, Id = 10, Empty = false, Stacked = false, Starttime = 53 });
             Camps.Add(new JungleCamps { Position = new Vector3(1098, 3338, 384), StackPosition = new Vector3(910, 5003, 384), WaitPosition = new Vector3(975, 3586, 384), Team = 3, Id = 11, Empty = false, Stacked = false, Starttime = 53 });
             Camps.Add(new JungleCamps { Position = new Vector3(4141, 554, 384), StackPosition = new Vector3(2987, -2, 384), WaitPosition = new Vector3(3876, 506, 384), Team = 3, Id = 12, Empty = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(-2960, -126, 384), StackPosition = new Vector3(-3850, -1491, 384), WaitPosition = new Vector3(-2777, -230, 384), Team = 2, Id = 11, Empty = false, Stacked = false, Starttime = 53 });
-            Camps.Add(new JungleCamps { Position = new Vector3(4000, -700, 256), StackPosition = new Vector3(1713, -134, 256), WaitPosition = new Vector3(3649, -721, 256), Team = 3, Id = 12, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(-2960, -126, 384), StackPosition = new Vector3(-3850, -1491, 384), WaitPosition = new Vector3(-2777, -230, 384), Team = 2, Id = 13, Empty = false, Stacked = false, Starttime = 53 });
+            Camps.Add(new JungleCamps { Position = new Vector3(4000, -700, 256), StackPosition = new Vector3(1713, -134, 256), WaitPosition = new Vector3(3649, -721, 256), Team = 3, Id = 14, Empty = false, Stacked = false, Starttime = 53 });
 
             Events.OnLoad += Events_OnLoad;
             Events.OnClose += Events_OnClose;
@@ -440,12 +440,26 @@ namespace Stack
 
                 if (num1 == num2)
                 {
-                    Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
+                    try
+                    {
+                        Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
+                    }
+                    catch (Exception)
+                    {
+                        //
+                    }
                 }
                 else if (num2 > 0 && num1 - num2 < num3)
                 {
                     if (!Unittrue(baseNpcCreep)) continue;
-                    Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
+                    try
+                    {
+                        Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
+                    }
+                    catch (Exception)
+                    {
+                        //
+                    }
                 }
                 else if (num1 <= num3 && num2 == 0 && GetClosestCampu(baseNpcCreep, 2).Id != 0)
                 {
@@ -456,17 +470,17 @@ namespace Stack
                     //        if (camp.Unit.Handle == baseNpcCreep.Handle)
                     //        {
                     //            camp.Unit = GetClosestCampu(baseNpcCreep, 2).Unit;
+                    //            goto Found;
                     //        }
                     //    }
-                    //    if (GetClosestCampu(baseNpcCreep, 2).Id == camp.Id)
-                    //    {
-                    //        camp.Unit = baseNpcCreep;
-                    //    }
                     //}
+                    //Found:
+                    //    Camps.First(x => GetClosestCampu(baseNpcCreep, 2).Id == x.Id).Unit = baseNpcCreep;
                     try
                     {
                         //Game.PrintMessage("3 ", MessageType.ChatMessage);
-                        Camps.First(x => x.Unit.Handle == baseNpcCreep.Handle).Unit = GetClosestCampu(baseNpcCreep, 2).Unit;
+                        Camps.First(x => x.Unit.Handle == baseNpcCreep.Handle).Unit =
+                            GetClosestCampu(baseNpcCreep, 2).Unit;
                         Camps.First(x => GetClosestCampu(baseNpcCreep, 2).Id == x.Id).Unit = baseNpcCreep;
                     }
                     catch (Exception)
@@ -479,7 +493,8 @@ namespace Stack
                     //Game.PrintMessage("4 ", MessageType.ChatMessage);
                     try
                     {
-                        Camps.First(x => x.Unit.Handle == baseNpcCreep.Handle).Unit = GetClosestCampu(baseNpcCreep, 3).Unit;
+                        Camps.First(x => x.Unit.Handle == baseNpcCreep.Handle).Unit =
+                            GetClosestCampu(baseNpcCreep, 3).Unit;
                         Camps.First(x => GetClosestCampu(baseNpcCreep, 3).Id == x.Id).Unit = baseNpcCreep;
                     }
                     catch (Exception)
