@@ -393,7 +393,11 @@ namespace Stack
                                     x.IsAlive && x.Team == _me.Team && x.IsControllable &&
                                     !x.Name.Contains("npc_dota_beastmaster_hawk") &&
                                     (x.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds) ||
-                                     x.Modifiers.Any(m => m.Name == "modifier_dominated")) &&
+                                     x.Modifiers.Any(m => m.Name == "modifier_dominated") ||
+                                     x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo ||
+                                     x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
+                                     x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar 
+                                     ) &&
                                     (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
                                      x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
                                      x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
