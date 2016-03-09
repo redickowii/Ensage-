@@ -86,7 +86,7 @@ namespace Stack
                 Id = 3,
                 Empty = false,
                 Stacked = false,
-                Starttime = 54
+                Starttime = 53
             });
             Camps.Add(new JungleCamps
             {
