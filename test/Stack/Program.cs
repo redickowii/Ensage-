@@ -263,7 +263,7 @@ namespace Stack
             }
             foreach (var camp in Camps.Where(camp => camp.Stacked && camp.Unit != null))
             {
-                var unit = ObjectManager.GetEntities<Unit>().First(x => x.Handle == camp.Unit.Handle);
+                var unit = camp.Unit;
                 if (!Utils.SleepCheck("wait" + unit.Handle)) continue;
                 var time =
                     (int)
