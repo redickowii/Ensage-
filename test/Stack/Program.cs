@@ -239,6 +239,7 @@ namespace Stack
                 if (_seconds < 10 && _seconds > 0) camp.State = 0;
                 if (camp.Unit == null) continue;
                 if (camp.Unit.IsAlive) continue;
+                if (camp.Unit.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds)) continue;
                 camp.Unit = null;
                 camp.State = 0;
             }
@@ -262,12 +263,18 @@ namespace Stack
                             continue;
                         }
                         if (_seconds < time) continue;
-                        if (unit.Distance2D(camp.WaitPosition) < 10)
-                            camp.State = 1;
                         unit.Move(camp.WaitPosition);
+                        camp.State = 1;
                         Utils.Sleep(500, "wait");
                         break;
                     case 1:
+                        if (_seconds < time) continue;
+                        if (unit.Distance2D(camp.WaitPosition) < 10)
+                            camp.State = 2;
+                        unit.Move(camp.WaitPosition);
+                        Utils.Sleep(500, "wait");
+                        break;
+                    case 2:
                         if (_seconds < time) continue;
                         if (_seconds >= camp.Starttime - 5)
                         {
@@ -276,31 +283,31 @@ namespace Stack
                                                      (unit.Distance2D(closestNeutral) -
                                                       Math.Max(GetCreepStackAttackRange(unit, 800), unit.AttackRange))/
                                                      unit.MovementSpeed);
-                            camp.State = 2;
+                            camp.State = 3;
                             //Game.PrintMessage(camp.Id + " " + camp.AttackTime, MessageType.ChatMessage);
                         }
                         Utils.Sleep(500, "wait");
                         break;
-                    case 2:
+                    case 3:
                         if (_seconds < time) continue;
                         if (_seconds >= camp.AttackTime)
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
                             unit.Attack(closestNeutral);
-                            camp.State = 3;
+                            camp.State = 4;
                             RotationRad = closestNeutral.RotationRad;
                         }
                         break;
-                    case 3:
+                    case 4:
                         if (closestNeutral.IsMoving ||
                             closestNeutral.IsAttacking() || Math.Abs(closestNeutral.RotationRad - RotationRad) > 0)
                         {
                             unit.Stop();
                             unit.Move(camp.StackPosition);
-                            camp.State = 4;
+                            camp.State = 6;
                         }
                         break;
-                    case 4:
+                    case 6:
                         if (_seconds == 0)
                             unit.Move(camp.WaitPosition);
                         Utils.Sleep(1000, "wait");
@@ -349,12 +356,14 @@ namespace Stack
                     }
                 }
             }
-            if (Utils.SleepCheck("Cooldown"))
+            if (Utils.SleepCheck("Cooldown") && _seconds < 45)
             {
-                var baseNpcCreeps =
+                try
+                {
+                    var baseNpcCreeps =
                     ObjectManager.GetEntities<Unit>()
                         .Where(
-                            x =>
+                            x => x.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds ) &&
                                 x.IsAlive && x.Team == _me.Team && x.IsControllable &&
                                 !x.Name.Contains("npc_dota_beastmaster_hawk") &&
                                 (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
@@ -368,7 +377,13 @@ namespace Stack
                                  x.IsIllusion ||
                                  (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level > 0)))
                         .ToList();
-                GetClosestCamp(baseNpcCreeps);
+                    GetClosestCamp(baseNpcCreeps);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Error baseNpcCreeps");
+                }
+
                 Utils.Sleep(1000, "Cooldown");
             }
 
@@ -571,6 +586,18 @@ namespace Stack
                 var num2 = Camps.Count(x => x.Stacked && x.State == 0 && x.Unit == null);
                 try
                 {
+                    var bid = 0;
+                    var cont = true;
+                    foreach (
+                        var camp in
+                            Camps.Where(x => x.Stacked)
+                                .Where(camp => camp.Unit?.Handle == baseNpcCreep.Handle))
+                    {
+                        if (camp.State != 0)
+                            cont = false;
+                        bid = camp.Id;
+                    }
+                    if (!cont) continue;
                     if (num1 == num2)
                     {
                         Camps.First(x => GetClosestCampu(baseNpcCreep, 1).Id == x.Id).Unit = baseNpcCreep;
@@ -584,22 +611,10 @@ namespace Stack
                     {
                         var id = GetClosestCampu(baseNpcCreep, 2).Id;
                         var unit = GetClosestCampu(baseNpcCreep, 2).Unit;
-                        var bid = 0;
+
                         var waitPosition = GetClosestCampu(baseNpcCreep, 2).WaitPosition;
                         if (baseNpcCreep.Distance2D(waitPosition) < unit.Distance2D(waitPosition))
                         {
-                            foreach (var camp in Camps.Where(x => x.State == 0 && x.Stacked))
-                            {
-                                if (camp.Unit != null)
-                                {
-                                    if (camp.Unit.Handle == baseNpcCreep.Handle)
-                                    {
-                                        bid = camp.Id;
-                                        goto find;
-                                    }
-                                }
-                            }
-                            find:
                             Camps.First(x => x.Id == id).Unit = baseNpcCreep;
                             Camps.First(x => x.Id == bid).Unit = unit;
                         }
@@ -608,22 +623,9 @@ namespace Stack
                     {
                         var id = GetClosestCampu(baseNpcCreep, 3).Id;
                         var unit = GetClosestCampu(baseNpcCreep, 3).Unit;
-                        var bid = 0;
                         var waitPosition = GetClosestCampu(baseNpcCreep, 3).WaitPosition;
                         if (unit == null || baseNpcCreep.Distance2D(waitPosition) < unit.Distance2D(waitPosition))
                         {
-                            foreach (var camp in Camps.Where(x => x.State == 0 && x.Stacked))
-                            {
-                                if (camp.Unit != null)
-                                {
-                                    if (camp.Unit.Handle == baseNpcCreep.Handle)
-                                    {
-                                        bid = camp.Id;
-                                        goto find;
-                                    }
-                                }
-                            }
-                            find:
                             Camps.First(x => x.Id == id).Unit = baseNpcCreep;
                             Camps.First(x => x.Id == bid).Unit = unit;
                         }
