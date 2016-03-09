@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
@@ -19,6 +20,7 @@ namespace Stack
             public Vector3 Position { get; set; }
             public Vector3 StackPosition { get; set; }
             public Vector3 WaitPosition { get; set; }
+            public Vector3 WaitPositionN { get; set; }
             public int Team { get; set; }
             public int Id { get; set; }
             public bool Stacked { get; set; }
@@ -40,7 +42,6 @@ namespace Stack
         private static MenuItem _subMenu1, _subMenu0;
         private static List<JungleCamps> Camps = new List<JungleCamps>();
         private static int _seconds;
-        private static float RotationRad;
 
         private static void Main(string[] args)
         {
@@ -49,6 +50,7 @@ namespace Stack
                 Position = new Vector3(-1708, -4284, 256),
                 StackPosition = new Vector3(-2776, -3144, 256),
                 WaitPosition = new Vector3(-1971, -3949, 256),
+                WaitPositionN = new Vector3(-2041, -3790, 256),
                 Team = 2,
                 Id = 1,
                 Empty = false,
@@ -60,6 +62,7 @@ namespace Stack
                 Position = new Vector3(-266, -3176, 256),
                 StackPosition = new Vector3(-522, -1351, 256),
                 WaitPosition = new Vector3(-325, -2699, 256),
+                WaitPositionN = new Vector3(-340, -2521, 256),
                 Team = 2,
                 Id = 2,
                 Empty = false,
@@ -68,22 +71,24 @@ namespace Stack
             });
             Camps.Add(new JungleCamps
             {
-                Position = new Vector3(3016, -4692, 384),
-                StackPosition = new Vector3(4777, -4954, 384),
-                WaitPosition = new Vector3(3132, -5000, 384),
+                Position = new Vector3(1656, -3714, 384),
+                StackPosition = new Vector3(1263, -6041, 384),
+                WaitPosition = new Vector3(1612, -4277, 384),
+                WaitPositionN = new Vector3(1647, -4651, 384),
                 Team = 2,
-                Id = 4,
+                Id = 3,
                 Empty = false,
                 Stacked = false,
                 Starttime = 53
             });
             Camps.Add(new JungleCamps
             {
-                Position = new Vector3(1656, -3714, 384),
-                StackPosition = new Vector3(1263, -6041, 384),
-                WaitPosition = new Vector3(1612, -4277, 384),
+                Position = new Vector3(3016, -4692, 384),
+                StackPosition = new Vector3(4777, -4954, 384),
+                WaitPosition = new Vector3(3146, -5071, 384),
+                WaitPositionN = new Vector3(3088, -5345, 384),
                 Team = 2,
-                Id = 3,
+                Id = 4,
                 Empty = false,
                 Stacked = false,
                 Starttime = 53
@@ -93,6 +98,7 @@ namespace Stack
                 Position = new Vector3(4474, -3598, 384),
                 StackPosition = new Vector3(2755, -4001, 384),
                 WaitPosition = new Vector3(4121, -3902, 384),
+                WaitPositionN = new Vector3(3714, -3941, 384),
                 Team = 2,
                 Id = 5,
                 Empty = false,
@@ -104,6 +110,7 @@ namespace Stack
                 Position = new Vector3(-3617, 805, 384),
                 StackPosition = new Vector3(-5268, 1400, 384),
                 WaitPosition = new Vector3(-3835, 643, 384),
+                WaitPositionN = new Vector3(-4571, 795, 384),
                 Team = 2,
                 Id = 6,
                 Empty = false,
@@ -115,6 +122,7 @@ namespace Stack
                 Position = new Vector3(-4446, 3541, 384),
                 StackPosition = new Vector3(-3953, 4954, 384),
                 WaitPosition = new Vector3(-4251, 3760, 384),
+                WaitPositionN = new Vector3(-4267, 4271, 384),
                 Team = 3,
                 Id = 7,
                 Empty = false,
@@ -125,7 +133,8 @@ namespace Stack
             {
                 Position = new Vector3(-2981, 4591, 384),
                 StackPosition = new Vector3(-3248, 5993, 384),
-                WaitPosition = new Vector3(-3055, 4837, 384),
+                WaitPosition = new Vector3(-3050, 4897, 384),
+                WaitPositionN = new Vector3(-3077, 5111, 384),
                 Team = 3,
                 Id = 8,
                 Empty = false,
@@ -137,6 +146,7 @@ namespace Stack
                 Position = new Vector3(-392, 3652, 384),
                 StackPosition = new Vector3(-224, 5088, 384),
                 WaitPosition = new Vector3(-503, 3955, 384),
+                WaitPositionN = new Vector3(-512, 4314, 384),
                 Team = 3,
                 Id = 9,
                 Empty = false,
@@ -148,6 +158,7 @@ namespace Stack
                 Position = new Vector3(-1524, 2641, 256),
                 StackPosition = new Vector3(-1266, 4273, 384),
                 WaitPosition = new Vector3(-1465, 2908, 256),
+                WaitPositionN = new Vector3(-1508, 3328, 256),
                 Team = 3,
                 Id = 10,
                 Empty = false,
@@ -159,6 +170,7 @@ namespace Stack
                 Position = new Vector3(1098, 3338, 384),
                 StackPosition = new Vector3(910, 5003, 384),
                 WaitPosition = new Vector3(975, 3586, 384),
+                WaitPositionN = new Vector3(983, 3949, 383),
                 Team = 3,
                 Id = 11,
                 Empty = false,
@@ -170,6 +182,7 @@ namespace Stack
                 Position = new Vector3(4141, 554, 384),
                 StackPosition = new Vector3(2987, -2, 384),
                 WaitPosition = new Vector3(3876, 506, 384),
+                WaitPositionN = new Vector3(3152, 586, 384),
                 Team = 3,
                 Id = 12,
                 Empty = false,
@@ -181,6 +194,7 @@ namespace Stack
                 Position = new Vector3(-2960, -126, 384),
                 StackPosition = new Vector3(-3850, -1491, 384),
                 WaitPosition = new Vector3(-2777, -230, 384),
+                WaitPositionN = new Vector3(-2340, -517, 384),
                 Team = 2,
                 Id = 13,
                 Empty = false,
@@ -192,6 +206,7 @@ namespace Stack
                 Position = new Vector3(4000, -700, 256),
                 StackPosition = new Vector3(1713, -134, 256),
                 WaitPosition = new Vector3(3649, -721, 256),
+                WaitPositionN = new Vector3(3589, -141, 384),
                 Team = 3,
                 Id = 14,
                 Empty = false,
@@ -230,23 +245,26 @@ namespace Stack
         private static void Game_Stack(EventArgs args)
         {
             if (!Menu.Item("Stack").GetValue<KeyBind>().Active || !Game.IsInGame || _me == null || Game.IsPaused ||
-                Game.IsChatOpen || !Utils.SleepCheck("wait")) return;
+                Game.IsChatOpen) return;
 
             foreach (var camp in Camps)
             {
-                if (_seconds == 0) camp.Empty = false;
+                if (_seconds == 1)
+                {
+                    camp.Empty = false;
+                    camp.Unit = null;
+                    camp.State = 0;
+                } 
                 if (_seconds > 47 && camp.Unit == null) camp.State = 5;
-                if (_seconds < 10 && _seconds > 0) camp.State = 0;
                 if (camp.Unit == null) continue;
                 if (camp.Unit.IsAlive) continue;
-                if (camp.Unit.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds)) continue;
                 camp.Unit = null;
                 camp.State = 0;
             }
-
             foreach (var camp in Camps.Where(camp => camp.Stacked && camp.Unit != null))
             {
-                var unit = camp.Unit;
+                var unit = ObjectManager.GetEntities<Unit>().First(x => x.Handle == camp.Unit.Handle);
+                if (!Utils.SleepCheck("wait" + unit.Handle)) continue;
                 var time =
                     (int)
                         (camp.Starttime - (unit.Distance2D(camp.WaitPosition)/unit.MovementSpeed) - 5 + Game.Ping/1000);
@@ -257,7 +275,7 @@ namespace Stack
                         if (creepscount == 0 && unit.Distance2D(camp.WaitPosition) < 10)
                         {
                             camp.Empty = true;
-                            camp.Unit.Move(camp.StackPosition);
+                            camp.Unit.Move(camp.WaitPositionN);
                             camp.Unit = null;
                             camp.State = 5;
                             continue;
@@ -265,42 +283,47 @@ namespace Stack
                         if (_seconds < time) continue;
                         unit.Move(camp.WaitPosition);
                         camp.State = 1;
-                        Utils.Sleep(500, "wait");
+                        Utils.Sleep(500, "wait" + unit.Handle);
                         break;
                     case 1:
                         if (_seconds < time) continue;
                         if (unit.Distance2D(camp.WaitPosition) < 10)
                             camp.State = 2;
                         unit.Move(camp.WaitPosition);
-                        Utils.Sleep(500, "wait");
+                        Utils.Sleep(500, "wait" + unit.Handle);
                         break;
                     case 2:
-                        if (_seconds < time) continue;
                         if (_seconds >= camp.Starttime - 5)
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
-                            camp.AttackTime = (int) (camp.Starttime -
-                                                     (unit.Distance2D(closestNeutral) -
-                                                      Math.Max(GetCreepStackAttackRange(unit, 800), unit.AttackRange))/
-                                                     unit.MovementSpeed);
+                            float distance = 0;
+                            if (unit.AttackRange < unit.Distance2D(closestNeutral))
+                            {
+                                distance = (unit.Distance2D(closestNeutral) - unit.AttackRange) / unit.MovementSpeed;
+                            }
+                            camp.AttackTime = (int) (camp.Starttime - (distance + (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime / 3 : 0)));
                             camp.State = 3;
-                            //Game.PrintMessage(camp.Id + " " + camp.AttackTime, MessageType.ChatMessage);
+                            unit.Move(PositionCalc(unit,closestNeutral));
                         }
-                        Utils.Sleep(500, "wait");
+                        Utils.Sleep(500, "wait" + unit.Handle);
                         break;
                     case 3:
-                        if (_seconds < time) continue;
                         if (_seconds >= camp.AttackTime)
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
+                            float distance = 0;
+                            if (unit.AttackRange < unit.Distance2D(closestNeutral))
+                            {
+                                distance = (unit.Distance2D(closestNeutral) - unit.AttackRange)/unit.MovementSpeed;
+                            }
+                            var tWait = (distance + (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0))*1000 + Game.Ping;
                             unit.Attack(closestNeutral);
+                            Utils.Sleep(tWait, "twait" + unit.Handle);
                             camp.State = 4;
-                            RotationRad = closestNeutral.RotationRad;
                         }
                         break;
                     case 4:
-                        if (closestNeutral.IsMoving ||
-                            closestNeutral.IsAttacking() || Math.Abs(closestNeutral.RotationRad - RotationRad) > 0)
+                        if (unit.Distance2D(closestNeutral) <= 50 || Utils.SleepCheck("twait" + unit.Handle))
                         {
                             unit.Stop();
                             unit.Move(camp.StackPosition);
@@ -309,8 +332,11 @@ namespace Stack
                         break;
                     case 6:
                         if (_seconds == 0)
-                            unit.Move(camp.WaitPosition);
-                        Utils.Sleep(1000, "wait");
+                        {
+                            unit.Move(camp.WaitPositionN);
+                            camp.State = 0;
+                        }
+                        Utils.Sleep(1000, "wait" + unit.Handle);
                         break;
                 }
             }
@@ -319,7 +345,7 @@ namespace Stack
         private static void Game_OnUpdate(EventArgs args)
         {
             if (!Game.IsInGame || _me == null || Game.IsPaused || Game.IsChatOpen ||
-                !Menu.Item("Stack").GetValue<KeyBind>().Active && Utils.SleepCheck("wait"))
+                !Menu.Item("Stack").GetValue<KeyBind>().Active)
             {
                 return;
             }
@@ -361,22 +387,25 @@ namespace Stack
                 try
                 {
                     var baseNpcCreeps =
-                    ObjectManager.GetEntities<Unit>()
-                        .Where(
-                            x => x.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds ) &&
-                                x.IsAlive && x.Team == _me.Team && x.IsControllable &&
-                                !x.Name.Contains("npc_dota_beastmaster_hawk") &&
-                                (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
-                                 x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
-                                 x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Invoker_Forged_Spirit ||
-                                 x.ClassID == ClassID.CDOTA_Unit_Broodmother_Spiderling ||
-                                 x.IsIllusion ||
-                                 (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle && R.Level > 0)))
-                        .ToList();
+                        ObjectManager.GetEntities<Unit>()
+                            .Where(
+                                x =>
+                                    x.IsAlive && x.Team == _me.Team && x.IsControllable &&
+                                    !x.Name.Contains("npc_dota_beastmaster_hawk") &&
+                                    (x.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds) ||
+                                     x.Modifiers.Any(m => m.Name == "modifier_dominated")) &&
+                                    (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                     x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                     x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                     x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
+                                     x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
+                                     x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
+                                     x.ClassID == ClassID.CDOTA_BaseNPC_Invoker_Forged_Spirit ||
+                                     x.ClassID == ClassID.CDOTA_Unit_Broodmother_Spiderling ||
+                                     x.IsIllusion ||
+                                     (x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo && _me.Handle != x.Handle &&
+                                      R.Level > 0)))
+                            .ToList();
                     GetClosestCamp(baseNpcCreeps);
                 }
                 catch (Exception)
@@ -477,7 +506,7 @@ namespace Stack
             //    var pos = Drawing.WorldToScreen(Game.MousePosition);
             //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
             //    if (unit != null)
-            //        Drawing.DrawText(unit.Name + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //        Drawing.DrawText(unit.Modifiers.Any(m => m.Name == "modifier_dominated") + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
             //}
             //catch (Exception)
             //{
@@ -503,7 +532,10 @@ namespace Stack
                 }
                 Drawing.DrawText(text, "", new Vector2(position.X + 8, position.Y - 3), new Vector2(40), color,
                     FontFlags.Outline);
-                //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X -20, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
+                //Drawing.DrawLine(position, Drawing.WorldToScreen(camp.WaitPosition), Color.DarkRed);
+                //Drawing.DrawLine(Drawing.WorldToScreen(camp.StackPosition), Drawing.WorldToScreen(camp.WaitPosition), Color.DarkRed);
+                //Drawing.DrawLine(Drawing.WorldToScreen(camp.WaitPositionN), Drawing.WorldToScreen(camp.WaitPosition), Color.DarkGreen);
+                //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X - 20, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
             }
         }
 
@@ -587,15 +619,17 @@ namespace Stack
                 try
                 {
                     var bid = 0;
+                    var bwaitPosition = new Vector3();
                     var cont = true;
                     foreach (
                         var camp in
                             Camps.Where(x => x.Stacked)
-                                .Where(camp => camp.Unit?.Handle == baseNpcCreep.Handle))
+                                .Where(x => x.Unit != null).Where(x => x.Unit.Handle == baseNpcCreep.Handle))
                     {
                         if (camp.State != 0)
                             cont = false;
                         bid = camp.Id;
+                        bwaitPosition = camp.WaitPosition;
                     }
                     if (!cont) continue;
                     if (num1 == num2)
@@ -613,7 +647,9 @@ namespace Stack
                         var unit = GetClosestCampu(baseNpcCreep, 2).Unit;
 
                         var waitPosition = GetClosestCampu(baseNpcCreep, 2).WaitPosition;
-                        if (baseNpcCreep.Distance2D(waitPosition) < unit.Distance2D(waitPosition))
+                        if (baseNpcCreep.Distance2D(waitPosition) < unit.Distance2D(waitPosition) &&
+                            baseNpcCreep.Distance2D(bwaitPosition) > baseNpcCreep.Distance2D(waitPosition)
+                            )
                         {
                             Camps.First(x => x.Id == id).Unit = baseNpcCreep;
                             Camps.First(x => x.Id == bid).Unit = unit;
@@ -624,7 +660,9 @@ namespace Stack
                         var id = GetClosestCampu(baseNpcCreep, 3).Id;
                         var unit = GetClosestCampu(baseNpcCreep, 3).Unit;
                         var waitPosition = GetClosestCampu(baseNpcCreep, 3).WaitPosition;
-                        if (unit == null || baseNpcCreep.Distance2D(waitPosition) < unit.Distance2D(waitPosition))
+                        if ((baseNpcCreep.Distance2D(waitPosition) < unit.Distance2D(waitPosition) &&
+                             baseNpcCreep.Distance2D(bwaitPosition) > baseNpcCreep.Distance2D(waitPosition)) ||
+                            unit == null)
                         {
                             Camps.First(x => x.Id == id).Unit = baseNpcCreep;
                             Camps.First(x => x.Id == bid).Unit = unit;
@@ -674,6 +712,16 @@ namespace Stack
                 ar[0] = neutral.AttackRange;
             }
             return ar[0];
+        }
+
+        private static Vector3 PositionCalc(Unit me, Unit target)
+        {
+            var l = (me.Distance2D(target) - me.Distance2D(target)+2) / (me.Distance2D(target)-2);
+            var posA = me.Position;
+            var posB = target.Position;
+            var x = (posA.X + l * posB.X) / (1 + l);
+            var y = (posA.Y + l * posB.Y) / (1 + l);
+            return new Vector3((int) x, (int) y, posA.Z);
         }
 
         public static void RoundedRectangle(float x, float y, float w, float h, int iSmooth, Color color)
