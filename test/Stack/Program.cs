@@ -682,10 +682,18 @@ namespace Stack
 
         private static int CreepCount(Unit h, float radius)
         {
-            return
+            try
+            {
+                return
                 ObjectManager.GetEntities<Unit>()
                     .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && h.Distance2D(x) <= radius)
                     .ToList().Count;
+            }
+            catch (Exception)
+            {
+                //
+            }
+            return 0;
         }
 
         private static Unit GetNearestCreepToPull(Unit h, float radius)
