@@ -271,6 +271,12 @@ namespace Stack
                 switch (camp.State)
                 {
                     case 0:
+                        if (_seconds < time) continue;
+                        unit.Move(camp.WaitPosition);
+                        camp.State = 1;
+                        Utils.Sleep(500, "wait" + unit.Handle);
+                        break;
+                    case 1:
                         var creepscount = CreepCount(unit, 800);
                         if (creepscount == 0 && unit.Distance2D(camp.WaitPosition) < 10)
                         {
@@ -280,12 +286,6 @@ namespace Stack
                             camp.State = 5;
                             continue;
                         }
-                        if (_seconds < time) continue;
-                        unit.Move(camp.WaitPosition);
-                        camp.State = 1;
-                        Utils.Sleep(500, "wait" + unit.Handle);
-                        break;
-                    case 1:
                         if (_seconds < time) continue;
                         if (unit.Distance2D(camp.WaitPosition) < 10)
                             camp.State = 2;
