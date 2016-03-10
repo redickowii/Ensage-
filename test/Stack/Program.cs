@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Globalization;
+using System.Linq;
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
 using Ensage.Common.Menu;
-
 using SharpDX;
-using System.Linq;
-
 
 namespace Stack
 {
@@ -41,7 +37,7 @@ namespace Stack
         private static bool _stackKey, _load, _enable;
         private static readonly Menu Menu = new Menu("Stack", "Stack", true, "item_helm_of_the_dominator", true);
         private static MenuItem _subMenu1, _subMenu0;
-        private static List<JungleCamps> Camps = new List<JungleCamps>();
+        private static readonly List<JungleCamps> Camps = new List<JungleCamps>();
         private static int _seconds;
 
         private static void Main(string[] args)
@@ -255,7 +251,7 @@ namespace Stack
                     camp.Empty = false;
                     camp.Unit = null;
                     camp.State = 0;
-                } 
+                }
                 if (_seconds > 47 && camp.Unit == null) camp.State = 5;
                 if (camp.Unit == null) continue;
                 if (camp.Unit.IsAlive) continue;
@@ -268,7 +264,7 @@ namespace Stack
                 if (!Utils.SleepCheck("wait" + unit.Handle)) continue;
                 var time =
                     (int)
-                        (camp.Starttime - (unit.Distance2D(camp.WaitPosition)/unit.MovementSpeed) - 5 + Game.Ping/1000);
+                        (camp.Starttime - unit.Distance2D(camp.WaitPosition)/unit.MovementSpeed - 5 + Game.Ping/1000);
                 switch (camp.State)
                 {
                     case 0:
@@ -298,7 +294,7 @@ namespace Stack
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
                             creepscount = CreepCount(unit, 800);
-                            var creeps = creepscount > 6 ? (creepscount*75)/1000 : 0;
+                            var creeps = creepscount > 6 ? creepscount*75/1000 : 0;
                             float distance = 0;
                             if (unit.AttackRange < unit.Distance2D(closestNeutral))
                             {
@@ -357,7 +353,7 @@ namespace Stack
                 return;
             }
 
-            _seconds = ((int) Game.GameTime)%60;
+            _seconds = (int) Game.GameTime%60;
 
             Q = _me.Spellbook.Spell1;
             W = _me.Spellbook.Spell2;
@@ -379,7 +375,7 @@ namespace Stack
                     var time =
                         (int)
                             (GetFurtherCamp(_me).Starttime -
-                             (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/_me.MovementSpeed) - 5 +
+                             _me.Distance2D(GetFurtherCamp(_me).WaitPosition)/_me.MovementSpeed - 5 +
                              Game.Ping/1000);
                     if (_enable && _manta.CanBeCasted() && Utils.SleepCheck("manta") && time < _seconds && time > 40 &&
                         _seconds < time + 5)
@@ -398,13 +394,12 @@ namespace Stack
                             .Where(
                                 x =>
                                     x.IsAlive && x.Team == _me.Team && x.IsControllable &&
-                                    !x.Name.Contains("npc_dota_beastmaster_hawk") &&
-                                    (x.Modifiers.Any(m => m.Name == "modifier_kill" && m.Duration - m.ElapsedTime >= 60 - _seconds) ||
+                                    !x.Name.Contains("beastmaster_hawk") &&
+                                    (x.Modifiers.Any(m =>m.Name == "modifier_kill" && (int) (m.Duration - m.ElapsedTime + _seconds) >= 60) ||
                                      x.Modifiers.Any(m => m.Name == "modifier_dominated") ||
                                      x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo ||
                                      x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
-                                     x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar 
-                                     ) &&
+                                     x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar) &&
                                     (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
                                      x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
                                      x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
@@ -443,7 +438,7 @@ namespace Stack
                     {
                         var time =
                             (int)
-                                (GetFurtherCamp(_me).Starttime - (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/440) -
+                                (GetFurtherCamp(_me).Starttime - _me.Distance2D(GetFurtherCamp(_me).WaitPosition)/440 -
                                  5 + Game.Ping/1000);
 
                         if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds &&
@@ -469,7 +464,7 @@ namespace Stack
                         var time =
                             (int)
                                 (GetFurtherCamp(_me).Starttime -
-                                 (_me.Distance2D(GetFurtherCamp(_me).WaitPosition)/_me.MovementSpeed) - 5 +
+                                 _me.Distance2D(GetFurtherCamp(_me).WaitPosition)/_me.MovementSpeed - 5 +
                                  Game.Ping/1000);
 
                         if (_enable && Q.CanBeCasted() && Utils.SleepCheck("Q") && Q != null && time < _seconds &&
@@ -496,7 +491,7 @@ namespace Stack
                     where Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40)
                     select camp)
                 {
-                    camp.Stacked = (camp.Stacked == false) ? true : false;
+                    camp.Stacked = camp.Stacked == false ? true : false;
                     camp.Unit = null;
                 }
             }
@@ -518,10 +513,11 @@ namespace Stack
         {
             //try
             //{
+            //    _seconds = ((int) Game.GameTime) % 60;
             //    var pos = Drawing.WorldToScreen(Game.MousePosition);
             //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
             //    if (unit != null)
-            //        Drawing.DrawText(unit.Modifiers.Any(m => m.Name == "modifier_dominated") + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //        Drawing.DrawText(unit.Team + "", "", new Vector2(pos.X, pos.Y + 20), new Vector2(40), Color.AliceBlue, FontFlags.Outline);
             //}
             //catch (Exception)
             //{
@@ -696,9 +692,9 @@ namespace Stack
             try
             {
                 return
-                ObjectManager.GetEntities<Unit>()
-                    .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && h.Distance2D(x) <= radius)
-                    .ToList().Count;
+                    ObjectManager.GetEntities<Unit>()
+                        .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && h.Distance2D(x) <= radius)
+                        .ToList().Count;
             }
             catch (Exception)
             {
@@ -739,11 +735,11 @@ namespace Stack
 
         private static Vector3 PositionCalc(Unit me, Unit target)
         {
-            var l = (me.Distance2D(target) - me.Distance2D(target)+2) / (me.Distance2D(target)-2);
+            var l = (me.Distance2D(target) - me.Distance2D(target) + 2)/(me.Distance2D(target) - 2);
             var posA = me.Position;
             var posB = target.Position;
-            var x = (posA.X + l * posB.X) / (1 + l);
-            var y = (posA.Y + l * posB.Y) / (1 + l);
+            var x = (posA.X + l*posB.X)/(1 + l);
+            var y = (posA.Y + l*posB.Y)/(1 + l);
             return new Vector3((int) x, (int) y, posA.Z);
         }
 
@@ -765,15 +761,15 @@ namespace Stack
             pt[3].Y = y + iSmooth;
 
             // Draw cross 
-            Drawing.DrawRect(new Vector2(x, y + iSmooth), new Vector2(w, h - (iSmooth*2)), color);
+            Drawing.DrawRect(new Vector2(x, y + iSmooth), new Vector2(w, h - iSmooth*2), color);
 
-            Drawing.DrawRect(new Vector2(x + iSmooth, y), new Vector2(w - (iSmooth*2), h), color);
+            Drawing.DrawRect(new Vector2(x + iSmooth, y), new Vector2(w - iSmooth*2, h), color);
 
             float fDegree = 0;
 
             for (var i = 0; i < 4; i++)
             {
-                for (var k = fDegree; k < fDegree + ((Math.PI*2)/4f); k += (float) (1*(Math.PI/180.0f)))
+                for (var k = fDegree; k < fDegree + Math.PI*2/4f; k += (float) (1*(Math.PI/180.0f)))
                 {
                     // Draw quarter circles on every corner
                     Drawing.DrawLine(
