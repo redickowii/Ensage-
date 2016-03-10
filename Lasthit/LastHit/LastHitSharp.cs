@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
@@ -20,12 +21,12 @@ namespace LastHit
             public int Cooldown { get; set; }
         }
 
-        public class DPS
-        {
-            public Unit Creep { get; set; }
-            public uint damageB { get; set; }
-            public double dps { get; set; }
-        }
+        //public class DPS
+        //{
+        //    public Unit Creep { get; set; }
+        //    public uint DamageB { get; set; }
+        //    public double Dps { get; set; }
+        //}
 
         private static readonly Menu Menu = new Menu("LastHit", "lasthit", true);
 
@@ -33,12 +34,14 @@ namespace LastHit
         private static Hero _target;
         private static Hero _me;
         private static double _aPoint;
-        private static int outrange;
-        private static int[] findIndex;
-        private static bool isloaded;
-        private static uint aRange;
-        private static List<DPS> dam = new List<DPS>();
+        private static int _outrange;
+        private static int[] _findIndex;
+        private static bool _isloaded;
+        //private static List<DPS> dam = new List<DPS>();
         private static readonly List<Damage> Dmg = new List<Damage>();
+        private static int _autoAttack, _autoAttackAfterSpell;
+        private static float _lastRange;
+        private static ParticleEffect _rangeDisplay;
 
         #endregion
 
@@ -48,14 +51,13 @@ namespace LastHit
             Menu.AddItem(new MenuItem("harass", "Lasthit mode").SetValue(new KeyBind('C', KeyBindType.Press)));
             Menu.AddItem(new MenuItem("farmKey", "Farm mode").SetValue(new KeyBind('V', KeyBindType.Press)));
             Menu.AddItem(new MenuItem("kitekey", "Kite mode").SetValue(new KeyBind('H', KeyBindType.Press)));
-            Menu.AddItem(
-                new MenuItem("bonuswindup", "Bonus WindUp time on kitting").SetValue(new Slider(500, 100, 2000))
-                    .SetTooltip("Time between attacks in kitting mode"));
+            Menu.AddItem(new MenuItem("bonuswindup", "Bonus WindUp time on kitting").SetValue(new Slider(500, 100, 2000)));
             Menu.AddItem(new MenuItem("hpleftcreep", "Mark hp ?").SetValue(true));
+            Menu.AddItem(new MenuItem("usespell", "Use spell ?").SetValue(true));
             Menu.AddItem(new MenuItem("harassheroes", "Harass in lasthit mode ?").SetValue(true));
             Menu.AddItem(new MenuItem("denied", "Deny creep ?").SetValue(true));
-            Menu.AddItem(new MenuItem("usespell", "Use spell ?").SetValue(true));
             Menu.AddItem(new MenuItem("AOC", "Atteck own creeps ?").SetValue(true));
+            Menu.AddItem(new MenuItem("showatkrange", "Show attack range ?").SetValue(true));
             Menu.AddItem(new MenuItem("outrange", "Bonus range").SetValue(new Slider(100, 100, 500)));
             Menu.AddToMainMenu();
 
@@ -77,6 +79,12 @@ namespace LastHit
                 Dmgint = new int[4] {60, 100, 140, 180},
                 Cooldown = 6000
             });
+
+            // Auto Attack Checker
+            _autoAttackAfterSpell = Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt();
+            _autoAttack = Game.GetConsoleVar("dota_player_units_auto_attack").GetInt();
+            // Auto Attack Checker
+
             Game.OnUpdate += Game_OnUpdate;
             Game.OnUpdate += Unit_dps;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -100,7 +108,7 @@ namespace LastHit
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                            && x.Team != _me.Team && x.Distance2D(_me) < attackRange + outrange);
+                            && x.Team != _me.Team && x.Distance2D(_me) < attackRange + _outrange);
             foreach (var enemy in enemies.Where(x => x != null))
             {
                 var health = enemy.Health;
@@ -145,21 +153,27 @@ namespace LastHit
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (!isloaded)
+            if (!_isloaded)
             {
                 _me = ObjectManager.LocalHero;
                 if (!Game.IsInGame || _me == null)
                 {
                     return;
                 }
-                isloaded = true;
+                _isloaded = true;
+                _rangeDisplay = null;
                 _target = null;
             }
 
             if (_me == null || !_me.IsValid)
             {
-                isloaded = false;
+                _isloaded = false;
                 _me = ObjectManager.LocalHero;
+                if (_rangeDisplay == null)
+                {
+                    return;
+                }
+                _rangeDisplay = null;
                 _target = null;
                 return;
             }
@@ -176,10 +190,10 @@ namespace LastHit
             var canCancel = Orbwalking.CanCancelAnimation();
             var wait = false;
             var rnd = new Random();
-            _aPoint = _me.SecondsPerAttack*100; //rnd.Next(100,200);
-            aRange = _me.AttackRange;
-            outrange = Menu.Item("outrange").GetValue<Slider>().Value;
-            if (!canCancel) return;
+            _lastRange = _me.GetAttackRange();
+            _aPoint = _me.SecondsPerAttack*200;
+            _outrange = Menu.Item("outrange").GetValue<Slider>().Value;
+
             if (_target != null && !_target.IsVisible && !Orbwalking.AttackOnCooldown(_target))
             {
                 _target = _me.ClosestToMouseTarget(500);
@@ -193,91 +207,116 @@ namespace LastHit
                 }
             }
 
+            if (Menu.Item("showatkrange").GetValue<bool>())
+            {
+                if (_rangeDisplay == null)
+                {
+                    if (_me.IsAlive)
+                    {
+                        _rangeDisplay = _me.AddParticleEffect(@"particles\ui_mouseactions\drag_selected_ring.vpcf");
+                        _rangeDisplay.SetControlPoint(1, new Vector3(255, 80, 50));
+                        _rangeDisplay.SetControlPoint(3, new Vector3(20, 0, 0));
+                        _rangeDisplay.SetControlPoint(2, new Vector3(_lastRange, 255, 0));
+                    }
+                }
+                else
+                {
+                    if (!_me.IsAlive)
+                    {
+                        _rangeDisplay.Dispose();
+                        _rangeDisplay = null;
+                    }
+                    else if (_lastRange != _me.GetAttackRange())
+                    {
+                        _rangeDisplay.Dispose();
+                        _rangeDisplay = _me.AddParticleEffect(@"particles\ui_mouseactions\drag_selected_ring.vpcf");
+                        _rangeDisplay.SetControlPoint(1, new Vector3(255, 80, 50));
+                        _rangeDisplay.SetControlPoint(3, new Vector3(15, 0, 0));
+                        _rangeDisplay.SetControlPoint(2, new Vector3(_lastRange, 255, 0));
+                    }
+                }
+            }
+            else
+            {
+                if (_rangeDisplay != null) _rangeDisplay.Dispose();
+                _rangeDisplay = null;
+            }
+
+            Autoattack(_autoAttack, _autoAttackAfterSpell);
+
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
             {
-                if ((_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || _creepTarget.IsAlive ||
-                     !Orbwalking.AttackOnCooldown(_creepTarget)) && Utils.SleepCheck("cast"))
+                Autoattack(0, 0);
+                _creepTarget = GetLowestHpCreep(_me, null);
+                _creepTarget = KillableCreep(false, _creepTarget, ref wait);
+                if (!Utils.SleepCheck("cast")) return;
+                if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive )
                 {
-                    _creepTarget = GetLowestHpCreep(_me, null);
-                    _creepTarget = KillableCreep(false, _creepTarget, ref wait);
-                    if (_creepTarget != null)
+                    if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Spell(_me).CanBeCasted() &&
+                        Utils.SleepCheck("wait"))
                     {
-                        var missilespeed = GetProjectileSpeed(_me);
-                        var time = _me.IsRanged == false
-                            ? 0
-                            : UnitDatabase.GetAttackBackswing(_me) + _me.Distance2D(_creepTarget)/missilespeed;
-                        double test = 0;
-                        if (time >= _creepTarget.AttackSpeedValue)
+                        Spell(_me).UseAbility();
+                        Spell(_me).UseAbility(Spellkill(_me));
+                        Utils.Sleep(Spell(_me).GetCastDelay(_me, _creepTarget)*1000 + 50 + Game.Ping, "cast");
+                        Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
+                    }
+                    else if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
+                    {
+                        if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0)*2 &&
+                            _creepTarget.Health >= GetPhysDamageOnUnit(_creepTarget, 0) &&
+                            _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
-                            test = time*_creepTarget.AttacksPerSecond*_creepTarget.MinimumDamage;
+                            _me.Hold();
+                            _me.Attack(_creepTarget);
+                            Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
-                        if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Utils.SleepCheck("wait"))
+                        else if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0) ||
+                                 (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
                         {
-                            if (Spell(_me).CanBeCasted())
-                            {
-                                Spell(_me).UseAbility();
-                                Spell(_me).UseAbility(Spellkill(_me));
-                            }
-                            Utils.Sleep(100, "cast");
-                            Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
-                        }
-                        else if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
-                        {
-                            if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0)*3 &&
-                                _creepTarget.Health >= GetPhysDamageOnUnit(_creepTarget, 0) &&
-                                _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
-                            {
-                                _me.Attack(_creepTarget);
-                                _me.Hold();
-                                Utils.Sleep(_aPoint + Game.Ping, "stop");
-                            }
-                            if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0) ||
-                                (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
-                            {
-                                //Game.PrintMessage(_aPoint + " ", MessageType.ChatMessage);
-                                _me.Attack(_creepTarget);
-                            }
-                        }
-                        else
-                        {
-                            _me.Move(_creepTarget.Position);
+                            if (_me.IsAttacking())
+                                return;
+                            _me.Attack(_creepTarget);
                         }
                     }
                     else
                     {
-                        if (_target != null && !_target.IsVisible)
-                        {
-                            var closestToMouse = _me.ClosestToMouseTarget(500);
-                            if (closestToMouse != null)
-                                _target = closestToMouse;
-                        }
-                        else if (Menu.Item("harassheroes").GetValue<bool>())
-                            _target = _me.BestAATarget();
-                        else
-                            _target = null;
-                        Orbwalking.Orbwalk(_target, 500);
+                        _me.Move(_creepTarget.Position);
                     }
                 }
+                else
+                {
+                    if (_target != null && !_target.IsVisible)
+                    {
+                        var closestToMouse = _me.ClosestToMouseTarget(500);
+                        if (closestToMouse != null)
+                            _target = closestToMouse;
+                    }
+                    else if (Menu.Item("harassheroes").GetValue<bool>())
+                        _target = _me.BestAATarget();
+                    else
+                        _target = null;
+                    Orbwalking.Orbwalk(_target, 500);
+                }
             }
+
             if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key))
             {
+                Autoattack(0, 0);
                 if (_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || !_creepTarget.IsAlive ||
                     _creepTarget.Health <= 0 || !Orbwalking.AttackOnCooldown(_creepTarget))
                 {
                     _creepTarget = GetLowestHpCreep(_me, null);
                     _creepTarget = KillableCreep(true, _creepTarget, ref wait);
                 }
-                if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Utils.SleepCheck("wait"))
+                if (!Utils.SleepCheck("cast")) return;
+                if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Spell(_me).CanBeCasted() && Utils.SleepCheck("wait"))
                 {
-                    if (Spell(_me).CanBeCasted())
-                    {
-                        Spell(_me).UseAbility();
-                        Spell(_me).UseAbility(Spellkill(_me));
-                    }
-                    Utils.Sleep(100, "cast");
+                    Spell(_me).UseAbility();
+                    Spell(_me).UseAbility(Spellkill(_me));
+                    Utils.Sleep(Spell(_me).GetCastDelay(_me, _creepTarget) * 1000 + 50 + Game.Ping, "cast");
                     Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
                 }
-                if (_creepTarget != null && Utils.SleepCheck("cast"))
+                if (_creepTarget != null)
                 {
                     Orbwalking.Orbwalk(_creepTarget, 500);
                 }
@@ -299,20 +338,20 @@ namespace LastHit
 
         private static void Unit_dps(EventArgs args)
         {
-             if (!isloaded)
+             if (!_isloaded)
             {
                 _me = ObjectManager.LocalHero;
                 if (!Game.IsInGame || _me == null)
                 {
                     return;
                 }
-                isloaded = true;
+                _isloaded = true;
                 _target = null;
             }
 
             if (_me == null || !_me.IsValid)
             {
-                isloaded = false;
+                _isloaded = false;
                 _me = ObjectManager.LocalHero;
                 _target = null;
                 return;
@@ -369,6 +408,14 @@ namespace LastHit
 
         #region predict
 
+        private static void Autoattack(int aa, int aas)
+        {
+            if (Game.GetConsoleVar("dota_player_units_auto_attack").GetInt() == aa &&
+                Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt() == aas) return;
+            Game.ExecuteCommand("dota_player_units_auto_attack "+ aa);
+            Game.ExecuteCommand("dota_player_units_auto_attack_after_spell "+ aas);
+        }
+
         private static Ability Spell(Hero me)
         {
             switch (me.ClassID)
@@ -387,7 +434,6 @@ namespace LastHit
         {
             try
             {
-                var attackRange = me.GetAttackRange();
                 var targetlist =
                     ObjectManager.GetEntities<Unit>()
                         .Where(
@@ -401,7 +447,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                && x.Team != me.Team && x.Distance2D(me) < Spell(me).CastRange + outrange)
+                                && x.Team != me.Team && x.Distance2D(me) < Spell(me).CastRange + _outrange)
                         .OrderByDescending(creep => creep.Health);
                 foreach (var target in targetlist)
                 {
@@ -409,7 +455,7 @@ namespace LastHit
                     {
                         case ClassID.CDOTA_Unit_Hero_Zuus:
                             if (
-                                Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1] >
+                                Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1] * (target.MagicDamageResist > 0 ? target.MagicDamageResist : 1) >
                                 target.Health)
                                 return target;
                             break;
@@ -476,7 +522,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                    /*&& x.Team != source.Team*/&& x.Distance2D(source) < attackRange + outrange)
+                                    /*&& x.Team != source.Team*/&& x.Distance2D(source) < attackRange + _outrange)
                         .OrderBy(creep => creep.Health)
                         .DefaultIfEmpty(null)
                         .FirstOrDefault();
@@ -507,7 +553,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                && x.Team != source.Team && x.Distance2D(source) < attackRange + outrange &&
+                                && x.Team != source.Team && x.Distance2D(source) < attackRange + _outrange &&
                                 x != markedcreep)
                         .OrderBy(creep => creep.Health)
                         .DefaultIfEmpty(null)
@@ -523,44 +569,52 @@ namespace LastHit
 
         private static Unit KillableCreep(bool islaneclear, Unit minion, ref bool wait)
         {
-            var missilespeed = GetProjectileSpeed(_me);
-            var time = _me.IsRanged == false
-                ? 0
-                : UnitDatabase.GetAttackBackswing(_me) + _me.Distance2D(minion)/missilespeed;
-            double test = 0;
-            if (time >= minion.AttackSpeedValue)
+            try
             {
-                test = time*minion.AttacksPerSecond*minion.MinimumDamage;
-            }
-            if (minion.Health < GetPhysDamageOnUnit(_creepTarget, test)*3)
-            {
-                if (_me.CanAttack())
-                    return minion;
-            }
-            if (islaneclear)
-            {
-                return minion;
-            }
-
-            if (Menu.Item("denied").GetValue<bool>())
-            {
-                var minion2 = GetAllLowestHpCreep(_me);
-                test = time*minion2.AttacksPerSecond*minion2.MinimumDamage;
-                if (minion2.Health < GetPhysDamageOnUnit(minion2, test)*1.5 && minion2.Team == _me.Team)
+                var missilespeed = GetProjectileSpeed(_me);
+                var time = _me.IsRanged == false
+                    ? 0
+                    : UnitDatabase.GetAttackBackswing(_me) + _me.Distance2D(minion) / missilespeed;
+                double test = 0;
+                if (time >= minion.AttackSpeedValue)
                 {
+                    test = time * minion.AttacksPerSecond * minion.MinimumDamage;
+                }
+                if (minion.Health < GetPhysDamageOnUnit(_creepTarget, test) * 2.5)
+                {
+                    if (_me.CanAttack())
+                        return minion;
+                }
+                if (islaneclear)
+                {
+                    return minion;
+                }
+
+                if (Menu.Item("denied").GetValue<bool>())
+                {
+                    var minion2 = GetAllLowestHpCreep(_me);
+                    test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
+                    if (minion2.Health < GetPhysDamageOnUnit(minion2, test) * 1.5 && minion2.Team == _me.Team)
+                    {
+                        if (_me.CanAttack())
+                            return minion2;
+                    }
+                }
+
+                if (!Menu.Item("AOC").GetValue<bool>()) return null;
+                {
+                    var minion2 = GetAllLowestHpCreep(_me);
+                    test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
+                    if (!(minion2.Health > GetPhysDamageOnUnit(minion2, test)) ||
+                        minion2.Health >= minion2.MaximumHealth / 2 || minion2.Team != _me.Team)
+                        return null;
                     if (_me.CanAttack())
                         return minion2;
                 }
             }
-
-            if (!Menu.Item("AOC").GetValue<bool>()) return null;
+            catch (Exception)
             {
-                var minion2 = GetAllLowestHpCreep(_me);
-                test = time*minion2.AttacksPerSecond*minion2.MinimumDamage;
-                if (!(minion2.Health > GetPhysDamageOnUnit(minion2, test)) ||
-                    minion2.Health >= minion2.MaximumHealth/2 || minion2.Team != _me.Team) return null;
-                if (_me.CanAttack())
-                    return minion2;
+                //
             }
             return null;
         }
