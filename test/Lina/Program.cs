@@ -103,7 +103,7 @@ namespace Lina
                     Eul.UseAbility(_target);
                     Utils.Sleep(4000 + Game.Ping, "eul");
                 }
-                else if (Eul == null || Eul.Cooldown != 0 || !_menuValue.IsEnabled("item_cyclone"))
+                else if (Eul == null || Eul.Cooldown > 0 || !_menuValue.IsEnabled("item_cyclone"))
                 {
                     if (Orchid != null && Orchid.CanBeCasted() && Utils.SleepCheck("orchid") && modifEul == null &&
                         _menuValue.IsEnabled("item_orchid"))
@@ -146,7 +146,7 @@ namespace Lina
                              (modifEul != null && modifEul.RemainingTime <= W.GetCastDelay(_me, _target, true) + 0.5 ||
                               modifHex != null && modifHex.RemainingTime <= W.GetCastDelay(_me, _target, true) + 0.5 ||
                               (Hex == null || !_menuValue.IsEnabled("item_sheepstick") || Hex.Cooldown > 0) && 
-                              (Eul == null || !_menuValue.IsEnabled("item_cyclone") || Eul.Cooldown <20)))
+                              (Eul == null || !_menuValue.IsEnabled("item_cyclone") || Eul.Cooldown <20 && Eul.Cooldown > 0)))
                     {
                         W.UseAbility(W.GetPrediction(_target, W.GetCastDelay(_me, _target)));
                         Utils.Sleep(150 + Game.Ping, "w");
