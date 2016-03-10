@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using Ensage;
 using Ensage.Common;
@@ -48,8 +49,8 @@ namespace Stack
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(-1708, -4284, 256),
-                StackPosition = new Vector3(-2776, -3144, 256),
-                WaitPosition = new Vector3(-1971, -3949, 256),
+                StackPosition = new Vector3(-1816, -2684, 256),
+                WaitPosition = new Vector3(-1867, -4033, 256),
                 WaitPositionN = new Vector3(-2041, -3790, 256),
                 Team = 2,
                 Id = 1,
@@ -61,7 +62,7 @@ namespace Stack
             {
                 Position = new Vector3(-266, -3176, 256),
                 StackPosition = new Vector3(-522, -1351, 256),
-                WaitPosition = new Vector3(-325, -2699, 256),
+                WaitPosition = new Vector3(-306, -2853, 256),
                 WaitPositionN = new Vector3(-340, -2521, 256),
                 Team = 2,
                 Id = 2,
@@ -72,19 +73,19 @@ namespace Stack
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(1656, -3714, 384),
-                StackPosition = new Vector3(1263, -6041, 384),
-                WaitPosition = new Vector3(1612, -4277, 384),
+                StackPosition = new Vector3(48, -4225, 384),
+                WaitPosition = new Vector3(1637, -4009, 384),
                 WaitPositionN = new Vector3(1647, -4651, 384),
                 Team = 2,
                 Id = 3,
                 Empty = false,
                 Stacked = false,
-                Starttime = 53
+                Starttime = 54
             });
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(3016, -4692, 384),
-                StackPosition = new Vector3(4777, -4954, 384),
+                StackPosition = new Vector3(3952, -6417, 384),
                 WaitPosition = new Vector3(3146, -5071, 384),
                 WaitPositionN = new Vector3(3088, -5345, 384),
                 Team = 2,
@@ -96,7 +97,7 @@ namespace Stack
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(4474, -3598, 384),
-                StackPosition = new Vector3(2755, -4001, 384),
+                StackPosition = new Vector3(2486, -4125, 384),
                 WaitPosition = new Vector3(4121, -3902, 384),
                 WaitPositionN = new Vector3(3714, -3941, 384),
                 Team = 2,
@@ -296,14 +297,19 @@ namespace Stack
                         if (_seconds >= camp.Starttime - 5)
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
+                            creepscount = CreepCount(unit, 800);
+                            var creeps = creepscount > 6 ? (creepscount*75)/1000 : 0;
                             float distance = 0;
                             if (unit.AttackRange < unit.Distance2D(closestNeutral))
                             {
-                                distance = (unit.Distance2D(closestNeutral) - unit.AttackRange) / unit.MovementSpeed;
+                                distance = (unit.Distance2D(closestNeutral) - unit.AttackRange)/unit.MovementSpeed;
                             }
-                            camp.AttackTime = (int) (camp.Starttime - (distance + (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime / 3 : 0)));
+                            camp.AttackTime =
+                                (int)
+                                    (camp.Starttime - creeps - unit.GetTurnTime(camp.StackPosition) -
+                                     distance - (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0));
                             camp.State = 3;
-                            unit.Move(PositionCalc(unit,closestNeutral));
+                            unit.Move(PositionCalc(unit, closestNeutral));
                         }
                         Utils.Sleep(500, "wait" + unit.Handle);
                         break;
@@ -316,14 +322,15 @@ namespace Stack
                             {
                                 distance = (unit.Distance2D(closestNeutral) - unit.AttackRange)/unit.MovementSpeed;
                             }
-                            var tWait = (distance + (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0))*1000 + Game.Ping;
+                            var tWait = (distance + (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0))*
+                                        1000 + Game.Ping;
                             unit.Attack(closestNeutral);
                             Utils.Sleep(tWait, "twait" + unit.Handle);
                             camp.State = 4;
                         }
                         break;
                     case 4:
-                        if (unit.Distance2D(closestNeutral) <= 50 || Utils.SleepCheck("twait" + unit.Handle))
+                        if (unit.Distance2D(closestNeutral) <= 150 || Utils.SleepCheck("twait" + unit.Handle))
                         {
                             unit.Stop();
                             unit.Move(camp.StackPosition);
@@ -480,6 +487,10 @@ namespace Stack
         {
             if (args.Msg == (ulong) Utils.WindowsMessages.WM_LBUTTONDOWN)
             {
+                //Console.WriteLine("Vector3({0}, {1}, {2}),",
+                //    (int) Game.MousePosition.X,
+                //    (int) Game.MousePosition.Y,
+                //    (int) Game.MousePosition.Z);
                 foreach (var camp in from camp in Camps
                     let position = Drawing.WorldToScreen(camp.Position)
                     where Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40)
@@ -539,7 +550,7 @@ namespace Stack
                 //Drawing.DrawLine(position, Drawing.WorldToScreen(camp.WaitPosition), Color.DarkRed);
                 //Drawing.DrawLine(Drawing.WorldToScreen(camp.StackPosition), Drawing.WorldToScreen(camp.WaitPosition), Color.DarkRed);
                 //Drawing.DrawLine(Drawing.WorldToScreen(camp.WaitPositionN), Drawing.WorldToScreen(camp.WaitPosition), Color.DarkGreen);
-                //Drawing.DrawText(camp.State.ToString(), "", new Vector2(position.X - 20, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
+                //Drawing.DrawText(camp.Id.ToString(), "", new Vector2(position.X - 20, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
             }
         }
 
