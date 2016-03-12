@@ -303,7 +303,7 @@ namespace Stack
                             camp.AttackTime =
                                 (int)
                                     (camp.Starttime - creeps - unit.GetTurnTime(camp.StackPosition) -
-                                     distance - (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0));
+                                     distance - (unit.IsRanged ? UnitDatabase.Units.Find(x => x.UnitName == unit.Name).AttackPoint / (1 + (unit.AttacksPerSecond * unit.BaseAttackTime / 100)) + 0.1 : 0));
                             camp.State = 3;
                             unit.Move(PositionCalc(unit, closestNeutral));
                         }
