@@ -278,9 +278,8 @@ namespace LastHit
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
             {
                 Autoattack(0, 0);
-                Game.PrintMessage("1 " + _me.AttackSpeedValue + " ", MessageType.ChatMessage);
-                Game.PrintMessage("2 " + _aPoint + " ", MessageType.ChatMessage);
-                
+                //Game.PrintMessage("1 " + _me.AttackSpeedValue + " ", MessageType.ChatMessage);
+                //Game.PrintMessage("2 " + _aPoint + " ", MessageType.ChatMessage);
                 _creepTarget = GetLowestHpCreep(_me, null);
                 _creepTarget = KillableCreep(false, _creepTarget, ref wait);
                 if (!Utils.SleepCheck("cast")) return;
@@ -640,22 +639,22 @@ namespace LastHit
             {
                 Drawhpbar();
             }
-            try
-            {
+            //try
+            //{
                 
-                //Drawing.DrawText( + " ", "", new Vector2(_me.Position.X, _me.Position.Y),new Vector2(40), Color.AliceBlue, FontFlags.Outline);
-                var pos = Drawing.WorldToScreen(Game.MousePosition);
-                var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
-                if (unit != null)
-                {
-                    var anim = UnitDatabase.Units.Find(x => x.UnitName == unit.Name);
-                    Drawing.DrawText(anim.AttackBackswing + " ", "", new Vector2(pos.X, pos.Y + 20),
-                        new Vector2(40), Color.AliceBlue, FontFlags.Outline);
-                }
-            }
-            catch (Exception)
-            {
-            }
+            //    //Drawing.DrawText( + " ", "", new Vector2(_me.Position.X, _me.Position.Y),new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //    var pos = Drawing.WorldToScreen(Game.MousePosition);
+            //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
+            //    if (unit != null)
+            //    {
+            //        var anim = UnitDatabase.Units.Find(x => x.UnitName == unit.Name);
+            //        Drawing.DrawText(anim.AttackBackswing + " ", "", new Vector2(pos.X, pos.Y + 20),
+            //            new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //}
         }
     }
 }
