@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
 using Ensage.Common.Menu;
+using Ensage.Common.Objects;
 using SharpDX;
 
 namespace LastHit
@@ -40,7 +40,7 @@ namespace LastHit
         //private static List<DPS> dam = new List<DPS>();
         private static readonly List<Damage> Dmg = new List<Damage>();
         private static int _autoAttack, _autoAttackAfterSpell;
-        private static float _lastRange;
+        private static float _lastRange, _ias;
         private static ParticleEffect _rangeDisplay;
 
         #endregion
@@ -86,9 +86,38 @@ namespace LastHit
             // Auto Attack Checker
 
             Game.OnUpdate += Game_OnUpdate;
-            Game.OnUpdate += Unit_dps;
             Drawing.OnDraw += Drawing_OnDraw;
+
             Orbwalking.Load();
+        }
+        
+        private static float Attack(Unit unit)
+        {
+            float t = 0;
+            try
+            {
+                var creeps =
+                    ObjectManager.GetEntities<Creep>()
+                        .Where(x => x.Distance2D(unit) <= x.AttackRange + 100 && x.IsAttacking() && x.IsAlive && x.Handle != unit.Handle && x.Team != unit.Team )
+                        .ToList();
+                foreach (var creep in creeps)
+                {
+                    var turnRate =
+                        Game.FindKeyValues(creep.StoredName() + "/MovementTurnRate", KeyValueSource.Unit).FloatValue;
+                    var tt = (float)
+                        (Math.Max(
+                            Math.Abs(
+                                (float)
+                                    (creep.RotationRad < 0 ? Math.Abs(creep.RotationRad) : 2 * Math.PI - creep.RotationRad) -
+                                Utils.DegreeToRadian(creep.FindAngleForTurnTime(unit.Position))) - 0.69, 0)/
+                        (turnRate*(1/0.03)));
+                    if (Math.Abs(tt) <=0 ) t++;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return t;
         }
 
         #region OnGameUpdate
@@ -187,11 +216,13 @@ namespace LastHit
             {
                 _target = null;
             }
-            var canCancel = Orbwalking.CanCancelAnimation();
+
+            //Game.PrintMessage( + " ",MessageType.ChatMessage);
+
             var wait = false;
-            var rnd = new Random();
             _lastRange = _me.GetAttackRange();
-            _aPoint = _me.SecondsPerAttack*200;
+            //_ias = (_me.BaseAttackTime / _me.AttacksPerSecond - 1) * 100;
+            _aPoint = UnitDatabase.Units.Find(x => x.UnitName == _me.Name).AttackPoint / (1 + (_me.AttacksPerSecond * _me.BaseAttackTime / 100) )* 500;
             _outrange = Menu.Item("outrange").GetValue<Slider>().Value;
 
             if (_target != null && !_target.IsVisible && !Orbwalking.AttackOnCooldown(_target))
@@ -247,6 +278,9 @@ namespace LastHit
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
             {
                 Autoattack(0, 0);
+                Game.PrintMessage("1 " + _me.AttackSpeedValue + " ", MessageType.ChatMessage);
+                Game.PrintMessage("2 " + _aPoint + " ", MessageType.ChatMessage);
+                
                 _creepTarget = GetLowestHpCreep(_me, null);
                 _creepTarget = KillableCreep(false, _creepTarget, ref wait);
                 if (!Utils.SleepCheck("cast")) return;
@@ -334,74 +368,6 @@ namespace LastHit
                     attackmodifiers: true,
                     bonusWindupMs: Menu.Item("bonusWindup").GetValue<Slider>().Value);
             }
-        }
-
-        private static void Unit_dps(EventArgs args)
-        {
-             if (!_isloaded)
-            {
-                _me = ObjectManager.LocalHero;
-                if (!Game.IsInGame || _me == null)
-                {
-                    return;
-                }
-                _isloaded = true;
-                _target = null;
-            }
-
-            if (_me == null || !_me.IsValid)
-            {
-                _isloaded = false;
-                _me = ObjectManager.LocalHero;
-                _target = null;
-                return;
-            }
-
-            if (Game.IsPaused || Game.IsChatOpen)
-            {
-                return;
-            }
-            //if (!Utils.SleepCheck("DPS")) return;
-            //var attackRange = _me.GetAttackRange();
-            //try
-            //{
-            //    var unitA =
-            //        ObjectManager.GetEntities<Unit>()
-            //            .Where(
-            //                x =>
-            //                    (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
-            //                     x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Creep
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Additive
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Building
-            //                     || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-            //                    && x.Distance2D(_me) < (_me.AttackRange + outrange)*2)
-            //            .DefaultIfEmpty(null);
-            //    if (unitA.Any())
-            //        foreach (var c in unitA)
-            //        {
-            //            var unitfind = dam.Where(x => x.Creep.Handle == c.Handle)
-            //                .DefaultIfEmpty(null)
-            //                .FirstOrDefault();
-            //            if (unitfind != null)
-            //            {
-            //                unitfind.dps = unitfind.damageB - c.Health;
-            //                unitfind.damageB = c.Health;
-            //            }
-            //            else
-            //            {
-            //                dam.Add(new DPS {Creep = c});
-            //            }
-            //        }
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e.Message);
-            //}
-            //Utils.Sleep(3000, "DPS");
         }
 
         #endregion
@@ -673,6 +639,22 @@ namespace LastHit
             if (Menu.Item("hpleftcreep").GetValue<bool>())
             {
                 Drawhpbar();
+            }
+            try
+            {
+                
+                //Drawing.DrawText( + " ", "", new Vector2(_me.Position.X, _me.Position.Y),new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+                var pos = Drawing.WorldToScreen(Game.MousePosition);
+                var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
+                if (unit != null)
+                {
+                    var anim = UnitDatabase.Units.Find(x => x.UnitName == unit.Name);
+                    Drawing.DrawText(anim.AttackBackswing + " ", "", new Vector2(pos.X, pos.Y + 20),
+                        new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+                }
+            }
+            catch (Exception)
+            {
             }
         }
     }
