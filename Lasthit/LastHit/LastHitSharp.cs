@@ -40,7 +40,7 @@ namespace LastHit
         //private static List<DPS> dam = new List<DPS>();
         private static readonly List<Damage> Dmg = new List<Damage>();
         private static int _autoAttack, _autoAttackAfterSpell;
-        private static float _lastRange, _ias;
+        private static float _lastRange, _ias, _attackRange;
         private static ParticleEffect _rangeDisplay;
 
         #endregion
@@ -189,6 +189,7 @@ namespace LastHit
                 {
                     return;
                 }
+                _lastRange = _me.GetAttackRange();
                 _isloaded = true;
                 _rangeDisplay = null;
                 _target = null;
@@ -217,11 +218,19 @@ namespace LastHit
                 _target = null;
             }
 
-            //Game.PrintMessage( + " ",MessageType.ChatMessage);
+            _attackRange = _me.GetAttackRange();
 
+            switch (_me.ClassID)
+            {
+                case ClassID.CDOTA_Unit_Hero_TrollWarlord:
+                    _attackRange = _me.Spellbook.Spell1.IsToggled ? 128 : _me.GetAttackRange();
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Sniper:
+                    if (_me.Spellbook.Spell3.Level > 0)
+                        _attackRange = _me.GetAttackRange() + 100 * _me.Spellbook.Spell3.Level;
+                    break;
+            }
             var wait = false;
-            _lastRange = _me.GetAttackRange();
-            //_ias = (_me.BaseAttackTime / _me.AttacksPerSecond - 1) * 100;
             _aPoint = UnitDatabase.Units.Find(x => x.UnitName == _me.Name).AttackPoint / (1 + (_me.AttacksPerSecond * _me.BaseAttackTime / 100) )* 500;
             _outrange = Menu.Item("outrange").GetValue<Slider>().Value;
 
@@ -237,7 +246,6 @@ namespace LastHit
                     _target = _me.BestAATarget();
                 }
             }
-
             if (Menu.Item("showatkrange").GetValue<bool>())
             {
                 if (_rangeDisplay == null)
@@ -257,9 +265,10 @@ namespace LastHit
                         _rangeDisplay.Dispose();
                         _rangeDisplay = null;
                     }
-                    else if (_lastRange != _me.GetAttackRange())
+                    else if (_lastRange != _attackRange)
                     {
                         _rangeDisplay.Dispose();
+                        _lastRange = _attackRange;
                         _rangeDisplay = _me.AddParticleEffect(@"particles\ui_mouseactions\drag_selected_ring.vpcf");
                         _rangeDisplay.SetControlPoint(1, new Vector3(255, 80, 50));
                         _rangeDisplay.SetControlPoint(3, new Vector3(15, 0, 0));
@@ -278,8 +287,6 @@ namespace LastHit
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
             {
                 Autoattack(0, 0);
-                //Game.PrintMessage("1 " + _me.AttackSpeedValue + " ", MessageType.ChatMessage);
-                //Game.PrintMessage("2 " + _aPoint + " ", MessageType.ChatMessage);
                 _creepTarget = GetLowestHpCreep(_me, null);
                 _creepTarget = KillableCreep(false, _creepTarget, ref wait);
                 if (!Utils.SleepCheck("cast")) return;
@@ -311,7 +318,7 @@ namespace LastHit
                             _me.Attack(_creepTarget);
                         }
                     }
-                    else
+                    else if (_me.Distance2D(_creepTarget) >= _me.AttackRange)
                     {
                         _me.Move(_creepTarget.Position);
                     }
@@ -320,7 +327,7 @@ namespace LastHit
                 {
                     if (_target != null && !_target.IsVisible)
                     {
-                        var closestToMouse = _me.ClosestToMouseTarget(500);
+                        var closestToMouse = _me.ClosestToMouseTarget(1000);
                         if (closestToMouse != null)
                             _target = closestToMouse;
                     }
@@ -328,7 +335,7 @@ namespace LastHit
                         _target = _me.BestAATarget();
                     else
                         _target = null;
-                    Orbwalking.Orbwalk(_target, 500);
+                    Orbwalking.Orbwalk(_target);
                 }
             }
 
@@ -351,7 +358,7 @@ namespace LastHit
                 }
                 if (_creepTarget != null)
                 {
-                    Orbwalking.Orbwalk(_creepTarget, 500);
+                    Orbwalking.Orbwalk(_creepTarget);
                 }
             }
 
