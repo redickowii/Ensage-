@@ -477,7 +477,7 @@ namespace LastHit
             }
             catch (Exception)
             {
-                //no   
+                Console.WriteLine("Error GetLowestHpCreep");
             }
             return null;
         }
@@ -509,7 +509,7 @@ namespace LastHit
             }
             catch (Exception)
             {
-                //no   
+                //
             }
             return null;
         }
@@ -698,17 +698,6 @@ namespace LastHit
             var damageMp = 1 - 0.06*unit.Armor/(1 + 0.06*Math.Abs(unit.Armor));
             double test = 0;
             magicdamage = magicdamage * (1-unit.MagicDamageResist);
-            /*if (_me.IsRanged)
-            {
-                var missilespeed = GetProjectileSpeed(_me);
-                var time = UnitDatabase.GetAttackBackswing(_me) + (_me.Distance2D(unit) / missilespeed);
-                var _dps = dam.Where(x => x.Creep.Handle == unit.Handle).DefaultIfEmpty(null).FirstOrDefault();
-                if (_dps != null)
-                {
-                    test = time * _dps.dps/3;
-                    Game.PrintMessage(_dps.dps/3 + " ", MessageType.ChatMessage);
-                }
-            }*/
 
             var realDamage = ((bonusdamage + physDamage) * damageMp + magicdamage) * modif;
             if (unit.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
@@ -722,7 +711,9 @@ namespace LastHit
 
         public static float GetProjectileSpeed(Hero unit)
         {
-            return UnitDatabase.GetByName(unit.Name).ProjectileSpeed;
+            return (_me.ClassID == ClassID.CDOTA_Unit_Hero_ArcWarden
+                ? 800
+                : UnitDatabase.GetByName(unit.Name).ProjectileSpeed);
         }
 
         #endregion
