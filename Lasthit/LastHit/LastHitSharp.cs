@@ -427,13 +427,13 @@ namespace LastHit
                                     if (damage > creep.Health && !_w.IsToggled && _me.IsAttacking())
                                     {
                                         _w.ToggleAbility();
-                                        Utils.Sleep(250 + Game.Ping, "cooldown");
+                                        Utils.Sleep(200 + Game.Ping, "cooldown");
                                     }
                                 }
                                 if (_w.IsToggled)
                                 {
                                     _w.ToggleAbility();
-                                    Utils.Sleep(150 + Game.Ping, "cooldown");
+                                    Utils.Sleep(_aPoint*2 + Game.Ping, "cooldown");
                                 }
                             }
                             break;
