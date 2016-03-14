@@ -14,31 +14,16 @@ namespace LastHit
     {
         #region Declare Static Fields
 
-        public class Damage
-        {
-            public string ClassId { get; set; }
-            public int[] Dmgint { get; set; }
-            public int Cooldown { get; set; }
-        }
-
-        //public class DPS
-        //{
-        //    public Unit Creep { get; set; }
-        //    public uint DamageB { get; set; }
-        //    public double Dps { get; set; }
-        //}
-
         private static readonly Menu Menu = new Menu("LastHit", "lasthit", true);
 
         private static Unit _creepTarget;
         private static Hero _target;
         private static Hero _me;
+        private static Ability _q,_w, _e, _r;
         private static double _aPoint;
         private static int _outrange;
-        private static int[] _findIndex;
         private static bool _isloaded;
         //private static List<DPS> dam = new List<DPS>();
-        private static readonly List<Damage> Dmg = new List<Damage>();
         private static int _autoAttack, _autoAttackAfterSpell;
         private static float _lastRange, _ias, _attackRange;
         private static ParticleEffect _rangeDisplay;
@@ -61,25 +46,6 @@ namespace LastHit
             Menu.AddItem(new MenuItem("outrange", "Bonus range").SetValue(new Slider(100, 100, 500)));
             Menu.AddToMainMenu();
 
-            Dmg.Add(new Damage
-            {
-                ClassId = "CDOTA_Unit_Hero_Zuus",
-                Dmgint = new int[4] {85, 100, 115, 145},
-                Cooldown = 1750
-            });
-            Dmg.Add(new Damage
-            {
-                ClassId = "CDOTA_Unit_Hero_Bristleback",
-                Dmgint = new int[4] {20, 40, 60, 80},
-                Cooldown = 3000
-            });
-            Dmg.Add(new Damage
-            {
-                ClassId = "CDOTA_Unit_Hero_PhantomAssassin",
-                Dmgint = new int[4] {60, 100, 140, 180},
-                Cooldown = 6000
-            });
-
             // Auto Attack Checker
             _autoAttackAfterSpell = Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt();
             _autoAttack = Game.GetConsoleVar("dota_player_units_auto_attack").GetInt();
@@ -90,28 +56,22 @@ namespace LastHit
 
             Orbwalking.Load();
         }
-        
+        #region TEST
+
         private static float Attack(Unit unit)
         {
             float t = 0;
+            var upos = unit.Position;
             try
             {
                 var creeps =
-                    ObjectManager.GetEntities<Creep>()
+                    ObjectManager.GetEntities<Unit>()
                         .Where(x => x.Distance2D(unit) <= x.AttackRange + 100 && x.IsAttacking() && x.IsAlive && x.Handle != unit.Handle && x.Team != unit.Team )
                         .ToList();
                 foreach (var creep in creeps)
                 {
-                    var turnRate =
-                        Game.FindKeyValues(creep.StoredName() + "/MovementTurnRate", KeyValueSource.Unit).FloatValue;
-                    var tt = (float)
-                        (Math.Max(
-                            Math.Abs(
-                                (float)
-                                    (creep.RotationRad < 0 ? Math.Abs(creep.RotationRad) : 2 * Math.PI - creep.RotationRad) -
-                                Utils.DegreeToRadian(creep.FindAngleForTurnTime(unit.Position))) - 0.69, 0)/
-                        (turnRate*(1/0.03)));
-                    if (Math.Abs(tt) <=0 ) t++;
+                    var angle = creep.Rotation < 0 ? Math.Abs(creep.Rotation) : 360 - creep.Rotation; 
+                    if (Math.Abs(angle - creep.FindAngleForTurnTime(unit.Position)) <= 3) t++;
                 }
             }
             catch (Exception)
@@ -120,65 +80,9 @@ namespace LastHit
             return t;
         }
 
+        #endregion
+
         #region OnGameUpdate
-
-        private static void Drawhpbar()
-        {
-            var attackRange = _me.GetAttackRange();
-            var enemies =
-                ObjectManager.GetEntities<Unit>()
-                    .Where(
-                        x =>
-                            (x.ClassID == ClassID.CDOTA_BaseNPC_Tower || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creep
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Additive
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Building
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                            && x.Team != _me.Team && x.Distance2D(_me) < attackRange + _outrange);
-            foreach (var enemy in enemies.Where(x => x != null))
-            {
-                var health = enemy.Health;
-                var maxHealth = enemy.MaximumHealth;
-                if (health == maxHealth) continue;
-                var damge = (float) GetPhysDamageOnUnit(enemy, 0);
-                var hpleft = health;
-                var hpperc = hpleft/maxHealth;
-
-                var dmgperc = Math.Min(damge, health)/maxHealth;
-                var hbarpos = HUDInfo.GetHPbarPosition(enemy);
-
-                Vector2 screenPos;
-                var enemyPos = enemy.Position + new Vector3(0, 0, enemy.HealthBarOffset);
-                if (!Drawing.WorldToScreen(enemyPos, out screenPos)) continue;
-
-                var start = screenPos;
-
-                hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(enemy)/2;
-                hbarpos.Y = start.Y;
-                var hpvarx = hbarpos.X;
-                var hpbary = hbarpos.Y;
-                var a = (float) Math.Round(damge*HUDInfo.GetHPBarSizeX(enemy)/enemy.MaximumHealth);
-                var position = hbarpos + new Vector2(hpvarx*hpperc + 10, -12);
-                try
-                {
-                    var left = (float) Math.Round(damge/7);
-                    Drawing.DrawRect(
-                        position,
-                        new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4),
-                        enemy.Health > damge
-                            ? enemy.Health > damge*2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
-                            : new Color(127, 255, 0, 80));
-                    Drawing.DrawRect(position, new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
-        }
 
         private static void Game_OnUpdate(EventArgs args)
         {
@@ -219,21 +123,19 @@ namespace LastHit
             }
 
             _attackRange = _me.GetAttackRange();
-
-            switch (_me.ClassID)
-            {
-                case ClassID.CDOTA_Unit_Hero_TrollWarlord:
-                    _attackRange = _me.Spellbook.Spell1.IsToggled ? 128 : _me.GetAttackRange();
-                    break;
-                case ClassID.CDOTA_Unit_Hero_Sniper:
-                    if (_me.Spellbook.Spell3.Level > 0)
-                        _attackRange = _me.GetAttackRange() + 100 * _me.Spellbook.Spell3.Level;
-                    break;
-            }
-            var wait = false;
-            _aPoint = UnitDatabase.Units.Find(x => x.UnitName == _me.Name).AttackPoint / (1 + (_me.AttacksPerSecond * _me.BaseAttackTime / 100) )* 500;
+            _q = _me.Spellbook.SpellQ;
+            _w = _me.Spellbook.SpellW;
+            _e = _me.Spellbook.SpellE;
+            _r = _me.Spellbook.SpellR;
+            _aPoint = UnitDatabase.Units.Find(x => x.UnitName == _me.Name).AttackPoint / (1 + _me.AttacksPerSecond * _me.BaseAttackTime / 100) * 500;
             _outrange = Menu.Item("outrange").GetValue<Slider>().Value;
 
+            if (_me.ClassID == ClassID.CDOTA_Unit_Hero_TrollWarlord)
+                _attackRange = _q.IsToggled ? 128 : _me.GetAttackRange();
+            else
+                _attackRange = _me.GetAttackRange();
+
+            var wait = false;
             if (_target != null && !_target.IsVisible && !Orbwalking.AttackOnCooldown(_target))
             {
                 _target = _me.ClosestToMouseTarget(500);
@@ -284,33 +186,26 @@ namespace LastHit
 
             Autoattack(_autoAttack, _autoAttackAfterSpell);
 
-            if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key))
+            if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
                 Autoattack(0, 0);
                 _creepTarget = GetLowestHpCreep(_me, null);
                 _creepTarget = KillableCreep(false, _creepTarget, ref wait);
-                if (!Utils.SleepCheck("cast")) return;
+                if (Menu.Item("usespell").GetValue<bool>() && Utils.SleepCheck("cooldown"))
+                    SpellCast();
                 if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive )
                 {
-                    if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Spell(_me).CanBeCasted() &&
-                        Utils.SleepCheck("wait"))
+                    if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
                     {
-                        Spell(_me).UseAbility();
-                        Spell(_me).UseAbility(Spellkill(_me));
-                        Utils.Sleep(Spell(_me).GetCastDelay(_me, _creepTarget)*1000 + 50 + Game.Ping, "cast");
-                        Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
-                    }
-                    else if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
-                    {
-                        if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0)*2 &&
-                            _creepTarget.Health >= GetPhysDamageOnUnit(_creepTarget, 0) &&
+                        if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, 0)*2 &&
+                            _creepTarget.Health >= GetDamageOnUnit(_creepTarget, 0) &&
                             _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
                             _me.Hold();
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
-                        else if (_creepTarget.Health < GetPhysDamageOnUnit(_creepTarget, 0) ||
+                        else if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, 0) ||
                                  (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
                         {
                             if (_me.IsAttacking())
@@ -318,7 +213,7 @@ namespace LastHit
                             _me.Attack(_creepTarget);
                         }
                     }
-                    else if (_me.Distance2D(_creepTarget) >= _me.AttackRange)
+                    else if (_me.Distance2D(_creepTarget) >= _attackRange)
                     {
                         _me.Move(_creepTarget.Position);
                     }
@@ -339,25 +234,15 @@ namespace LastHit
                 }
             }
 
-            if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key))
+            if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
                 Autoattack(0, 0);
-                if (_creepTarget == null || !_creepTarget.IsValid || !_creepTarget.IsVisible || !_creepTarget.IsAlive ||
-                    _creepTarget.Health <= 0 || !Orbwalking.AttackOnCooldown(_creepTarget))
-                {
                     _creepTarget = GetLowestHpCreep(_me, null);
                     _creepTarget = KillableCreep(true, _creepTarget, ref wait);
-                }
-                if (!Utils.SleepCheck("cast")) return;
-                if (Menu.Item("usespell").GetValue<bool>() && Spellkill(_me) != null && Spell(_me).CanBeCasted() && Utils.SleepCheck("wait"))
+                if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive)
                 {
-                    Spell(_me).UseAbility();
-                    Spell(_me).UseAbility(Spellkill(_me));
-                    Utils.Sleep(Spell(_me).GetCastDelay(_me, _creepTarget) * 1000 + 50 + Game.Ping, "cast");
-                    Utils.Sleep(Dmg.Find(x => x.ClassId == _me.ClassID.ToString()).Cooldown, "wait");
-                }
-                if (_creepTarget != null)
-                {
+                    if (Menu.Item("usespell").GetValue<bool>() && Utils.SleepCheck("cooldown"))
+                        SpellCast();
                     Orbwalking.Orbwalk(_creepTarget);
                 }
             }
@@ -376,6 +261,70 @@ namespace LastHit
             }
         }
 
+        private static void Drawhpbar()
+        {
+            try
+            {
+                var enemies =
+                ObjectManager.GetEntities<Unit>()
+                    .Where(
+                        x =>
+                            (x.ClassID == ClassID.CDOTA_BaseNPC_Tower || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creep
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Additive
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Building
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
+                            && x.Team != _me.Team && x.Distance2D(_me) < _lastRange + _outrange);
+                foreach (var enemy in enemies)
+                {
+                    var health = enemy.Health;
+                    var maxHealth = enemy.MaximumHealth;
+                    if (health == maxHealth) continue;
+                    var damge = (float) GetDamageOnUnit(enemy, 0);
+                    var hpleft = health;
+                    var hpperc = hpleft / maxHealth;
+
+                    var dmgperc = Math.Min(damge, health) / maxHealth;
+                    var hbarpos = HUDInfo.GetHPbarPosition(enemy);
+
+                    Vector2 screenPos;
+                    var enemyPos = enemy.Position + new Vector3(0, 0, enemy.HealthBarOffset);
+                    if (!Drawing.WorldToScreen(enemyPos, out screenPos)) continue;
+
+                    var start = screenPos;
+
+                    hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(enemy) / 2;
+                    hbarpos.Y = start.Y;
+                    var hpvarx = hbarpos.X;
+                    var hpbary = hbarpos.Y;
+                    var a = (float) Math.Round(damge * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
+                    var position = hbarpos + new Vector2(hpvarx * hpperc + 10, -12);
+                    try
+                    {
+                        var left = (float) Math.Round(damge / 7);
+                        Drawing.DrawRect(
+                            position,
+                            new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4),
+                            enemy.Health > damge
+                                ? enemy.Health > damge * 2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
+                                : new Color(127, 255, 0, 80));
+                        Drawing.DrawRect(position, new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                //
+            }
+        }
+
         #endregion
 
         #region predict
@@ -388,25 +337,11 @@ namespace LastHit
             Game.ExecuteCommand("dota_player_units_auto_attack_after_spell "+ aas);
         }
 
-        private static Ability Spell(Hero me)
-        {
-            switch (me.ClassID)
-            {
-                case ClassID.CDOTA_Unit_Hero_Zuus:
-                    return me.Spellbook.Spell1;
-                case ClassID.CDOTA_Unit_Hero_Bristleback:
-                    return me.Spellbook.Spell2;
-                case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
-                    return me.Spellbook.Spell1;
-            }
-            return null;
-        }
-
-        private static Unit Spellkill(Hero me)
+        private static void SpellCast()
         {
             try
             {
-                var targetlist =
+                var creeps =
                     ObjectManager.GetEntities<Unit>()
                         .Where(
                             x =>
@@ -419,61 +354,96 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                && x.Team != me.Team && x.Distance2D(me) < Spell(me).CastRange + _outrange)
+                                && x.Team != _me.Team && x.Distance2D(_me) < 800 + _outrange)
                         .OrderByDescending(creep => creep.Health);
-                foreach (var target in targetlist)
+                foreach (var creep in creeps)
                 {
-                    switch (me.ClassID)
+                    double damage = 0;
+                    switch (_me.ClassID)
                     {
                         case ClassID.CDOTA_Unit_Hero_Zuus:
-                            if (
-                                Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1] * (target.MagicDamageResist > 0 ? target.MagicDamageResist : 1) >
-                                target.Health)
-                                return target;
+                            if (_q != null && _q.CanBeCasted() &&
+                                (creep.Handle != _creepTarget.Handle && _me.Distance2D(_creepTarget) <= _attackRange) ||
+                                _me.Distance2D(_creepTarget) > _attackRange)
+                            {
+                                damage = ((_q.Level - 1)*15 + 85)*(1 - creep.MagicDamageResist);
+                                if (damage > creep.Health)
+                                {
+                                    _q.UseAbility(creep);
+                                    Utils.Sleep(_q.GetCastPoint(_q.Level)*1000 + 50 + Game.Ping, "cast");
+                                    Utils.Sleep(_q.GetCooldown(_q.Level)*1000 + 50 + Game.Ping, "cooldown");
+                                }
+                            }
                             break;
                         case ClassID.CDOTA_Unit_Hero_Bristleback:
-                            float quillSprayDmg = 0;
-                            try
+                            if (_w != null && _w.CanBeCasted() &&
+                                (creep.Handle != _creepTarget.Handle && _me.Distance2D(_creepTarget) <= _attackRange) ||
+                                _me.Distance2D(_creepTarget) > _attackRange)
                             {
+                                double quillSprayDmg = 0;
                                 if (
-                                    target.Modifiers.Find(
+                                    creep.Modifiers.Any(
                                         x =>
                                             x.Name == "modifier_bristleback_quill_spray_stack" ||
-                                            x.Name == "modifier_bristleback_quill_spray").IsDebuff)
+                                            x.Name == "modifier_bristleback_quill_spray"))
                                     quillSprayDmg =
-                                        target.Modifiers.Find(
+                                        creep.Modifiers.Find(
                                             x =>
                                                 x.Name == "modifier_bristleback_quill_spray_stack" ||
                                                 x.Name == "modifier_bristleback_quill_spray").StackCount*30 +
-                                        (me.Spellbook.Spell2.Level - 1)*2;
+                                        (_w.Level - 1)*2;
+                                damage = ((_w.Level - 1)*20 + 20 + quillSprayDmg)*
+                                         (1 - 0.06*creep.Armor/(1 + 0.06*creep.Armor));
+                                if (damage > creep.Health && _w.CastRange < _me.Distance2D(creep))
+                                {
+                                    _w.UseAbility();
+                                    Utils.Sleep(_w.GetCastPoint(_w.Level)*1000 + 50 + Game.Ping, "cast");
+                                    Utils.Sleep(_w.GetCooldown(_w.Level)*1000 + 50 + Game.Ping, "cooldown");
+                                }
                             }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e.Message);
-                            }
-                            if (
-                                (Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell2.Level - 1] +
-                                 quillSprayDmg)*(float) (1 - 0.06*target.Armor/(1 + 0.06*target.Armor)) > target.Health)
-                                return target;
                             break;
                         case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
-                            float BonusDamage = 0;
-                            var time = UnitDatabase.GetAttackBackswing(me) +
-                                       me.Distance2D(target)/me.Spellbook.Spell1.GetProjectileSpeed();
-                            if (time >= target.AttackSpeedValue)
-                                BonusDamage = (float) (time*target.AttacksPerSecond*target.MinimumDamage);
-                            if (
-                                Dmg.Find(x => x.ClassId == me.ClassID.ToString()).Dmgint[me.Spellbook.Spell1.Level - 1] +
-                                BonusDamage > target.Health)
-                                return target;
+                            if (_q != null && _q.CanBeCasted() &&
+                                (creep.Handle != _creepTarget.Handle && _me.Distance2D(_creepTarget) <= _attackRange) ||
+                                _me.Distance2D(_creepTarget) > _attackRange)
+                            {
+                                var time = 300 + _me.Distance2D(creep)/_q.GetProjectileSpeed();
+                                if (time < creep.SecondsPerAttack*1000)
+                                    damage = ((_q.Level - 1)*40 + 60)*(1 - 0.06*creep.Armor/(1 + 0.06*creep.Armor));
+                                if (damage > creep.Health)
+                                {
+                                    _q.UseAbility(creep);
+                                    Utils.Sleep(_q.GetCastPoint(_q.Level)*1000 + 50 + Game.Ping, "cast");
+                                    Utils.Sleep(6*1000 + Game.Ping, "cooldown");
+                                }
+                            }
+                            break;
+                        case ClassID.CDOTA_Unit_Hero_Pudge:
+                            if (_w != null)
+                            {
+                                if (_creepTarget != null && creep.Handle == _creepTarget.Handle && _me.Distance2D(creep) <= _attackRange)
+                                {
+                                    damage = GetDamageOnUnit(creep, 0);
+                                    if (damage > creep.Health && !_w.IsToggled && _me.IsAttacking())
+                                    {
+                                        _w.ToggleAbility();
+                                        Utils.Sleep(250 + Game.Ping, "cooldown");
+                                    }
+                                }
+                                else if (_w.IsToggled)
+                                {
+                                    _w.ToggleAbility();
+                                    Utils.Sleep(150 + Game.Ping, "cooldown");
+                                }
+                            }
                             break;
                     }
                 }
             }
             catch (Exception)
             {
+                //
             }
-            return null;
         }
 
         public static Unit GetAllLowestHpCreep(Hero source)
@@ -552,7 +522,7 @@ namespace LastHit
                 {
                     test = time * minion.AttacksPerSecond * minion.MinimumDamage;
                 }
-                if (minion.Health < GetPhysDamageOnUnit(_creepTarget, test) * 2.5)
+                if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2.5)
                 {
                     if (_me.CanAttack())
                         return minion;
@@ -566,7 +536,7 @@ namespace LastHit
                 {
                     var minion2 = GetAllLowestHpCreep(_me);
                     test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                    if (minion2.Health < GetPhysDamageOnUnit(minion2, test) * 1.5 && minion2.Team == _me.Team)
+                    if (minion2.Health < GetDamageOnUnit(minion2, test) * 1.5 && minion2.Team == _me.Team)
                     {
                         if (_me.CanAttack())
                             return minion2;
@@ -577,7 +547,7 @@ namespace LastHit
                 {
                     var minion2 = GetAllLowestHpCreep(_me);
                     test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                    if (!(minion2.Health > GetPhysDamageOnUnit(minion2, test)) ||
+                    if (!(minion2.Health > GetDamageOnUnit(minion2, test)) ||
                         minion2.Health >= minion2.MaximumHealth / 2 || minion2.Team != _me.Team)
                         return null;
                     if (_me.CanAttack())
@@ -591,9 +561,11 @@ namespace LastHit
             return null;
         }
 
-        private static double GetPhysDamageOnUnit(Unit unit, double bonusdamage)
+        private static double GetDamageOnUnit(Unit unit, double bonusdamage)
         {
             var quelling_blade = _me.FindItem("item_quelling_blade");
+            double modif = 1;
+            double magicdamage = 0;
             double physDamage = _me.MinimumDamage + _me.BonusDamage;
             if (quelling_blade != null)
             {
@@ -606,8 +578,121 @@ namespace LastHit
                     physDamage = _me.MinimumDamage*1.4 + _me.BonusDamage;
                 }
             }
+            double bonusdamage2 = 0;
+            switch (_me.ClassID)
+            {
+                case ClassID.CDOTA_Unit_Hero_AntiMage:
+                    if (unit.MaximumMana > 0 && unit.Mana > 0 && _q != null)
+                        bonusdamage2 = (_q.Level-1) * 12 + 28 * 0.6 ;
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Viper:
+                    if (_w != null)
+                    {
+                        var nethertoxindmg = _w.Level*2.5;
+                        var percent = (float)unit.Health/unit.MaximumHealth*100;
+                        if (percent > 80 && percent <= 100)
+                            bonusdamage2 = nethertoxindmg*0.5;
+                        else if (percent > 60 && percent <= 80)
+                            bonusdamage2 = nethertoxindmg*1;
+                        else if (percent > 40 && percent <= 60)
+                            bonusdamage2 = nethertoxindmg*2;
+                        else if (percent > 20 && percent <= 40)
+                            bonusdamage2 = nethertoxindmg*4;
+                        else if (percent > 0 && percent <= 20)
+                            bonusdamage2 = nethertoxindmg*8;
+                    }
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Ursa:
+                    try
+                    {
+                        var furymodif = unit.Modifiers.Find(x => x.Name == "modifier_ursa_fury_swipes_damage_increase").StackCount;
+                        if (_e != null)
+                        {
+                            if (furymodif > 0)
+                                bonusdamage2 = furymodif * ((_e.Level - 1) * 5 + 15) ;
+                            else
+                                bonusdamage2 = (_e.Level - 1) * 5 + 15;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        //
+                    }   
+                    break;
+                case ClassID.CDOTA_Unit_Hero_BountyHunter:
+                    if (_w != null && _w.AbilityState == AbilityState.Ready)
+                        bonusdamage2 = physDamage*((_w.Level - 1) * 0.25 + 0.50);
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Weaver:
+                    if (_e != null && _e.AbilityState == AbilityState.Ready)
+                        bonusdamage2 = physDamage;   
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Kunkka:
+                    if (_w!= null && _w.AbilityState == AbilityState.Ready && _w.IsAutoCastEnabled)
+                        bonusdamage2 = (_w.Level - 1) * 15 + 25;
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Juggernaut:
+                    if (_e!= null)
+                        if (_me.NetworkActivity == NetworkActivity.Crit)
+                            bonusdamage2 = physDamage;
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Brewmaster:
+                    if (_e!= null)
+                        if (_me.NetworkActivity == NetworkActivity.Crit)
+                            bonusdamage2 = physDamage;
+                    break;
+                case ClassID.CDOTA_Unit_Hero_ChaosKnight:
+                    if (_e!= null)
+                        if (_me.NetworkActivity == NetworkActivity.Crit)
+                            bonusdamage2 = physDamage * ((_e.Level - 1) * 0.5 + 0.25);
+                    break;
+                case ClassID.CDOTA_Unit_Hero_SkeletonKing:
+                    if (_e!= null)
+                        if (_me.NetworkActivity == NetworkActivity.Crit)
+                            bonusdamage2 = physDamage * ((_e.Level - 1) * 0.5 + 0.5);
+                    break;
+                case ClassID.CDOTA_Unit_Hero_Life_Stealer:
+                    if (_w!= null)
+                        bonusdamage2 = unit.Health * ((_w.Level - 1) * 0.01 + 0.045);
+                    break;
+                case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
+                    if (_r != null)
+                        if (_me.NetworkActivity == NetworkActivity.Crit)
+                            bonusdamage2 = physDamage * ((_r.Level - 1) * 1.1 + 1.3);
+                    break;
+            }
+            bonusdamage = bonusdamage + bonusdamage2;
+            try
+            {
+                if (_me.Modifiers.Any(x => x.Name =="modifier_bloodseeker_bloodrage"))
+                {
+                    modif = modif*
+                            (ObjectManager.GetEntities<Hero>()
+                                .First(x => x.ClassID == ClassID.CDOTA_Unit_Hero_Bloodseeker)
+                                .Spellbook.Spell1.Level - 1)*0.05 + 1.25;
+                }
+                if (_me.Modifiers.Any(x => x.Name == "modifier_storm_spirit_overload"))
+                {
+                    magicdamage = magicdamage + (_e.Level - 1) * 20 + 30;
+                }
+                if (_me.Modifiers.Any(x => x.Name == "modifier_chilling_touch"))
+                {
+                    magicdamage = magicdamage + (_e.Level - 1) * 20 + 50;
+                }
+                if (_me.ClassID == ClassID.CDOTA_Unit_Hero_Pudge && _w != null && Menu.Item("usespell").GetValue<bool>() &&
+                    _me.Distance2D(unit) <= _attackRange)
+                {
+                    magicdamage = magicdamage + (_w.Level - 1)*6 + 6;
+                }
+            }
+            catch (Exception)
+            {
+                //
+            }
+            bonusdamage = bonusdamage + bonusdamage2;
             var damageMp = 1 - 0.06*unit.Armor/(1 + 0.06*Math.Abs(unit.Armor));
             double test = 0;
+            magicdamage = magicdamage * (1-unit.MagicDamageResist);
             /*if (_me.IsRanged)
             {
                 var missilespeed = GetProjectileSpeed(_me);
@@ -619,7 +704,8 @@ namespace LastHit
                     Game.PrintMessage(_dps.dps/3 + " ", MessageType.ChatMessage);
                 }
             }*/
-            var realDamage = (bonusdamage + physDamage)*damageMp + test;
+
+            var realDamage = ((bonusdamage + physDamage) * damageMp + magicdamage) * modif;
             if (unit.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
                 unit.ClassID == ClassID.CDOTA_BaseNPC_Tower)
             {
@@ -631,9 +717,7 @@ namespace LastHit
 
         public static float GetProjectileSpeed(Hero unit)
         {
-            var projectileSpeed = UnitDatabase.GetByName(unit.Name).ProjectileSpeed;
-
-            return projectileSpeed;
+            return UnitDatabase.GetByName(unit.Name).ProjectileSpeed;
         }
 
         #endregion
@@ -646,21 +730,41 @@ namespace LastHit
             {
                 Drawhpbar();
             }
+            //var units = ObjectManager.GetEntities<Unit>().Where(x => x.Distance2D(_me) < 1000);
+            //foreach (var unit in units)
+            //{
+            //    var upos = Drawing.WorldToScreen(unit.Position);
+            //    Drawing.DrawText(unit.MagicDamageResist + " ", "", new Vector2(upos.X - 40, upos.Y - 20), new Vector2(30), Color.White, FontFlags.Outline);
+            //}
             //try
             //{
-                
             //    //Drawing.DrawText( + " ", "", new Vector2(_me.Position.X, _me.Position.Y),new Vector2(40), Color.AliceBlue, FontFlags.Outline);
             //    var pos = Drawing.WorldToScreen(Game.MousePosition);
-            //    var unit = ObjectManager.GetEntities<Unit>().FirstOrDefault(x => x.Distance2D(Game.MousePosition) < 50);
-            //    if (unit != null)
+            //    //Drawing.DrawText("   " + _me.Rotation , "", new Vector2(pos.X, pos.Y - 20), new Vector2(30), Color.White, FontFlags.Outline);
+            //    var units = ObjectManager.GetEntities<Unit>().Where(x => x.Distance2D(_me) < 1000);
+            //    //Color[] color = new Color[]();
+            //    foreach (var unit in units)
             //    {
-            //        var anim = UnitDatabase.Units.Find(x => x.UnitName == unit.Name);
-            //        Drawing.DrawText(anim.AttackBackswing + " ", "", new Vector2(pos.X, pos.Y + 20),
-            //            new Vector2(40), Color.AliceBlue, FontFlags.Outline);
+            //        var upos = Drawing.WorldToScreen(unit.Position);
+            //        var creeps =
+            //            ObjectManager.GetEntities<Unit>()
+            //                .Where(x => x.Distance2D(unit) <= x.AttackRange + 50 && x.IsAttacking() && x.IsAlive && x.Handle != unit.Handle && x.Team != unit.Team)
+            //                .ToList();
+            //        foreach (var creep in creeps)
+            //        {
+            //            var angle = Utils.RadianToDegree(creep.RotationRad < 0 ? Math.Abs(creep.RotationRad) : Math.PI * 2 - creep.RotationRad);
+            //            if (Math.Abs(creep.FindAngleForTurnTime(unit.Position) - angle) <= 3)
+            //            {
+            //                var cpos = Drawing.WorldToScreen(creep.Position);
+            //                Drawing.DrawLine(upos, cpos, Color.Gainsboro);
+            //                Drawing.DrawText(Attack(unit).ToString(), "", new Vector2(cpos.X - 40, cpos.Y - 20), new Vector2(30), Color.White, FontFlags.Outline);
+            //            }
+            //        }
             //    }
             //}
             //catch (Exception)
             //{
+            //    //
             //}
         }
     }
