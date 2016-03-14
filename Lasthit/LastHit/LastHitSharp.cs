@@ -7,6 +7,7 @@ using Ensage.Common.Extensions;
 using Ensage.Common.Menu;
 using Ensage.Common.Objects;
 using SharpDX;
+using SharpDX.Direct3D9;
 
 namespace LastHit
 {
@@ -69,7 +70,7 @@ namespace LastHit
                         .Where(x => x.Distance2D(unit) <= x.AttackRange + 100 && x.IsAttacking() && x.IsAlive && x.Handle != unit.Handle && x.Team != unit.Team )
                         .ToList();
                 foreach (var creep in creeps)
-                {
+                { 
                     var angle = creep.Rotation < 0 ? Math.Abs(creep.Rotation) : 360 - creep.Rotation; 
                     if (Math.Abs(angle - creep.FindAngleForTurnTime(unit.Position)) <= 3) t++;
                 }
@@ -127,7 +128,11 @@ namespace LastHit
             _w = _me.Spellbook.SpellW;
             _e = _me.Spellbook.SpellE;
             _r = _me.Spellbook.SpellR;
-            _aPoint = UnitDatabase.Units.Find(x => x.UnitName == _me.Name).AttackPoint / (1 + _me.AttacksPerSecond * _me.BaseAttackTime / 100) * 500;
+            double apoint = 0;
+            apoint = _me.ClassID == ClassID.CDOTA_Unit_Hero_ArcWarden
+                ? 0.3
+                : UnitDatabase.Units.Find(x => x.UnitName == _me.Name).AttackPoint;
+            _aPoint = apoint / (1 + _me.AttacksPerSecond * _me.BaseAttackTime / 100) * 500;
             _outrange = Menu.Item("outrange").GetValue<Slider>().Value;
 
             if (_me.ClassID == ClassID.CDOTA_Unit_Hero_TrollWarlord)
@@ -193,11 +198,11 @@ namespace LastHit
                 _creepTarget = KillableCreep(false, _creepTarget, ref wait);
                 if (Menu.Item("usespell").GetValue<bool>() && Utils.SleepCheck("cooldown"))
                     SpellCast();
-                if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive )
+                if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive)
                 {
                     if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
                     {
-                        if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, 0)*2 &&
+                        if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, 0) * 2 &&
                             _creepTarget.Health >= GetDamageOnUnit(_creepTarget, 0) &&
                             _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
@@ -237,8 +242,8 @@ namespace LastHit
             if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
                 Autoattack(0, 0);
-                    _creepTarget = GetLowestHpCreep(_me, null);
-                    _creepTarget = KillableCreep(true, _creepTarget, ref wait);
+                _creepTarget = GetLowestHpCreep(_me, null);
+                _creepTarget = KillableCreep(true, _creepTarget, ref wait);
                 if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive)
                 {
                     if (Menu.Item("usespell").GetValue<bool>() && Utils.SleepCheck("cooldown"))
