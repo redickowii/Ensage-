@@ -430,7 +430,7 @@ namespace LastHit
                                         Utils.Sleep(250 + Game.Ping, "cooldown");
                                     }
                                 }
-                                else if (_w.IsToggled)
+                                if (_w.IsToggled)
                                 {
                                     _w.ToggleAbility();
                                     Utils.Sleep(150 + Game.Ping, "cooldown");
