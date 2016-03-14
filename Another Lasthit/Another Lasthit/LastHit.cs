@@ -11,7 +11,7 @@ using SharpDX.Direct3D9;
 
 namespace LastHit
 {
-    internal class LastHitSharp
+    internal class LastHit
     {
         #region Declare Static Fields
 

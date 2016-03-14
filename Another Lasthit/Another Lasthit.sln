@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LastHit", "LastHit\LastHit.csproj", "{41A7952D-E374-4F98-A46D-97AEDFF0D5FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Another Lasthit", "Another Lasthit\Another Lasthit.csproj", "{41A7952D-E374-4F98-A46D-97AEDFF0D5FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

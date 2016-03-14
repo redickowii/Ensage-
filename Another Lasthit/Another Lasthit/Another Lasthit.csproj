@@ -7,8 +7,8 @@
     <ProjectGuid>{41A7952D-E374-4F98-A46D-97AEDFF0D5FD}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LastHit</RootNamespace>
-    <AssemblyName>LastHit</AssemblyName>
+    <RootNamespace>Another Lasthit</RootNamespace>
+    <AssemblyName>Another Lasthit</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -73,7 +73,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LastHitSharp.cs" />
+    <Compile Include="LastHit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
