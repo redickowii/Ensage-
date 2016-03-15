@@ -367,9 +367,7 @@ namespace LastHit
                     switch (_me.ClassID)
                     {
                         case ClassID.CDOTA_Unit_Hero_Zuus:
-                            if (_q != null && _q.CanBeCasted() &&
-                                (creep.Handle != _creepTarget.Handle && _me.Distance2D(_creepTarget) <= _attackRange) ||
-                                _me.Distance2D(_creepTarget) > _attackRange)
+                            if (_q != null && _q.CanBeCasted() && _me.Distance2D(creep) > _attackRange)
                             {
                                 damage = ((_q.Level - 1)*15 + 85)*(1 - creep.MagicDamageResist);
                                 if (damage > creep.Health)
@@ -381,9 +379,7 @@ namespace LastHit
                             }
                             break;
                         case ClassID.CDOTA_Unit_Hero_Bristleback:
-                            if (_w != null && _w.CanBeCasted() &&
-                                (creep.Handle != _creepTarget.Handle && _me.Distance2D(_creepTarget) <= _attackRange) ||
-                                _me.Distance2D(_creepTarget) > _attackRange)
+                            if (_w != null && _w.CanBeCasted() && _me.Distance2D(creep) > _attackRange)
                             {
                                 double quillSprayDmg = 0;
                                 if (
