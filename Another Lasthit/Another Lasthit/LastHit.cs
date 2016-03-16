@@ -42,10 +42,9 @@ namespace LastHit
         private static Hero _me;
         private static Ability _q, _w, _e, _r;
         private static double _aPoint;
-        private static int _outrange;
+        private static int _outrange, _autoAttack, _autoAttackAfterSpell;
         private static bool _isloaded;
         private static List<DictionaryUnit> Creeps = new List<DictionaryUnit>();
-        private static int _autoAttack, _autoAttackAfterSpell;
         private static float _lastRange, _ias, _attackRange;
         private static ParticleEffect _rangeDisplay;
 
@@ -67,11 +66,6 @@ namespace LastHit
             Menu.AddItem(new MenuItem("test", "Test Attack_Calc").SetValue(false));
             Menu.AddItem(new MenuItem("outrange", "Bonus range").SetValue(new Slider(100, 100, 500)));
             Menu.AddToMainMenu();
-
-            // Auto Attack Checker
-            _autoAttackAfterSpell = Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt();
-            _autoAttack = Game.GetConsoleVar("dota_player_units_auto_attack").GetInt();
-            // Auto Attack Checker
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -145,28 +139,35 @@ namespace LastHit
         {
             if (Creeps.Any(x => x.Unit.Handle == unit.Handle) && Menu.Item("test").GetValue<bool>())
             {
-                var f = true;
-                float h = 0, t = 0;
-                List<float> dh = new List<float>(), dt = new List<float>();
-                foreach (var healthtime in Creeps.First(x => x.Unit.Handle == unit.Handle).HT)
+                try
                 {
-                    if (f)
+                    var f = true;
+                    float h = 0, t = 0;
+                    List<float> dh = new List<float>(), dt = new List<float>();
+                    foreach (var healthtime in Creeps.First(x => x.Unit.Handle == unit.Handle).HT)
                     {
-                        h = healthtime.Health;
-                        t = healthtime.Time;
-                        f = false;
-                        //Console.WriteLine("--------------------------------------------------------");
+                        if (f)
+                        {
+                            h = healthtime.Health;
+                            t = healthtime.Time;
+                            f = false;
+                            //Console.WriteLine("--------------------------------------------------------");
+                        }
+                        else
+                        {
+                            dh.Add(h - healthtime.Health);
+                            dt.Add(healthtime.Time - t);
+                            //Console.WriteLine("Health/Time {0} / {1}", h - healthtime.Health, healthtime.Time - t);
+                            h = healthtime.Health;
+                            t = healthtime.Time;
+                        }
                     }
-                    else
-                    {
-                        dh.Add(h - healthtime.Health);
-                        dt.Add(healthtime.Time - t);
-                        //Console.WriteLine("Health/Time {0} / {1}", h - healthtime.Health, healthtime.Time - t);
-                        h = healthtime.Health;
-                        t = healthtime.Time;
-                    }
+                    return dh.Average() * (time / dt.Average());
                 }
-                return dh.Average() * (time / dt.Average());
+                catch (Exception)
+                {
+                    //
+                }
             }
             return 0;
         }
@@ -184,6 +185,10 @@ namespace LastHit
                 {
                     return;
                 }
+                // Auto Attack Checker
+                _autoAttackAfterSpell = Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt();
+                _autoAttack = Game.GetConsoleVar("dota_player_units_auto_attack").GetInt();
+                // Auto Attack Checker
                 _lastRange = _me.GetAttackRange();
                 _isloaded = true;
                 _rangeDisplay = null;
@@ -278,7 +283,6 @@ namespace LastHit
                 _rangeDisplay = null;
             }
 
-            Autoattack(_autoAttack, _autoAttackAfterSpell);
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
                 Autoattack(0, 0);
@@ -289,29 +293,29 @@ namespace LastHit
                 if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive)
                 {
                     var time = _me.IsRanged == false
-                    ? 0
+                    ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
                     : _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position) + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
-                    double ttt = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time));
+                    var getDamage = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time));
                     if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
                     {
-                        if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time)) * 2 &&
-                            _creepTarget.Health >= GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time)) &&
+                        if (_creepTarget.Health < getDamage * 2 && _creepTarget.Health >= getDamage &&
                             _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
                             _me.Hold();
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
-                        else if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time)) ||
+                        else if (_creepTarget.Health < getDamage ||
                                  (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
                         {
-                            //Game.PrintMessage(_creepTarget.Health + "!!!" + ttt, MessageType.ChatMessage);
-                            _me.Attack(_creepTarget);
+                            if (!_me.IsAttacking())
+                                _me.Attack(_creepTarget);
                         }
                     }
-                    else if (_me.Distance2D(_creepTarget) >= _attackRange)
+                    else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
                     {
                         _me.Move(_creepTarget.Position);
+                        Utils.Sleep(100 + Game.Ping, "walk");
                     }
                 }
                 else
@@ -329,8 +333,7 @@ namespace LastHit
                     Orbwalking.Orbwalk(_target, 500);
                 }
             }
-
-            if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
+            else if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
                 Autoattack(0, 0);
                 _creepTarget = GetLowestHpCreep(_me, null);
@@ -342,18 +345,20 @@ namespace LastHit
                     Orbwalking.Orbwalk(_creepTarget);
                 }
             }
-
-            if (Game.IsKeyDown(Menu.Item("combatkey").GetValue<KeyBind>().Key))
+            else if (Game.IsKeyDown(Menu.Item("combatkey").GetValue<KeyBind>().Key))
             {
                 Orbwalking.Orbwalk(_target, attackmodifiers: true);
             }
-
-            if (Game.IsKeyDown(Menu.Item("kitekey").GetValue<KeyBind>().Key))
+            else if (Game.IsKeyDown(Menu.Item("kitekey").GetValue<KeyBind>().Key))
             {
                 Orbwalking.Orbwalk(
                     _target,
                     attackmodifiers: true,
                     bonusWindupMs: Menu.Item("bonusWindup").GetValue<Slider>().Value);
+            }
+            else
+            {
+                Autoattack(_autoAttack, _autoAttackAfterSpell);
             }
         }
 
@@ -373,12 +378,22 @@ namespace LastHit
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                            && x.Team != _me.Team && x.Distance2D(_me) < _lastRange + _outrange);
+                            && x.Team != _me.Team && x.Distance2D(_me) < _attackRange + _outrange);
                 foreach (var enemy in enemies)
                 {
                     var health = enemy.Health;
                     var maxHealth = enemy.MaximumHealth;
                     if (health == maxHealth) continue;
+                    var time = _me.IsRanged == false
+                    ? 0
+                    : _aPoint * 2 / 1000 + _me.GetTurnTime(enemy.Position) + _me.Distance2D(enemy) / GetProjectileSpeed(_me);
+                    double damgeprediction = 0;
+                    if (time >= enemy.SecondsPerAttack)
+                    {
+                        damgeprediction = time * enemy.AttacksPerSecond * enemy.MinimumDamage;
+                    }
+                    if (Menu.Item("test").GetValue<bool>())
+                       damgeprediction = Healthpredict(enemy, time);
                     var damge = (float) GetDamageOnUnit(enemy, 0);
                     var hpleft = health;
                     var hpperc = hpleft / maxHealth;
@@ -395,24 +410,19 @@ namespace LastHit
                     hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(enemy) / 2;
                     hbarpos.Y = start.Y;
                     var hpvarx = hbarpos.X;
-                    var hpbary = hbarpos.Y;
                     var a = (float) Math.Round(damge * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
+                    var b = (float) Math.Round(damgeprediction * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
                     var position = hbarpos + new Vector2(hpvarx * hpperc + 10, -12);
-                    try
-                    {
-                        var left = (float) Math.Round(damge / 7);
-                        Drawing.DrawRect(
-                            position,
-                            new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4),
-                            enemy.Health > damge
-                                ? enemy.Health > damge * 2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
-                                : new Color(127, 255, 0, 80));
-                        Drawing.DrawRect(position, new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
+                    var position2 = position + new Vector2(a, 0);
+
+                    Drawing.DrawRect(
+                        position,
+                        new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4),
+                        enemy.Health > damge
+                            ? enemy.Health > damge * 2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
+                            : new Color(127, 255, 0, 80));
+                    Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.YellowGreen);
+                    Drawing.DrawRect(position, new Vector2(a + b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
                 }
             }
             catch (Exception)
@@ -555,7 +565,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                    /*&& x.Team != source.Team*/&& x.Distance2D(source) < attackRange + _outrange)
+                                 && x.Distance2D(source) < attackRange + _outrange)
                         .OrderBy(creep => creep.Health)
                         .DefaultIfEmpty(null)
                         .FirstOrDefault();
@@ -572,7 +582,6 @@ namespace LastHit
         {
             try
             {
-                var attackRange = source.GetAttackRange();
                 var lowestHp =
                     ObjectManager.GetEntities<Unit>()
                         .Where(
@@ -586,7 +595,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                && x.Team != source.Team && x.Distance2D(source) < attackRange + _outrange &&
+                                && x.Team != source.Team && x.Distance2D(source) < _attackRange + _outrange &&
                                 x != markedcreep)
                         .OrderBy(creep => creep.Health)
                         .DefaultIfEmpty(null)
@@ -607,16 +616,14 @@ namespace LastHit
                 var missilespeed = GetProjectileSpeed(_me);
                 var time = _me.IsRanged == false
                     ? 0
-                    : UnitDatabase.GetAttackBackswing(_me) + _me.Distance2D(minion) / missilespeed;
+                    : _aPoint * 2 + _me.GetTurnTime(minion.Position) + _me.Distance2D(minion) / missilespeed;
                 double test = 0;
-                if (time >= minion.AttackSpeedValue)
+                if (time >= minion.SecondsPerAttack)
                 {
                     test = time * minion.AttacksPerSecond * minion.MinimumDamage;
                 }
                 if (Menu.Item("test").GetValue<bool>())
-                {
                     test = 0;
-                }
                 if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2.5)
                 {
                     if (_me.CanAttack())
@@ -681,24 +688,24 @@ namespace LastHit
             switch (_me.ClassID)
             {
                 case ClassID.CDOTA_Unit_Hero_AntiMage:
-                    if (unit.MaximumMana > 0 && unit.Mana > 0 && _q.Level > 0)
+                    if (unit.MaximumMana > 0 && unit.Mana > 0 && _q.Level > 0 && unit.Team != _me.Team)
                         bonusdamage2 = (_q.Level - 1) * 12 + 28 * 0.6;
                     break;
                 case ClassID.CDOTA_Unit_Hero_Viper:
-                    if (_w.Level > 0)
+                    if (_w.Level > 0 && unit.Team != _me.Team)
                     {
                         var nethertoxindmg = _w.Level * 2.5;
-                        var percent = Math.Floor((double) unit.Health / unit.MaximumHealth * 100);
-                        if (percent > 80 && percent <= 100)
-                            bonusdamage2 = nethertoxindmg * 0.5;
-                        else if (percent > 60 && percent <= 80)
-                            bonusdamage2 = nethertoxindmg * 1;
-                        else if (percent > 40 && percent <= 60)
-                            bonusdamage2 = nethertoxindmg * 2;
-                        else if (percent > 20 && percent <= 40)
-                            bonusdamage2 = nethertoxindmg * 4;
-                        else if (percent > 0 && percent <= 20)
-                            bonusdamage2 = nethertoxindmg * 8;
+                        //var percent = Math.Floor((double) unit.Health / unit.MaximumHealth * 100);
+                        //if (percent > 80 && percent <= 100)
+                        //    bonusdamage2 = nethertoxindmg * 0.5;
+                        //else if (percent > 60 && percent <= 80)
+                        //    bonusdamage2 = nethertoxindmg * 1;
+                        //else if (percent > 40 && percent <= 60)
+                        //    bonusdamage2 = nethertoxindmg * 2;
+                        //else if (percent > 20 && percent <= 40)
+                        //    bonusdamage2 = nethertoxindmg * 4;
+                        //else if (percent > 0 && percent <= 20)
+                        //    bonusdamage2 = nethertoxindmg * 8;
                     }
                     break;
                 case ClassID.CDOTA_Unit_Hero_Ursa:
