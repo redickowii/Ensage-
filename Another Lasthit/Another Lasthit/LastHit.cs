@@ -305,7 +305,7 @@ namespace LastHit
                         else if (_creepTarget.Health < GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time)) ||
                                  (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
                         {
-                            Game.PrintMessage(_creepTarget.Health + "!!!" + ttt, MessageType.ChatMessage);
+                            //Game.PrintMessage(_creepTarget.Health + "!!!" + ttt, MessageType.ChatMessage);
                             _me.Attack(_creepTarget);
                         }
                     }
