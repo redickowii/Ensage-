@@ -388,7 +388,6 @@ namespace LastHit
                     var hpleft = health;
                     var hpperc = hpleft / maxHealth;
 
-                    var dmgperc = Math.Min(damge, health) / maxHealth;
                     var hbarpos = HUDInfo.GetHPbarPosition(enemy);
 
                     Vector2 screenPos;
@@ -619,7 +618,7 @@ namespace LastHit
                 }
                 if (Menu.Item("test").GetValue<bool>())
                     test = 0;
-                if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2.5)
+                if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2)
                 {
                     if (_me.CanAttack())
                         return minion;
