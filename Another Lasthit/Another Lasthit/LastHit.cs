@@ -296,7 +296,7 @@ namespace LastHit
                     ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
                     : _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position) + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
                     var getDamage = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time));
-                    if (_creepTarget.Distance2D(_me) <= _me.AttackRange)
+                    if (_creepTarget.Distance2D(_me) <= _attackRange)
                     {
                         if (_creepTarget.Health < getDamage * 2 && _creepTarget.Health >= getDamage &&
                             _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
@@ -384,10 +384,6 @@ namespace LastHit
                     var health = enemy.Health;
                     var maxHealth = enemy.MaximumHealth;
                     if (health == maxHealth) continue;
-                    var time = _me.IsRanged == false
-                    ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
-                    : _aPoint * 2 / 1000 + _me.GetTurnTime(enemy.Position) + _me.Distance2D(enemy) / GetProjectileSpeed(_me);
-                    var damgeprediction = Healthpredict(enemy, time);
                     var damge = (float) GetDamageOnUnit(enemy, 0);
                     var hpleft = health;
                     var hpperc = hpleft / maxHealth;
@@ -405,18 +401,23 @@ namespace LastHit
                     hbarpos.Y = start.Y;
                     var hpvarx = hbarpos.X;
                     var a = (float) Math.Round(damge * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
-                    var b = (float) Math.Round(damgeprediction * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
                     var position = hbarpos + new Vector2(hpvarx * hpperc + 10, -12);
-                    var position2 = position + new Vector2(a, 0);
-
                     Drawing.DrawRect(
                         position,
                         new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4),
                         enemy.Health > damge
                             ? enemy.Health > damge * 2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
                             : new Color(127, 255, 0, 80));
+                    Drawing.DrawRect(position, new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
+                    if (!Menu.Item("test").GetValue<bool>()) continue;
+                    var time = _me.IsRanged == false
+                    ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
+                    : _aPoint * 2 / 1000 + _me.GetTurnTime(enemy.Position) + _me.Distance2D(enemy) / GetProjectileSpeed(_me);
+                    var damgeprediction = Healthpredict(enemy, time);
+                    var b = (float) Math.Round(damgeprediction * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
+                    var position2 = position + new Vector2(a, 0);
                     Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.YellowGreen);
-                    Drawing.DrawRect(position, new Vector2(a + b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
+                    Drawing.DrawRect(position, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
                 }
             }
             catch (Exception)
