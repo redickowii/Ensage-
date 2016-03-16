@@ -1,1 +1,3 @@
-# Ensage-
+# Script for Ensage#
+
+Skype: redickowii
