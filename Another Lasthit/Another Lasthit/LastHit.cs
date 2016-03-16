@@ -385,15 +385,9 @@ namespace LastHit
                     var maxHealth = enemy.MaximumHealth;
                     if (health == maxHealth) continue;
                     var time = _me.IsRanged == false
-                    ? 0
+                    ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
                     : _aPoint * 2 / 1000 + _me.GetTurnTime(enemy.Position) + _me.Distance2D(enemy) / GetProjectileSpeed(_me);
-                    double damgeprediction = 0;
-                    if (time >= enemy.SecondsPerAttack)
-                    {
-                        damgeprediction = time * enemy.AttacksPerSecond * enemy.MinimumDamage;
-                    }
-                    if (Menu.Item("test").GetValue<bool>())
-                       damgeprediction = Healthpredict(enemy, time);
+                    var damgeprediction = Healthpredict(enemy, time);
                     var damge = (float) GetDamageOnUnit(enemy, 0);
                     var hpleft = health;
                     var hpperc = hpleft / maxHealth;
