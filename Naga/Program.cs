@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 
 using Ensage;
@@ -14,83 +15,51 @@ namespace NagaSharp
 
     public class JungleCamps
     {
-        public Hero illusion { get; set; }
-        public Vector3 position { get; set; }
-        public Vector3 stackPosition { get; set; }
-        public Vector3 waitPosition { get; set; }
-        public int team { get; set; }
-        public int id { get; set; }
-        public bool farming { get; set; }
-        public int lvlReq { get; set; }
-        public bool visible { get; set; }
-        public int visTime { get; set; }
-        public bool stacking { get; set; }
-        public int stacked { get; set; }
-        public bool ancients { get; set; }
-        public bool empty { get; set; }
+        public Hero Illusion { get; set; }
+        public Vector3 Position { get; set; }
+        public Vector3 StackPosition { get; set; }
+        public Vector3 WaitPosition { get; set; }
+        public int Team { get; set; }
+        public int Id { get; set; }
+        public bool Farming { get; set; }
+        public int LvlReq { get; set; }
+        public bool Visible { get; set; }
+        public int VisTime { get; set; }
+        public bool Stacking { get; set; }
+        public bool Stacked { get; set; }
+        public bool Ancients { get; set; }
+        public bool Empty { get; set; }
         public int State { get; set; }
         public int AttackTime { get; set; }
-        public int creepscount { get; set; }
-        public int starttime { get; set; }
+        public int Creepscount { get; set; }
+        public int Starttime { get; set; }
+    }
+
+    public class CreepWaves
+    {
+        public Hero Illusion { get; set; }
+        public List<Unit> Creeps { get; set; }
+        public Vector3 Position { get; set; }
     }
 
     internal class Program
     {
-        /*JungleCamps,reg,stack,farm,auto,enemyjungle,*/
+        
         private static Ability Q, E;
         private static Item radiance, manta, travels, octa;
-        private static Hero me;
-        private static Unit closestNeutral, closestCreep;
-        private static Player player;
+        private static Hero _me;
+        private static Unit _closestNeutral, _clos7EstCreep;
         private static readonly Menu Menu = new Menu("Naga", "Naga", true, "npc_dota_hero_naga_siren", true);
-        private static bool toggle = true, isloaded;
-        private static bool active, cr, noCreep, newVal;
-        private static AbilityToggler menuValue;
-        private static int creepscount;
-        private static Vector3 stackPosition;
-        private static Vector3[] mid;
-        private static Vector3[] top;
-        private static Vector3[] bot;
+        private static bool _isloaded;
+        private static AbilityToggler _menuValue;
+        private static int _creepscount;
+        private static Vector3 _stackPosition;
 
-        private static Key KeyControl = Key.K;
+        private static List<CreepWaves> _creepWaves = new List<CreepWaves>();
+        private static readonly List<JungleCamps> JungleCamps = new List<JungleCamps>();
 
-        private static List<JungleCamps> JungleCamps = new List<JungleCamps>();
-
-        private static List<Unit> neutrals;
-        private static List<Hero> illusions;
-
-        private static readonly Vector3[] Mid =
-{
-                new Vector3(-5589, -5098, 261),
-                new Vector3(-4027, -3532, 137),
-                new Vector3(-2470, -1960, 127),
-                new Vector3(-891, -425, 55),
-                new Vector3(1002, 703, 127),
-                new Vector3(2627, 2193, 127),
-                new Vector3(4382, 3601, 2562)};
-        private static readonly Vector3[] Bot =
-        {
-                new Vector3(-4077, -6160, 268),
-                new Vector3(-1875, -6125, 127),
-                new Vector3(325, -6217, 256),
-                new Vector3(2532, -6215, 256),
-                new Vector3(5197, -5968, 384),
-                new Vector3(6090, -4318, 256),
-                new Vector3(6180, -2117, 256),
-                new Vector3(6242, 84, 256),
-                new Vector3(6307, 2286, 141),
-                new Vector3(6254, 3680, 256)};
-        private static readonly Vector3[] Top =
-        {
-                new Vector3(-6400, -793, 256),
-                new Vector3(-6356, 1141, 256),
-                new Vector3(-6320, 3762, 256),
-                new Vector3(-5300, 5924, 256),
-                new Vector3(-3104, 5929, 256),
-                new Vector3(-826, 5942, 256),
-                new Vector3(1445, 5807, 256),
-                new Vector3(3473, 5949, 256),
-                new Vector3(-6506, -4701, 384)};
+        private static List<Unit> _neutrals;
+        private static List<Hero> _illusions;
 
         private static void Main(string[] args)
         {
@@ -103,363 +72,365 @@ namespace NagaSharp
                 { "naga_siren_rip_tide", true }
             };
 
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-1708, -4284, 256), stackPosition = new Vector3(-2776, -3144, 256), waitPosition = new Vector3(-1971, -3949, 256), team = 2, id = 1, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 55 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-266, -3176, 256), stackPosition = new Vector3(-522, -1351, 256), waitPosition = new Vector3(-325, -2699, 256), team = 2, id = 2, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 55 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(1656, -3714, 384), stackPosition = new Vector3(1263, -6041, 384), waitPosition = new Vector3(1612, -4277, 384), team = 2, id = 3, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 54 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(3016, -4692, 384), stackPosition = new Vector3(4777, -4954, 384), waitPosition = new Vector3(3074, -4955, 384), team = 2, id = 4, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(4474, -3598, 384), stackPosition = new Vector3(2755, -4001, 384), waitPosition = new Vector3(4121, -3902, 384), team = 2, id = 5, farming = false, empty = false, lvlReq = 1, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-3617, 805, 384), stackPosition = new Vector3(-5268, 1400, 384), waitPosition = new Vector3(-3835, 643, 384), team = 2, id = 6, farming = false, empty = false, lvlReq = 12, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-4446, 3541, 384), stackPosition = new Vector3(-3953, 4954, 384), waitPosition = new Vector3(-4251, 3760, 384), team = 3, id = 7, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-2981, 4591, 384), stackPosition = new Vector3(-3248, 5993, 384), waitPosition = new Vector3(-3055, 4837, 384), team = 3, id = 8, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-392, 3652, 384), stackPosition = new Vector3(-224, 5088, 384), waitPosition = new Vector3(-503, 3955, 384), team = 3, id = 9, farming = false, empty = false, lvlReq = 3, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 55 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(-1524, 2641, 256), stackPosition = new Vector3(-1266, 4273, 384), waitPosition = new Vector3(-1465, 2908, 256), team = 3, id = 10, farming = false, empty = false, lvlReq = 1, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(1098, 3338, 384), stackPosition = new Vector3(910, 5003, 384), waitPosition = new Vector3(975, 3586, 384), team = 3, id = 11, farming = false, empty = false, lvlReq = 8, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
-            JungleCamps.Add(new JungleCamps { position = new Vector3(4141, 554, 384), stackPosition = new Vector3(2987, -2, 384), waitPosition = new Vector3(3876, 506, 384), team = 3, id = 12, farming = false, empty = false, lvlReq = 12, visible = false, visTime = 0, stacking = false, stacked = 0, starttime = 53 });
+            #region array
 
-            JungleCamps.Add(new JungleCamps { position = new Vector3(9999, 9999, 9999), id = 13 }); 
+            _creepWaves.Add(new CreepWaves
+            {
+                Illusion = null,
+                Creeps = new List<Unit>()
+            });
+            _creepWaves.Add(new CreepWaves
+            {
+                Illusion = null,
+                Creeps = new List<Unit>()
+            });
+            _creepWaves.Add(new CreepWaves
+            {
+                Illusion = null,
+                Creeps = new List<Unit>()
+            });
+
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-1708, -4284, 256),
+                StackPosition = new Vector3(-1816, -2684, 256),
+                WaitPosition = new Vector3(-1867, -4033, 256),
+                Team = 2,
+                Id = 1,
+                Empty = false,
+                Stacked = false,
+                Starttime = 55
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-266, -3176, 256),
+                StackPosition = new Vector3(-522, -1351, 256),
+                WaitPosition = new Vector3(-306, -2853, 256),
+                Team = 2,
+                Id = 2,
+                Empty = false,
+                Stacked = false,
+                Starttime = 55
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(1656, -3714, 384),
+                StackPosition = new Vector3(48, -4225, 384),
+                WaitPosition = new Vector3(1637, -4009, 384),
+                Team = 2,
+                Id = 3,
+                Empty = false,
+                Stacked = false,
+                Starttime = 54
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(3016, -4692, 384),
+                StackPosition = new Vector3(3952, -6417, 384),
+                WaitPosition = new Vector3(3146, -5071, 384),
+                Team = 2,
+                Id = 4,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(4474, -3598, 384),
+                StackPosition = new Vector3(2486, -4125, 384),
+                WaitPosition = new Vector3(4121, -3902, 384),
+                Team = 2,
+                Id = 5,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-3617, 805, 384),
+                StackPosition = new Vector3(-5268, 1400, 384),
+                WaitPosition = new Vector3(-3835, 643, 384),
+                Team = 2,
+                Id = 6,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-4446, 3541, 384),
+                StackPosition = new Vector3(-3953, 4954, 384),
+                WaitPosition = new Vector3(-4251, 3760, 384),
+                Team = 3,
+                Id = 7,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-2981, 4591, 384),
+                StackPosition = new Vector3(-3248, 5993, 384),
+                WaitPosition = new Vector3(-3050, 4897, 384),
+                Team = 3,
+                Id = 8,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-392, 3652, 384),
+                StackPosition = new Vector3(-224, 5088, 384),
+                WaitPosition = new Vector3(-503, 3955, 384),
+                Team = 3,
+                Id = 9,
+                Empty = false,
+                Stacked = false,
+                Starttime = 55
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-1524, 2641, 256),
+                StackPosition = new Vector3(-1266, 4273, 384),
+                WaitPosition = new Vector3(-1465, 2908, 256),
+                Team = 3,
+                Id = 10,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(1098, 3338, 384),
+                StackPosition = new Vector3(910, 5003, 384),
+                WaitPosition = new Vector3(975, 3586, 384),
+                Team = 3,
+                Id = 11,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(4141, 554, 384),
+                StackPosition = new Vector3(2987, -2, 384),
+                WaitPosition = new Vector3(3876, 506, 384),
+                Team = 3,
+                Id = 12,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(-2960, -126, 384),
+                StackPosition = new Vector3(-3850, -1491, 384),
+                WaitPosition = new Vector3(-2777, -230, 384),
+                Team = 2,
+                Id = 13,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+            JungleCamps.Add(new JungleCamps
+            {
+                Position = new Vector3(4000, -700, 256),
+                StackPosition = new Vector3(1713, -134, 256),
+                WaitPosition = new Vector3(3649, -721, 256),
+                Team = 3,
+                Id = 14,
+                Empty = false,
+                Stacked = false,
+                Starttime = 53
+            });
+       #endregion
 
             Menu.AddItem(new MenuItem("enabledAbilities", "Abilities:").SetValue(new AbilityToggler(dict)));
             Menu.AddItem(new MenuItem("Stack", "Stack").SetValue(new KeyBind('F', KeyBindType.Toggle)));
             Menu.AddItem(new MenuItem("LinePush", "Line Push").SetValue(new KeyBind('G', KeyBindType.Toggle)));
             Menu.AddItem(new MenuItem("FarmJ", "Jungle Farm").SetValue(new KeyBind('H', KeyBindType.Toggle)));
-            Menu.AddToMainMenu(); 
-
+            Menu.AddToMainMenu();
+        
         }
         public static void Game_OnUpdate(EventArgs args)
         {
-            if (!isloaded)
+            if (!_isloaded)
             {
-                me = ObjectManager.LocalHero;
-                if (!Game.IsInGame || me == null)
+                _me = ObjectManager.LocalHero;
+                if (!Game.IsInGame || _me == null)
                 {
                     return;
                 }
-                isloaded = true;
+                _isloaded = true;
             }
 
-            if (me == null || !me.IsValid)
+            if (_me == null || !_me.IsValid)
             {
-                isloaded = false;
-                me = ObjectManager.LocalHero;
+                _isloaded = false;
+                _me = ObjectManager.LocalHero;
                 return;
             }
 
 
-            if (me.ClassID != ClassID.CDOTA_Unit_Hero_Naga_Siren || Game.IsPaused || Game.IsChatOpen)
+            if (_me.ClassID != ClassID.CDOTA_Unit_Hero_Naga_Siren || Game.IsPaused || Game.IsChatOpen)
             {
                 return;
             }
 
-            var StackKey = Menu.Item("Stack").GetValue<KeyBind>().Active;
-            var LinePush = Menu.Item("LinePush").GetValue<KeyBind>().Active;
-            var FarmJ = Menu.Item("FarmJ").GetValue<KeyBind>().Active;
-            menuValue = Menu.Item("enabledAbilities").GetValue<AbilityToggler>();
-            Q = me.Spellbook.Spell1;
-            E = me.Spellbook.Spell3;
-            var ERadius = E.GetCastRange() - 30;
-            var movementspeed = me.MovementSpeed;
+            var stackKey = Menu.Item("Stack").GetValue<KeyBind>().Active;
+            var linePush = Menu.Item("LinePush").GetValue<KeyBind>().Active;
+            var farmJ = Menu.Item("FarmJ").GetValue<KeyBind>().Active;
+            _menuValue = Menu.Item("enabledAbilities").GetValue<AbilityToggler>();
+            Q = _me.Spellbook.Spell1;
+            E = _me.Spellbook.Spell3;
+            var eRadius = E.GetCastRange() - 30;
+            var movementspeed = _me.MovementSpeed;
         
-            radiance = me.FindItem("item_radiance");
-            manta = me.FindItem("item_manta");
-            travels = me.Inventory.Items.FirstOrDefault(item => item.Name.Contains("item_travel_boots"));
-            octa = me.FindItem("item_octarine_core");
+            radiance = _me.FindItem("item_radiance");
+            manta = _me.FindItem("item_manta");
+            travels = _me.Inventory.Items.FirstOrDefault(item => item.Name.Contains("item_travel_boots"));
+            octa = _me.FindItem("item_octarine_core");
 
-            var enemyTeam = me.GetEnemyTeam();
-            var myteam = me.Team;
-            /*
-            var enemy = ObjectManager.GetEntities<Unit>().Where(x => x.Team == Team.Neutral || x.Team == enemyTeam && !x.IsIllusion && x.IsSpawned && x.IsVisible).ToList();
-            var allies = ObjectManager.GetEntities<Hero>().Where(x => x.IsAlive && !x.IsIllusion && x.IsVisible && x.Team == me.Team).ToList();
-            var enemies = ObjectManager.GetEntities<Hero>().Where(x => x.IsAlive && !x.IsIllusion && x.IsVisible && x.Team == enemyTeam).ToList();
-            */
-            illusions = ObjectManager.GetEntities<Hero>().Where(x => x.ClassID == ClassID.CDOTA_Unit_Hero_Naga_Siren && x.IsIllusion && x.IsVisible && x.IsAlive && x.Team == myteam).ToList();
+            _illusions =
+                ObjectManager.GetEntities<Hero>()
+                    .Where(
+                        x =>
+                            x.ClassID == ClassID.CDOTA_Unit_Hero_Naga_Siren && x.IsIllusion && x.IsVisible && x.IsAlive &&
+                            x.Team == _me.Team)
+                    .ToList();
             
             var seconds = ((int)Game.GameTime) % 60;
-            if (JungleCamps.FindAll(x => x.illusion != null).Count != illusions.Count || seconds == 1)
+            if (JungleCamps.FindAll(x => x.Illusion != null).Count != _illusions.Count || seconds == 1)
                 {
-                foreach (var illusion in JungleCamps)
+                foreach (var camp in JungleCamps)
                 {
-                    illusion.illusion = null;
-                    illusion.stacking = false;
-                    illusion.farming = false;
-                    illusion.State = 0;
+                    camp.Illusion = null;
+                    camp.Stacking = false;
+                    camp.Farming = false;
+                    camp.State = 0;
+                }
+            }
+            if (seconds == 0)
+            {
+                foreach (var camp in JungleCamps)
+                {
+                    camp.Illusion = null;
+                    camp.Stacking = false;
+                    camp.Farming = false;
+                    camp.Empty = false;
+                    camp.State = 0;
                 }
             }
             #region linepush
-            //--------------------------Line push------------------------
-            if (illusions.Count > 0 && LinePush)
+
+            if (linePush && Utils.SleepCheck("linePush"))
             {
-                mid = Mid;
-                bot = Bot;
-                top = Top;
-
-                if (me.Team == Team.Radiant)
+                    var creeps =
+                    ObjectManager.GetEntities<Creep>()
+                        .Where(
+                            x =>
+                                x.IsAlive && x.IsVisible && x.Team == _me.GetEnemyTeam() && (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege))
+                                .OrderByDescending(x => x.Distance2D(new Vector3(0,0,0))).ToList();
+                try
                 {
-                    foreach (Hero v in illusions.Where(v => v.Distance2D(me) > 700))
+                    if (Utils.SleepCheck("clear"))
                     {
-                        /******************************************MID******************************************/
-                        if (v.Distance2D(mid[0]) <= 2300 && v.Distance2D(mid[1]) >= 2190 && Utils.SleepCheck(v.Handle.ToString()))
+                        var creepdel = new List<Unit>();
+                        foreach (var creepWave in _creepWaves)
                         {
-                            v.Attack(mid[1]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[1]) <= 2400 && v.Distance2D(mid[2]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[2]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[2]) <= 2640 && v.Distance2D(mid[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[3]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[3]) <= 2340 && v.Distance2D(mid[4]) >= 1900 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[4]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[4]) <= 2400 && v.Distance2D(mid[5]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[5]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[5]) <= 2400 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[6]);
-                            Utils.Sleep(3700, v.Handle.ToString());
+                            creepdel.AddRange(creepWave.Creeps.Where(creep => creeps.All(x => x.Handle != creep.Handle)));
+                            foreach (var creep in creepdel)
+                                creepWave.Creeps.Remove(creep);
                         }
 
-                        /******************************************MID******************************************/
-                        /******************************************BOT******************************************/
-
-
-                        if (v.Distance2D(bot[0]) <= 2400 && v.Distance2D(bot[1]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[1]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[1]) <= 2440 && v.Distance2D(bot[2]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[2]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[2]) <= 2640 && v.Distance2D(bot[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[3]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[3]) <= 2340 && v.Distance2D(bot[4]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[4]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[4]) <= 2380 && v.Distance2D(bot[5]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[5]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[5]) <= 2380 && v.Distance2D(bot[6]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[6]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[6]) <= 2630 && v.Distance2D(bot[7]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[7]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[7]) <= 2630 && v.Distance2D(bot[8]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[8]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[8]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[9]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        /******************************************BOT******************************************/
-                        /******************************************TOP******************************************/
-                        if (v.Distance2D(top[0]) <= 1900 && v.Distance2D(top[1]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[1]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[1]) <= 2640 && v.Distance2D(top[2]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[2]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[2]) <= 2640 && v.Distance2D(top[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[3]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[3]) <= 2340 && v.Distance2D(top[4]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[4]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[4]) <= 2380 && v.Distance2D(top[5]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[5]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[5]) <= 2380 && v.Distance2D(top[6]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[6]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[6]) <= 2630 && v.Distance2D(top[7]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[7]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[7]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[8]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-
-                        /******************************************TOP******************************************/
+                        Utils.Sleep(5000, "clear");
                     }
                 }
-                if (me.Team != Team.Dire) return;
+                catch (Exception e)
                 {
-                    foreach (Hero v in illusions.Where(v => v.Distance2D(me) > 700))
+                    Console.WriteLine("Erroe LinePush 1" + e);
+                }
+                try
+                {
+                    foreach (var creepWave in _creepWaves)
                     {
-                        /******************************************MID******************************************/
-                        if (v.Distance2D(mid[6]) <= 2300 && v.Distance2D(mid[5]) >= 2190 && Utils.SleepCheck(v.Handle.ToString()))
+                        if (creepWave.Creeps.Count == 0)
                         {
-                            v.Attack(mid[5]);
-                            Utils.Sleep(3700, v.Handle.ToString());
+                            creepWave.Position = creeps.First().Position;
+                            creepWave.Creeps.Add(creeps.First());
+                            creeps.Remove(creeps.First());
                         }
-                        if (v.Distance2D(mid[5]) <= 2400 && v.Distance2D(mid[4]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
+                        var creepdel = new List<Creep>();
+                        foreach (var creep in creeps)
                         {
-                            v.Attack(mid[4]);
-                            Utils.Sleep(3700, v.Handle.ToString());
+                            if (creepWave.Creeps.Any(x => x.Handle == creep.Handle))
+                            {
+                                creepdel.Add(creep);
+                            }
+                            if (!(creepWave.Position.Distance2D(creep) < 2000) ||
+                                creepWave.Creeps.Any(x => x.Handle == creep.Handle)) continue;
+                            creepWave.Creeps.Add(creep);
+                            creepdel.Add(creep);
                         }
-                        if (v.Distance2D(mid[4]) <= 2640 && v.Distance2D(mid[3]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[3]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[3]) <= 2340 && v.Distance2D(mid[2]) >= 1900 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[2]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[2]) <= 2400 && v.Distance2D(mid[1]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[1]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(mid[1]) <= 2400 && v.Distance2D(mid[2]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(mid[0]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-
-                        /******************************************MID******************************************/
-                        /******************************************BOT******************************************/
-
-                        if (v.Distance2D(bot[9]) <= 2400 && v.Distance2D(bot[8]) >= 2490 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[8]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[8]) <= 2440 && v.Distance2D(bot[7]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[7]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[7]) <= 2640 && v.Distance2D(bot[6]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[6]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[6]) <= 2340 && v.Distance2D(bot[5]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[5]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[5]) <= 2380 && v.Distance2D(bot[4]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[4]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[4]) <= 500 && v.Distance2D(bot[3]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[3]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[3]) <= 2630 && v.Distance2D(bot[2]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[2]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[2]) <= 2630 && v.Distance2D(bot[1]) >= 2000 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[1]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(bot[1]) <= 2630 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(bot[0]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        /******************************************BOT******************************************/
-                        /******************************************TOP******************************************/
-                        if (v.Distance2D(top[7]) <= 1900 && v.Distance2D(top[6]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[6]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[6]) <= 2640 && v.Distance2D(top[5]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[5]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[5]) <= 2640 && v.Distance2D(top[4]) >= 2420 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[4]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[4]) <= 2340 && v.Distance2D(top[3]) >= 2280 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[3]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[3]) <= 2380 && v.Distance2D(top[2]) >= 2380 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[2]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[2]) <= 2600 && v.Distance2D(top[1]) >= 2300 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[1]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-                        if (v.Distance2D(top[1]) <= 3500 && Utils.SleepCheck(v.Handle.ToString()))
-                        {
-                            v.Attack(top[8]);
-                            Utils.Sleep(3700, v.Handle.ToString());
-                        }
-
-                        /******************************************TOP******************************************/
+                        foreach (var creep in creepdel)
+                            creeps.Remove(creep);
+                    }
+                    foreach (var creepWave in _creepWaves)
+                    {
+                        creepWave.Position = new Vector3(
+                            creepWave.Creeps.Average(x => x.Position.X),
+                            creepWave.Creeps.Average(x => x.Position.Y),
+                            creepWave.Creeps.Average(x => x.Position.Z));
                     }
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Erroe LinePush 2" + e);
+                }
+                //try
+                //{
+                //    if (Utils.SleepCheck("Print"))
+                //    {
+                //        foreach (var creepWave in _creepWaves)
+                //        {
+                //            Console.WriteLine("illusion {0} , Position {1} , Count {2}", creepWave.Illusion, creepWave.Position, creepWave.Creeps.Count);
+                //            foreach (var creep in creepWave.Creeps)
+                //                Console.WriteLine(creep.Handle);
+                //        }
+                //        Utils.Sleep(2000, "Print");
+                //    }
+                //}
+                //catch (Exception e)
+                //{
+                //    Console.WriteLine("Erroe LinePush 3" + e);
+                //}
+
+                if (_illusions.Count > 0)
+                {
+                    foreach (var creepWave in _creepWaves.Where(creepWave => _illusions.Count > 0))
+                    {
+                        _illusions.First().Attack(GetClosestCreep(_illusions.First(), creepWave.Creeps));
+                        _illusions.Remove(_illusions.First());
+                    }
+                }
+                Utils.Sleep(1000, "linePush");
             }
-            #endregion linepush
+            #endregion
 
             #region Stack
-            else if (StackKey && illusions.Count > 0 && Utils.SleepCheck("wait"))
+
+            else if (stackKey && _illusions.Count > 0 && Utils.SleepCheck("wait"))
             {
-                foreach (var illusion in illusions)
+                foreach (var illusion in _illusions)
                 {
                     if (!Check(illusion))
                     {
-                        JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).illusion = illusion;
-                        JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).stacking = true;
+                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Illusion = illusion;
+                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Stacking = true;
                     }
                     else
                     {
@@ -467,27 +438,34 @@ namespace NagaSharp
                         switch (illusionCamps.State)
                         {
                             case 0:
-                                if (illusion.Distance2D(illusionCamps.waitPosition) < 5)
+                                if (illusion.Distance2D(illusionCamps.WaitPosition) < 5)
                                     illusionCamps.State = 1;
                                 else
-                                    illusion.Move(illusionCamps.waitPosition);
+                                    illusion.Move(illusionCamps.WaitPosition);
                                 Utils.Sleep(500, "wait");
                                 break;
                             case 1:
-                                creepscount = Creepcount(illusionCamps.illusion, 800);
-                                if (creepscount == 0)
+                                _creepscount = CreepCount(illusionCamps.Illusion, 800);
+                                if (_creepscount == 0)
                                 {
-                                    JungleCamps.Find(x => x.id == illusionCamps.id).illusion = null;
-                                    JungleCamps.Find(x => x.id == illusionCamps.id).empty = true;
-                                    JungleCamps.Find(x => x.id == illusionCamps.id).stacking = false;
-                                    JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).illusion = illusion;
-                                    JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).stacking = true;
+                                    JungleCamps.Find(x => x.Id == illusionCamps.Id).Illusion = null;
+                                    JungleCamps.Find(x => x.Id == illusionCamps.Id).Empty = true;
+                                    JungleCamps.Find(x => x.Id == illusionCamps.Id).Stacking = false;
+                                    JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Illusion =
+                                        illusion;
+                                    JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Stacking =
+                                        true;
                                 }
-                                else if (seconds >= illusionCamps.starttime - 5)
+                                else if (seconds >= illusionCamps.Starttime - 5)
                                 {
-                                    closestNeutral = GetNearestCreepToPull(illusionCamps.illusion, 800);
-                                    stackPosition = illusionCamps.stackPosition;
-                                    var moveTime = illusionCamps.starttime - (GetDistance2D(illusionCamps.illusion.Position,closestNeutral.Position) + (closestNeutral.IsRanged ? closestNeutral.AttackRange : closestNeutral.RingRadius) ) / movementspeed;
+                                    _closestNeutral = GetNearestCreepToPull(illusionCamps.Illusion, 800);
+                                    _stackPosition = illusionCamps.StackPosition;
+                                    var moveTime = illusionCamps.Starttime -
+                                                   (GetDistance2D(illusionCamps.Illusion.Position,
+                                                       _closestNeutral.Position) +
+                                                    (_closestNeutral.IsRanged
+                                                        ? _closestNeutral.AttackRange
+                                                        : _closestNeutral.RingRadius))/movementspeed;
                                     illusionCamps.AttackTime = (int) moveTime;
                                     illusionCamps.State = 2;
                                 }
@@ -496,64 +474,71 @@ namespace NagaSharp
                             case 2:
                                 if (seconds >= illusionCamps.AttackTime)
                                 {
-                                    closestNeutral = GetNearestCreepToPull(illusionCamps.illusion, 1200);
-                                    stackPosition = GetClosestCamp(illusionCamps.illusion, false, false).stackPosition;
-                                    illusionCamps.illusion.Attack(closestNeutral);
+                                    _closestNeutral = GetNearestCreepToPull(illusionCamps.Illusion, 1200);
+                                    _stackPosition = GetClosestCamp(illusionCamps.Illusion, false, false).StackPosition;
+                                    illusionCamps.Illusion.Attack(_closestNeutral);
                                     illusionCamps.State = 3;
-                                    var tWait =(int)(((GetDistance2D(illusionCamps.illusion.Position,closestNeutral.Position))/movementspeed)*1000 + Game.Ping);
-                                    Utils.Sleep(tWait, "" + illusionCamps.illusion.Handle);
+                                    var tWait =
+                                        (int)
+                                            (((GetDistance2D(illusionCamps.Illusion.Position, _closestNeutral.Position))/
+                                              movementspeed)*1000 + Game.Ping);
+                                    Utils.Sleep(tWait, "" + illusionCamps.Illusion.Handle);
                                 }
                                 break;
                             case 3:
-                                if (Utils.SleepCheck("" + illusionCamps.illusion.Handle))
+                                if (Utils.SleepCheck("" + illusionCamps.Illusion.Handle))
                                 {
-                                    if (menuValue.IsEnabled(E.Name) && E.CanBeCasted() && Creepcountall(ERadius) > Creepcountall(600)/2)
+                                    if (_menuValue.IsEnabled(E.Name) && E.CanBeCasted() &&
+                                        Creepcountall(eRadius) > Creepcountall(600)/2)
                                         E.UseAbility();
-                                    illusionCamps.illusion.Move(illusionCamps.stackPosition);
+                                    illusionCamps.Illusion.Move(illusionCamps.StackPosition);
                                     illusionCamps.State = 4;
                                 }
                                 break;
                             case 4:
-                                illusion.Move(illusionCamps.stackPosition);
+                                illusion.Move(illusionCamps.StackPosition);
                                 Utils.Sleep(1000, "wait");
                                 break;
                             default:
                                 illusionCamps.State = 0;
                                 break;
-                            }
                         }
                     }
-                    
                 }
+
+            }
             #endregion Stack or farm
 
             #region Farm
-            else if (FarmJ && illusions.Count > 0 && Utils.SleepCheck("farm"))
+
+            else if (farmJ && _illusions.Count > 0 && Utils.SleepCheck("farm"))
             {
-                foreach (var illusion in illusions)
+                foreach (var illusion in _illusions)
                 {
                     if (!Check(illusion))
                     {
-                        JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).illusion = illusion;
-                        JungleCamps.Find(x => x.id == GetClosestCamp(illusion, false, false).id).farming = true;
+                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Illusion = illusion;
+                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Farming = true;
                     }
                     else
                     {
                         var illusionCamps = Checkillusion(illusion);
-                        if (illusion.Distance2D(illusionCamps.position) > 100)
+                        if (illusion.Distance2D(illusionCamps.Position) > 100)
                         {
-                            illusion.Move(illusionCamps.position);
+                            illusion.Move(illusionCamps.Position);
                         }
                         else
                         {
-                            if (E.CanBeCasted() && menuValue.IsEnabled(E.Name) && Creepcountall(ERadius) >= Creepcountall(600) / 2)
+                            if (E.CanBeCasted() && _menuValue.IsEnabled(E.Name) &&
+                                Creepcountall(eRadius) >= Creepcountall(600)/2)
                                 E.UseAbility();
-                            illusion.Attack(GetNearestCreepToPull(illusionCamps.illusion, 500));
+                            illusion.Attack(GetNearestCreepToPull(illusionCamps.Illusion, 500));
                         }
                     }
                 }
                 Utils.Sleep(1000, "farm");
             }
+
             #endregion Farm
         }
 
@@ -579,68 +564,74 @@ namespace NagaSharp
 
         private static JungleCamps GetClosestCamp(Hero illusion,bool stack, bool any)
         {
-            var closest = JungleCamps[12];
-            foreach (var x in JungleCamps.Where(x => illusion.Distance2D(x.position) < illusion.Distance2D(closest.position) && !x.farming && !x.stacking && !x.empty))
+            JungleCamps[] closest =
             {
-                closest = x;
+                new JungleCamps {WaitPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue), Id = 0}
+            };
+            foreach (var x in JungleCamps.Where(x => illusion.Distance2D(x.WaitPosition) < illusion.Distance2D(closest[0].WaitPosition) && !x.Farming && !x.Stacking && !x.Empty))
+            {
+                closest[0] = x;
             }
-            return closest;
+            return closest[0];
         }
 
         private static JungleCamps Checkillusion(Hero illu)
         {
             var a = new JungleCamps();
-            return JungleCamps.Where(x => x.illusion != null).Aggregate(a, (current, x) => (x.illusion.Handle == illu.Handle ? x : current));
+            return JungleCamps.Where(x => x.Illusion != null).Aggregate(a, (current, x) => (x.Illusion.Handle == illu.Handle ? x : current));
         }
-        
+
         private static bool Check(Hero illu)
         {
-            return JungleCamps.Where(x => x.illusion != null).Aggregate(false, (current, x) => (x.illusion.Handle == illu.Handle || current));
+            return JungleCamps.Where(x => x.Illusion != null).Aggregate(false, (current, x) => (x.Illusion.Handle == illu.Handle || current));
         }
 
         private static int Creepcountall(float radius)
         {
             var a = 0;
-            foreach (var illusoin in illusions)
+            foreach (var illusoin in _illusions)
             {
-                neutrals = ObjectManager.GetEntities<Unit>()
+                _neutrals = ObjectManager.GetEntities<Unit>()
                         .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && illusoin.Distance2D(x) <= radius)
                         .ToList();
-                a = a + neutrals.Count;
+                a = a + _neutrals.Count;
             }
-            return a;
+            return a;   
         }
 
-        private static int Creepcount(Hero illu, float radius)
+        private static int CreepCount(Unit h, float radius)
         {
-            neutrals = ObjectManager.GetEntities<Unit>().Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && illu.Distance2D(x) <= radius).ToList();
-            return neutrals.Count;
-        }
-
-        /*
-        private static CreepWaves getClosestWave(Hero illu)
-        {
-            var closest = creepwaves[6];
-            var lanecreeps = ObjectManager.GetEntities<Creep>().Where(creep => (creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane || creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege || creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-            creep.ClassID == ClassID.CDOTA_Unit_SpiritBear || creep.ClassID == ClassID.CDOTA_BaseNPC_Invoker_Forged_Spirit || creep.ClassID == ClassID.CDOTA_BaseNPC_Creep &&
-            creep.IsAlive && creep.IsVisible && creep.IsSpawned) && creep.Team == ObjectManager.LocalHero.GetEnemyTeam()).ToList();
-
-            foreach (var wave in lanecreeps)
+            try
             {
-                if (illu.Distance2D(wave) < illu.Distance2D(closest.position) && !closest.cutted)
-                {
-                    //Game.PrintMessage("farming " + camp.id, MessageType.LogMessage);
-                    //Console.WriteLine("farming " + camp.id);
-                    closest.position = wave.Position;
-                }
+                return
+                    ObjectManager.GetEntities<Unit>()
+                        .Where(x => x.Team == Team.Neutral && x.IsSpawned && x.IsVisible && h.Distance2D(x) <= radius)
+                        .ToList().Count;
+            }
+            catch (Exception)
+            {
+                //
+            }
+            return 0;
+        }
+
+        
+        private static Unit GetClosestCreep(Entity hero, IEnumerable<Unit> creeps)
+        {
+            float[] distance = {float.MaxValue};
+            Unit closest = null;
+            foreach (var creep in creeps.Where(creep => distance[0] > hero.Distance2D(creep.Position)))
+            {
+                distance[0] = hero.Distance2D(creep.Position);
+                closest = creep;
             }
             return closest;
-        }*/
+        }
 
         private static Unit GetNearestCreepToPull(Hero illusion, int dis)
         {
             var creeps =
-                ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && x.IsSpawned && x.IsVisible && illusion.Distance2D(x) <= dis && x.Team != me.Team).ToList();
+                ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && x.IsSpawned && x.IsVisible && illusion.Distance2D(x) <= dis && x.Team != _me.Team).ToList();
             Unit bestCreep = null;
             var bestDistance = float.MaxValue;
             foreach (var creep in creeps)
