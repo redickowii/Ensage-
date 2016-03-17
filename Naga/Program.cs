@@ -337,17 +337,12 @@ namespace NagaSharp
                                 .OrderByDescending(x => x.Distance2D(new Vector3(0,0,0))).ToList();
                 try
                 {
-                    if (Utils.SleepCheck("clear"))
+                    var creepdel = new List<Unit>();
+                    foreach (var creepWave in _creepWaves)
                     {
-                        var creepdel = new List<Unit>();
-                        foreach (var creepWave in _creepWaves)
-                        {
-                            creepdel.AddRange(creepWave.Creeps.Where(creep => creeps.All(x => x.Handle != creep.Handle)));
-                            foreach (var creep in creepdel)
-                                creepWave.Creeps.Remove(creep);
-                        }
-
-                        Utils.Sleep(5000, "clear");
+                        creepdel.AddRange(creepWave.Creeps.Where(creep => creeps.All(x => x.Handle != creep.Handle)));
+                        foreach (var creep in creepdel)
+                            creepWave.Creeps.Remove(creep);
                     }
                 }
                 catch (Exception e)
@@ -413,8 +408,27 @@ namespace NagaSharp
                 {
                     foreach (var creepWave in _creepWaves.Where(creepWave => _illusions.Count > 0))
                     {
-                        _illusions.First().Attack(GetClosestCreep(_illusions.First(), creepWave.Creeps));
-                        _illusions.Remove(_illusions.First());
+                        if (creepWave.Illusion == null)
+                        {
+                            creepWave.Illusion = _illusions.First();
+                            creepWave.Illusion.Move(creepWave.Position);
+                            _illusions.Remove(_illusions.First());
+                        }
+                        else if (_illusions.Any(x => x.Handle == creepWave.Illusion.Handle))
+                        {
+                            if (!creepWave.Illusion.IsAttacking() && creepWave.Creeps.Count > 0)
+                            {
+                                creepWave.Illusion.Attack(GetClosestCreep(_illusions.First(), creepWave.Creeps));
+                            }
+                            else
+                            {
+                                creepWave.Illusion.Move(GetClosestCreep(creepWave.Illusion).Position);
+                            }
+                        }
+                        else if (_illusions.All(x => x.Handle != creepWave.Illusion.Handle))
+                        {
+                            creepWave.Illusion = null;
+                        }
                     }
                 }
                 Utils.Sleep(1000, "linePush");
@@ -615,7 +629,19 @@ namespace NagaSharp
             return 0;
         }
 
-        
+        private static Unit GetClosestCreep(Entity hero)
+        {
+            Unit closest = null;
+            float[] distance = { float.MaxValue };
+            var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.Team == _me.Team && x.IsAlive && hero.Distance2D(x) <= 2000);
+            foreach (var creep in creeps.Where(creep => distance[0] > hero.Distance2D(creep.Position)))
+            {
+                distance[0] = hero.Distance2D(creep.Position);
+                closest = creep;
+            }
+            return closest;
+        }
+
         private static Unit GetClosestCreep(Entity hero, IEnumerable<Unit> creeps)
         {
             float[] distance = {float.MaxValue};
