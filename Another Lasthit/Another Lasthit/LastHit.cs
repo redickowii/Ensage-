@@ -306,7 +306,8 @@ namespace LastHit
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
                         else if (_creepTarget.Health < getDamage ||
-                                 (_creepTarget.Team == _me.Team && Menu.Item("denied").GetValue<bool>()))
+                                 (_creepTarget.Health < getDamage && _creepTarget.Team == _me.Team &&
+                                  Menu.Item("denied").GetValue<bool>()))
                         {
                             if (!_me.IsAttacking())
                                 _me.Attack(_creepTarget);
@@ -667,7 +668,7 @@ namespace LastHit
             double modif = 1;
             double magicdamage = 0;
             double physDamage = _me.MinimumDamage + _me.BonusDamage;
-            if (quellingBlade != null)
+            if (quellingBlade != null && unit.Team != _me.Team)
             {
                 if (_me.IsRanged)
                 {
