@@ -422,7 +422,7 @@ namespace NagaSharp
                             }
                             else
                             {
-                                creepWave.Illusion.Move(GetClosestCreep(creepWave.Illusion).Position);
+                                creepWave.Illusion.Move(GetClosestCreep(creepWave.Illusion).Position); 
                             }
                         }
                         else if (_illusions.All(x => x.Handle != creepWave.Illusion.Handle))
