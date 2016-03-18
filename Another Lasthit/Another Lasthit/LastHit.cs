@@ -19,13 +19,13 @@ namespace LastHit
         {
             public Unit Unit { get; set; }
 
-            public List<Ht> HT { get; set; }
+            public List<Ht> Ht { get; set; }
 
             public bool AHealth(Entity unit)
             {
                 if (unit.Handle != Unit.Handle) return false;
-                if (HT.Any(x => x.Health - unit.Health < 10)) return true;
-                HT.Add(new Ht { Health = unit.Health, Time = Game.GameTime });
+                if (Ht.Any(x => x.Health - unit.Health < 10)) return true;
+                Ht.Add(new Ht { Health = unit.Health, Time = Game.GameTime , ACreeps = Attack(unit) });
                 return true;
             }
         }
@@ -33,6 +33,7 @@ namespace LastHit
         {
             public float Health { get; set; }
             public float Time { get; set; }
+            public int ACreeps { get; set; }
         }
 
         private static readonly Menu Menu = new Menu("LastHit", "lasthit", true);
@@ -44,7 +45,7 @@ namespace LastHit
         private static double _aPoint;
         private static int _outrange, _autoAttack, _autoAttackAfterSpell;
         private static bool _isloaded;
-        private static List<DictionaryUnit> Creeps = new List<DictionaryUnit>();
+        private static List<DictionaryUnit> _creeps = new List<DictionaryUnit>();
         private static float _lastRange, _ias, _attackRange;
         private static ParticleEffect _rangeDisplay;
 
@@ -77,45 +78,40 @@ namespace LastHit
 
         private static void Attack_Calc(EventArgs args)
         {
-            if (!_isloaded) return;
+            if (!_isloaded || Game.IsPaused || Game.IsChatOpen) return;
             if (!Menu.Item("test").GetValue<bool>()) return;
             if (!ObjectManager.GetEntities<Unit>().Any(x => x.Distance2D(_me) <= 2000 && x.IsAlive && x.Health > 0)) return;
             var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.Distance2D(_me) <= 2000 && x.IsAlive && x.Health > 0).ToList();
             foreach (var creep in creeps)
             {
-                if (!Creeps.Any(x => x.AHealth(creep)))
+                if (!_creeps.Any(x => x.AHealth(creep)))
                 {
-                    Creeps.Add(new DictionaryUnit { Unit = creep, HT = new List<Ht>() });
+                    _creeps.Add(new DictionaryUnit { Unit = creep, Ht = new List<Ht>() });
                 }
             }
             //if (Utils.SleepCheck("Test"))
             //{
-            //    Game.PrintMessage("!!!", MessageType.ChatMessage);
-            //    foreach (var creep in Creeps)
+            //    foreach (var creep in _creeps)
             //    {
             //        Console.WriteLine("Unit : {0}", creep.Unit.Handle);
-            //        foreach (var ht in creep.HT)
+            //        foreach (var ht in creep.Ht)
             //        {
-            //            Console.WriteLine("Health - time : {0} - {1}", ht.Health, ht.Time);
+            //            Console.WriteLine("Health - time : {0} - {1} - {2}", ht.Health, ht.Time, ht.ACreeps);
             //        }
             //    }
             //    Utils.Sleep(2000, "Test");
             //}
             if (!Utils.SleepCheck("Clear")) return;
             creeps = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive).ToList();
-            var Creeps_temp = new List<DictionaryUnit>();
-            foreach (var creep in creeps)
-            {
-                if (Creeps.Any(x => x.Unit.Handle == creep.Handle))
-                    Creeps_temp.Add(Creeps.Find(x => x.Unit.Handle == creep.Handle));
-            }
-            Creeps = Creeps_temp;
+            _creeps = (from creep in creeps
+                where _creeps.Any(x => x.Unit.Handle == creep.Handle)
+                select _creeps.Find(x => x.Unit.Handle == creep.Handle)).ToList();
             Utils.Sleep(10000, "Clear");
         }
 
-        private static float Attack(Unit unit)
+        private static int Attack(Entity unit)
         {
-            float t = 0;
+            int t = 0;
             var upos = unit.Position;
             try
             {
@@ -137,32 +133,24 @@ namespace LastHit
 
         public static double Healthpredict(Unit unit, double time)
         {
-            if (Creeps.Any(x => x.Unit.Handle == unit.Handle) && Menu.Item("test").GetValue<bool>())
+            if (_creeps.Any(x => x.Unit.Handle == unit.Handle) && Menu.Item("test").GetValue<bool>())
             {
                 try
                 {
-                    var f = true;
-                    float h = 0, t = 0;
-                    List<float> dh = new List<float>(), dt = new List<float>();
-                    foreach (var healthtime in Creeps.First(x => x.Unit.Handle == unit.Handle).HT)
+                    var hta = _creeps.First(x => x.Unit.Handle == unit.Handle).Ht.ToArray();
+                    var length = hta.Length - 1;
+                    if ((hta.Length - hta[length].ACreeps) >= 0)
                     {
-                        if (f)
+                        var aCreeps = hta[length].ACreeps;
+
+                        if (time <=
+                            hta[length - aCreeps + 1].Time -
+                            hta[length - aCreeps].Time)
                         {
-                            h = healthtime.Health;
-                            t = healthtime.Time;
-                            f = false;
-                            //Console.WriteLine("--------------------------------------------------------");
-                        }
-                        else
-                        {
-                            dh.Add(h - healthtime.Health);
-                            dt.Add(healthtime.Time - t);
-                            //Console.WriteLine("Health/Time {0} / {1}", h - healthtime.Health, healthtime.Time - t);
-                            h = healthtime.Health;
-                            t = healthtime.Time;
+                            return hta[length - aCreeps].Health -
+                                   hta[length - aCreeps + 1].Health - 10;
                         }
                     }
-                    return dh.Average() * (time / dt.Average());
                 }
                 catch (Exception)
                 {
@@ -295,22 +283,28 @@ namespace LastHit
                     var time = _me.IsRanged == false
                     ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
                     : _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position) + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
+
+                    var time2 = _me.IsRanged == false
+                    ? _aPoint / 1000
+                    : _aPoint / 1000 + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
+
                     var getDamage = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time));
+                    var getDamage2 = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time2));
                     if (_creepTarget.Distance2D(_me) <= _attackRange)
                     {
-                        if (_creepTarget.Health < getDamage * 2 && _creepTarget.Health >= getDamage &&
-                            _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
-                        {
-                            _me.Hold();
-                            _me.Attack(_creepTarget);
-                            Utils.Sleep(_aPoint + Game.Ping, "stop");
-                        }
-                        else if (_creepTarget.Health < getDamage ||
+                        if (_creepTarget.Health < getDamage ||
                                  (_creepTarget.Health < getDamage && _creepTarget.Team == _me.Team &&
                                   Menu.Item("denied").GetValue<bool>()))
                         {
                             if (!_me.IsAttacking())
                                 _me.Attack(_creepTarget);
+                        }
+                        else if (_creepTarget.Health < getDamage * 2 && _creepTarget.Health >= getDamage &&
+                            _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
+                        {
+                            _me.Hold();
+                            _me.Attack(_creepTarget);
+                            Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
                     }
                     else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
@@ -414,10 +408,10 @@ namespace LastHit
                     ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
                     : _aPoint * 2 / 1000 + _me.GetTurnTime(enemy.Position) + _me.Distance2D(enemy) / GetProjectileSpeed(_me);
                     var damgeprediction = Healthpredict(enemy, time);
-                    var b = (float) Math.Round(damgeprediction * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
+                    var b = (float) Math.Round(damgeprediction * 1 * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
                     var position2 = position + new Vector2(a, 0);
                     Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.YellowGreen);
-                    Drawing.DrawRect(position, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
+                    Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
                 }
             }
             catch (Exception)
@@ -619,7 +613,8 @@ namespace LastHit
                 }
                 if (Menu.Item("test").GetValue<bool>())
                     test = 0;
-                if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2)
+                if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2 &&
+                    minion.Health/minion.MaximumHealth < 0.75)
                 {
                     if (_me.CanAttack())
                         return minion;
@@ -789,6 +784,8 @@ namespace LastHit
             {
                 realDamage = realDamage / 2;
             }
+            if (realDamage > unit.MaximumHealth)
+                realDamage = unit.MaximumHealth;
 
             return realDamage;
         }
@@ -814,7 +811,7 @@ namespace LastHit
             //foreach (var unit in units)
             //{
             //    var upos = Drawing.WorldToScreen(unit.Position);
-            //    Drawing.DrawText(unit.MagicDamageResist + " ", "", new Vector2(upos.X - 40, upos.Y - 20), new Vector2(30), Color.White, FontFlags.Outline);
+            //    Drawing.DrawText(_me.NetworkActivity + " ", "", new Vector2(upos.X - 40, upos.Y - 20), new Vector2(30), Color.White, FontFlags.Outline);
             //}
             //try
             //{
