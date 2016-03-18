@@ -37,9 +37,11 @@ namespace NagaSharp
 
     public class CreepWaves
     {
+        public string Name { get; set; }
         public Hero Illusion { get; set; }
         public List<Unit> Creeps { get; set; }
         public Vector3 Position { get; set; }
+        public List<Vector3> Coords { get; set; }
     }
 
     internal class Program
@@ -55,7 +57,7 @@ namespace NagaSharp
         private static int _creepscount;
         private static Vector3 _stackPosition;
 
-        private static List<CreepWaves> _creepWaves = new List<CreepWaves>();
+        private static readonly List<CreepWaves> CreepWaves = new List<CreepWaves>();
         private static readonly List<JungleCamps> JungleCamps = new List<JungleCamps>();
 
         private static List<Unit> _neutrals;
@@ -65,6 +67,7 @@ namespace NagaSharp
         {
             Game.OnUpdate += Game_OnUpdate;
             Game.OnWndProc += Game_OnWndProc;
+            Drawing.OnDraw += Drawing_OnDraw;
 
             var dict = new Dictionary<string, bool>
             {
@@ -74,20 +77,68 @@ namespace NagaSharp
 
             #region array
 
-            _creepWaves.Add(new CreepWaves
+            CreepWaves.Add(new CreepWaves
             {
+                Name = "Top",
                 Illusion = null,
-                Creeps = new List<Unit>()
+                Creeps = new List<Unit>(),
+                Coords = new List<Vector3>
+                {
+                    new Vector3(-6625, -3070, 383),
+                    new Vector3(-6599, -1813, 373),
+                    new Vector3(-6484, -291, 384),
+                    new Vector3(-6409, 1851, 384),
+                    new Vector3(-6308, 3979, 384),
+                    new Vector3(-5902, 5526, 384),
+                    new Vector3(-4703, 5875, 384),
+                    new Vector3(-2883, 5956, 384),
+                    new Vector3(-954, 6014, 384),
+                    new Vector3(1009, 5922, 384),
+                    new Vector3(2494, 5772, 264),
+                    new Vector3(3395, 5801, 384)
+                }
             });
-            _creepWaves.Add(new CreepWaves
+            CreepWaves.Add(new CreepWaves
             {
+                Name = "Mid",
                 Illusion = null,
-                Creeps = new List<Unit>()
+                Creeps = new List<Unit>(),
+                Coords = new List<Vector3>
+                {
+                new Vector3(-4531, -4160, 384),
+                new Vector3(-3928, -3539, 264),
+                new Vector3(-3334, -2907, 256),
+                new Vector3(-2436, -2076, 255),
+                new Vector3(-1708, -1393, 256),
+                new Vector3(-504, -332, 128),
+                new Vector3(581, 309, 256),
+                new Vector3(1883, 1204, 256),
+                new Vector3(2771, 2034, 256),
+                new Vector3(3377, 2707, 256),
+                new Vector3(4180, 3649, 384)
+                }
             });
-            _creepWaves.Add(new CreepWaves
+            CreepWaves.Add(new CreepWaves
             {
+                Name = "Bot",
                 Illusion = null,
-                Creeps = new List<Unit>()
+                Creeps = new List<Unit>(),
+                Coords = new List<Vector3>
+                { 
+                new Vector3(-3827, -6198, 384),
+                new Vector3(-2897, -6140, 264),
+                new Vector3(-1423, -6323, 312),
+                new Vector3(-460, -6306, 384),
+                new Vector3(1024, -6415, 384),
+                new Vector3(2838, -6249, 384),
+                new Vector3(4827, -5903, 383),
+                new Vector3(5709, -5289, 384),
+                new Vector3(6135, -4057, 384),
+                new Vector3(6190, -2062, 384),
+                new Vector3(6193, -694, 384),
+                new Vector3(6230, 691, 383),
+                new Vector3(6337, 1932, 264),
+                new Vector3(6352, 2922, 384)}
             });
 
             JungleCamps.Add(new JungleCamps
@@ -253,6 +304,24 @@ namespace NagaSharp
             Menu.AddToMainMenu();
         
         }
+
+        private static void Drawing_OnDraw(EventArgs args)
+        {
+            //foreach (var creepWave in CreepWaves)
+            //{
+            //    var pos2 = new Vector2();
+            //    var first = true;
+            //    foreach (var x in creepWave.Coords)
+            //    {
+            //        if (first) pos2 = Drawing.WorldToScreen(x);
+            //        var pos1 = Drawing.WorldToScreen(x);
+            //        Drawing.DrawLine(pos1, pos2, Color.DarkRed);
+            //        pos2 = Drawing.WorldToScreen(x);
+            //        first = false;
+            //    }
+            //}
+        }
+
         public static void Game_OnUpdate(EventArgs args)
         {
             if (!_isloaded)
@@ -262,6 +331,9 @@ namespace NagaSharp
                 {
                     return;
                 }
+                if (_me.Team == Team.Dire)
+                    foreach (var creepWave in CreepWaves)
+                        creepWave.Coords.Reverse();
                 _isloaded = true;
             }
 
@@ -326,56 +398,47 @@ namespace NagaSharp
 
             if (linePush && Utils.SleepCheck("linePush"))
             {
-                    var creeps =
-                    ObjectManager.GetEntities<Creep>()
-                        .Where(
-                            x =>
-                                x.IsAlive && x.IsVisible && x.Team == _me.GetEnemyTeam() && (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                                x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege))
-                                .OrderByDescending(x => x.Distance2D(new Vector3(0,0,0))).ToList();
                 try
                 {
+                    var creeps =
+                        ObjectManager.GetEntities<Unit>()
+                            .Where(
+                                x =>
+                                    x.IsAlive && x.IsVisible && x.Team != _me.Team 
+                                    && (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane 
+                                    || x.ClassID == ClassID.CDOTA_BaseNPC_Creep 
+                                    || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral 
+                                    || x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege 
+                                     ))
+                            .OrderByDescending(x => x.Distance2D(new Vector3(0, 0, 0))).ToList();
+
                     var creepdel = new List<Unit>();
-                    foreach (var creepWave in _creepWaves)
+                    foreach (var creepWave in CreepWaves)
                     {
                         creepdel.AddRange(creepWave.Creeps.Where(creep => creeps.All(x => x.Handle != creep.Handle)));
                         foreach (var creep in creepdel)
                             creepWave.Creeps.Remove(creep);
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Erroe LinePush 1" + e);
-                }
-                try
-                {
-                    foreach (var creepWave in _creepWaves)
+
+                    foreach (var creep in creeps)
                     {
-                        if (creepWave.Creeps.Count == 0)
+                        float[] distance = { float.MaxValue };
+                        var name = "";
+                        foreach (var creepWave in CreepWaves)
                         {
-                            creepWave.Position = creeps.First().Position;
-                            creepWave.Creeps.Add(creeps.First());
-                            creeps.Remove(creeps.First());
-                        }
-                        var creepdel = new List<Creep>();
-                        foreach (var creep in creeps)
-                        {
-                            if (creepWave.Creeps.Any(x => x.Handle == creep.Handle))
+                            foreach (var pos in creepWave.Coords.Where(pos => distance[0] > pos.Distance2D(creep)))
                             {
-                                creepdel.Add(creep);
+                                name = creepWave.Name;
+                                distance[0] = pos.Distance2D(creep);
                             }
-                            if (!(creepWave.Position.Distance2D(creep) < 2000) ||
-                                creepWave.Creeps.Any(x => x.Handle == creep.Handle)) continue;
-                            creepWave.Creeps.Add(creep);
-                            creepdel.Add(creep);
                         }
-                        foreach (var creep in creepdel)
-                            creeps.Remove(creep);
+                        if (CreepWaves.Any(x => x.Name == name && !x.Creeps.Contains(creep)))
+                            CreepWaves.First(x=> x.Name == name && !x.Creeps.Contains(creep)).Creeps.Add(creep);
                     }
-                    foreach (var creepWave in _creepWaves)
+
+                    foreach (var creepWave in CreepWaves)
                     {
+                        if (creepWave.Creeps.Count > 0 )
                         creepWave.Position = new Vector3(
                             creepWave.Creeps.Average(x => x.Position.X),
                             creepWave.Creeps.Average(x => x.Position.Y),
@@ -384,54 +447,79 @@ namespace NagaSharp
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Erroe LinePush 2" + e);
+                    Console.WriteLine("Error LinePush" + e);
                 }
                 //try
                 //{
                 //    if (Utils.SleepCheck("Print"))
                 //    {
-                //        foreach (var creepWave in _creepWaves)
+                //        Console.WriteLine("----------------------------------------");
+                //        foreach (var creepWave in CreepWaves)
                 //        {
-                //            Console.WriteLine("illusion {0} , Position {1} , Count {2}", creepWave.Illusion, creepWave.Position, creepWave.Creeps.Count);
-                //            foreach (var creep in creepWave.Creeps)
-                //                Console.WriteLine(creep.Handle);
+                //            Console.WriteLine("illusion {0} , Position {1} , Count {2}", creepWave.Illusion.Handle,
+                //                creepWave.Position, creepWave.Creeps.Count);
+                //            //foreach (var creep in creepWave.Creeps)
+                //            //    Console.WriteLine(creep.Handle);
                 //        }
-                //        Utils.Sleep(2000, "Print");
+                //        Utils.Sleep(1000, "Print");
                 //    }
                 //}
                 //catch (Exception e)
                 //{
-                //    Console.WriteLine("Erroe LinePush 3" + e);
+                //    Console.WriteLine("Error LinePush 3");
                 //}
 
                 if (_illusions.Count > 0)
                 {
-                    foreach (var creepWave in _creepWaves.Where(creepWave => _illusions.Count > 0))
+                    try
                     {
-                        if (creepWave.Illusion == null)
+                        foreach (var illusion in _illusions)
                         {
-                            creepWave.Illusion = _illusions.First();
-                            creepWave.Illusion.Move(creepWave.Position);
-                            _illusions.Remove(_illusions.First());
+                            if (!CreepWaves.Any(x => x.Illusion!= null && x.Illusion.Handle == illusion.Handle) &&
+                                CreepWaves.Count(x => x.Illusion == null) > 0)
+                                CreepWaves.First(x => x.Illusion == null).Illusion = illusion;
                         }
-                        else if (_illusions.Any(x => x.Handle == creepWave.Illusion.Handle))
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Error LinePush 4");
+                    }
+                    try
+                    {
+                        foreach (var creepWave in CreepWaves.Where(x => x.Illusion != null))
                         {
-                            if (!creepWave.Illusion.IsAttacking() && creepWave.Creeps.Count > 0)
+                            if (GetClosestCreep(creepWave) != null)
                             {
-                                creepWave.Illusion.Attack(GetClosestCreep(_illusions.First(), creepWave.Creeps));
+                                if (creepWave.Illusion.Distance2D(GetClosestWave(creepWave)) < 500
+                                    || creepWave.Illusion.Distance2D(creepWave.Position) < 500)
+                                    creepWave.Illusion.Attack(GetClosestCreep(creepWave));
+                                else
+                                    creepWave.Illusion.Move(creepWave.Position);
                             }
                             else
                             {
-                                creepWave.Illusion.Move(GetClosestCreep(creepWave.Illusion).Position); 
+                                if (creepWave.Illusion.Distance2D(GetClosestWave(creepWave)) > 100)
+                                {
+                                    creepWave.Illusion.Move(GetClosestWave(creepWave));
+                                    creepWave.Position = GetNextWave(creepWave);
+                                }
+                                else
+                                {
+                                    creepWave.Illusion.Move(GetNextWave(creepWave));
+                                    creepWave.Position = GetNextWave(creepWave);
+                                }
                             }
-                        }
-                        else if (_illusions.All(x => x.Handle != creepWave.Illusion.Handle))
-                        {
-                            creepWave.Illusion = null;
+
+                            if (!creepWave.Illusion.IsAlive)
+                                creepWave.Illusion = null;
                         }
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error LinePush 5" + e);
+                    }
                 }
-                Utils.Sleep(1000, "linePush");
+                Utils.Sleep(500, "linePush");
             }
             #endregion
 
@@ -629,29 +717,62 @@ namespace NagaSharp
             return 0;
         }
 
-        private static Unit GetClosestCreep(Entity hero)
+        private static Vector3 GetClosestWave(CreepWaves creepWave)
         {
-            Unit closest = null;
-            float[] distance = { float.MaxValue };
-            var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.Team == _me.Team && x.IsAlive && hero.Distance2D(x) <= 2000);
-            foreach (var creep in creeps.Where(creep => distance[0] > hero.Distance2D(creep.Position)))
+            var pos = new Vector3();
+            try
             {
-                distance[0] = hero.Distance2D(creep.Position);
-                closest = creep;
+                float[] distance = { float.MaxValue };
+                foreach (var position in creepWave.Coords)
+                {
+                    if (!(position.Distance2D(creepWave.Position) < distance[0])) continue;
+                    distance[0] = position.Distance2D(creepWave.Position);
+                    pos = position;
+                }
+                return pos;
             }
-            return closest;
+            catch (Exception)
+            {
+                Console.WriteLine("Error GetClosestWave");
+            }
+            return pos;
         }
 
-        private static Unit GetClosestCreep(Entity hero, IEnumerable<Unit> creeps)
+        private static Vector3 GetNextWave(CreepWaves creepWave)
+        {
+            float[] distance = { float.MaxValue };
+            var p = 0;
+            var coords = creepWave.Coords.ToArray();
+            for (var i = 0; i < coords.Length; i++)
+            {
+                if (coords[i].Distance2D(creepWave.Illusion.Position) < distance[0])
+                {
+                    distance[0] = coords[i].Distance2D(creepWave.Illusion.Position);
+                    p = i + 1 < coords.Length ? i + 1 : i;
+                }
+            }
+            return coords[p];
+        }
+
+        private static Unit GetClosestCreep(CreepWaves creepWave)
         {
             float[] distance = {float.MaxValue};
             Unit closest = null;
-            foreach (var creep in creeps.Where(creep => distance[0] > hero.Distance2D(creep.Position)))
-            {
-                distance[0] = hero.Distance2D(creep.Position);
-                closest = creep;
-            }
-            return closest;
+
+                var creeps = creepWave.Creeps;
+                foreach (var creep in creeps.Where(creep => creep.IsValidTarget() && distance[0] > creepWave.Illusion.Distance2D(creep.Position))
+                    )
+                {
+                    distance[0] = creepWave.Illusion.Distance2D(creep.Position);
+                    closest = creep;
+                }
+            return closest ?? ObjectManager
+                            .GetEntities<Unit>(
+                                ).DefaultIfEmpty(null).FirstOrDefault(
+                                    x => x.IsAlive && x.IsVisible && x.IsValidTarget() && x.Team != _me.Team
+                                    && (x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
+                                    || x.ClassID == ClassID.CDOTA_BaseNPC_Tower
+                                     ) && x.Distance2D(creepWave.Position) < 2000);
         }
 
         private static Unit GetNearestCreepToPull(Hero illusion, int dis)
