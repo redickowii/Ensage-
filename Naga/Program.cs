@@ -490,8 +490,8 @@ namespace NagaSharp
                         {
                             if (GetClosestCreep(creepWave) != null)
                             {
-                                if (creepWave.Illusion.Distance2D(GetClosestWave(creepWave)) < 500
-                                    || creepWave.Illusion.Distance2D(creepWave.Position) < 500)
+                                if (creepWave.Illusion.Distance2D(GetClosestWave(creepWave)) < 300
+                                    || creepWave.Illusion.Distance2D(creepWave.Position) < 1000)
                                     creepWave.Illusion.Attack(GetClosestCreep(creepWave));
                                 else
                                     creepWave.Illusion.Move(creepWave.Position);
@@ -510,7 +510,9 @@ namespace NagaSharp
                                 }
                             }
 
-                            if (!creepWave.Illusion.IsAlive)
+                            if (creepWave.Illusion.Modifiers.Any(
+                                m => m.Name == "modifier_kill" && Math.Abs(m.Duration - m.ElapsedTime - 1) < 0) ||
+                                _illusions.All(x => x.Handle != creepWave.Illusion.Handle))
                                 creepWave.Illusion = null;
                         }
                     }
@@ -767,12 +769,16 @@ namespace NagaSharp
                     closest = creep;
                 }
             return closest ?? ObjectManager
-                            .GetEntities<Unit>(
-                                ).DefaultIfEmpty(null).FirstOrDefault(
-                                    x => x.IsAlive && x.IsVisible && x.IsValidTarget() && x.Team != _me.Team
-                                    && (x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
-                                    || x.ClassID == ClassID.CDOTA_BaseNPC_Tower
-                                     ) && x.Distance2D(creepWave.Position) < 2000);
+                .GetEntities<Unit>(
+                ).Where(
+                    x => x.IsAlive && x.IsVisible && x.IsValidTarget() && x.Team != _me.Team
+                         && (x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Tower
+                             || x.ClassID == ClassID.CDOTA_BaseNPC_Building
+                             ) && x.Distance2D(creepWave.Position) < 2000)
+                .OrderBy(x => x.Distance2D(creepWave.Illusion))
+                .DefaultIfEmpty(null)
+                .FirstOrDefault();
         }
 
         private static Unit GetNearestCreepToPull(Hero illusion, int dis)
