@@ -288,8 +288,9 @@ namespace LastHit
                     if (_creepTarget.Distance2D(_me) <= _attackRange)
                     {
                         if (_creepTarget.Health < getDamage ||
-                                 (_creepTarget.Health < getDamage && _creepTarget.Team == _me.Team &&
-                                  Menu.Item("denied").GetValue<bool>()))
+                            _creepTarget.Health < getDamage && _creepTarget.Team == _me.Team &&
+                            Menu.Item("denied").GetValue<bool>() ||
+                            Menu.Item("AOC").GetValue<bool>() && _creepTarget.Team == _me.Team)
                         {
                             if (!_me.IsAttacking())
                                 _me.Attack(_creepTarget);
