@@ -301,10 +301,6 @@ namespace LastHit
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
-                        else if (_me.IsMoving)
-                        {
-                            _me.Stop();
-                        }
                     }
                     else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
                     {
