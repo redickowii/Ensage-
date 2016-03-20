@@ -19,7 +19,7 @@ namespace NagaSharp
         public Vector3 Position { get; set; }
         public Vector3 StackPosition { get; set; }
         public Vector3 WaitPosition { get; set; }
-        public int Team { get; set; }
+        public Team Team { get; set; }
         public int Id { get; set; }
         public bool Farming { get; set; }
         public int LvlReq { get; set; }
@@ -67,7 +67,6 @@ namespace NagaSharp
         {
             Game.OnUpdate += Game_OnUpdate;
             Game.OnWndProc += Game_OnWndProc;
-            Drawing.OnDraw += Drawing_OnDraw;
 
             var dict = new Dictionary<string, bool>
             {
@@ -146,7 +145,7 @@ namespace NagaSharp
                 Position = new Vector3(-1708, -4284, 256),
                 StackPosition = new Vector3(-1816, -2684, 256),
                 WaitPosition = new Vector3(-1867, -4033, 256),
-                Team = 2,
+                Team = Team.Radiant,
                 Id = 1,
                 Empty = false,
                 Stacked = false,
@@ -157,7 +156,7 @@ namespace NagaSharp
                 Position = new Vector3(-266, -3176, 256),
                 StackPosition = new Vector3(-522, -1351, 256),
                 WaitPosition = new Vector3(-306, -2853, 256),
-                Team = 2,
+                Team = Team.Radiant,
                 Id = 2,
                 Empty = false,
                 Stacked = false,
@@ -168,7 +167,7 @@ namespace NagaSharp
                 Position = new Vector3(1656, -3714, 384),
                 StackPosition = new Vector3(48, -4225, 384),
                 WaitPosition = new Vector3(1637, -4009, 384),
-                Team = 2,
+                Team = Team.Radiant,
                 Id = 3,
                 Empty = false,
                 Stacked = false,
@@ -179,7 +178,7 @@ namespace NagaSharp
                 Position = new Vector3(3016, -4692, 384),
                 StackPosition = new Vector3(3952, -6417, 384),
                 WaitPosition = new Vector3(3146, -5071, 384),
-                Team = 2,
+                Team = Team.Radiant,
                 Id = 4,
                 Empty = false,
                 Stacked = false,
@@ -190,7 +189,7 @@ namespace NagaSharp
                 Position = new Vector3(4474, -3598, 384),
                 StackPosition = new Vector3(2486, -4125, 384),
                 WaitPosition = new Vector3(4121, -3902, 384),
-                Team = 2,
+                Team = Team.Radiant,
                 Id = 5,
                 Empty = false,
                 Stacked = false,
@@ -201,7 +200,7 @@ namespace NagaSharp
                 Position = new Vector3(-3617, 805, 384),
                 StackPosition = new Vector3(-5268, 1400, 384),
                 WaitPosition = new Vector3(-3835, 643, 384),
-                Team = 2,
+                Team = Team.Radiant,
                 Id = 6,
                 Empty = false,
                 Stacked = false,
@@ -212,7 +211,7 @@ namespace NagaSharp
                 Position = new Vector3(-4446, 3541, 384),
                 StackPosition = new Vector3(-3953, 4954, 384),
                 WaitPosition = new Vector3(-4251, 3760, 384),
-                Team = 3,
+                Team = Team.Dire,
                 Id = 7,
                 Empty = false,
                 Stacked = false,
@@ -223,7 +222,7 @@ namespace NagaSharp
                 Position = new Vector3(-2981, 4591, 384),
                 StackPosition = new Vector3(-3248, 5993, 384),
                 WaitPosition = new Vector3(-3050, 4897, 384),
-                Team = 3,
+                Team = Team.Dire,
                 Id = 8,
                 Empty = false,
                 Stacked = false,
@@ -234,7 +233,7 @@ namespace NagaSharp
                 Position = new Vector3(-392, 3652, 384),
                 StackPosition = new Vector3(-224, 5088, 384),
                 WaitPosition = new Vector3(-503, 3955, 384),
-                Team = 3,
+                Team = Team.Dire,
                 Id = 9,
                 Empty = false,
                 Stacked = false,
@@ -245,7 +244,7 @@ namespace NagaSharp
                 Position = new Vector3(-1524, 2641, 256),
                 StackPosition = new Vector3(-1266, 4273, 384),
                 WaitPosition = new Vector3(-1465, 2908, 256),
-                Team = 3,
+                Team = Team.Dire,
                 Id = 10,
                 Empty = false,
                 Stacked = false,
@@ -256,7 +255,7 @@ namespace NagaSharp
                 Position = new Vector3(1098, 3338, 384),
                 StackPosition = new Vector3(910, 5003, 384),
                 WaitPosition = new Vector3(975, 3586, 384),
-                Team = 3,
+                Team = Team.Dire,
                 Id = 11,
                 Empty = false,
                 Stacked = false,
@@ -267,59 +266,45 @@ namespace NagaSharp
                 Position = new Vector3(4141, 554, 384),
                 StackPosition = new Vector3(2987, -2, 384),
                 WaitPosition = new Vector3(3876, 506, 384),
-                Team = 3,
+                Team = Team.Dire,
                 Id = 12,
                 Empty = false,
                 Stacked = false,
                 Starttime = 53
             });
-            JungleCamps.Add(new JungleCamps
-            {
-                Position = new Vector3(-2960, -126, 384),
-                StackPosition = new Vector3(-3850, -1491, 384),
-                WaitPosition = new Vector3(-2777, -230, 384),
-                Team = 2,
-                Id = 13,
-                Empty = false,
-                Stacked = false,
-                Starttime = 53
-            });
-            JungleCamps.Add(new JungleCamps
-            {
-                Position = new Vector3(4000, -700, 256),
-                StackPosition = new Vector3(1713, -134, 256),
-                WaitPosition = new Vector3(3649, -721, 256),
-                Team = 3,
-                Id = 14,
-                Empty = false,
-                Stacked = false,
-                Starttime = 53
-            });
+            //JungleCamps.Add(new JungleCamps
+            //{
+            //    Position = new Vector3(-2960, -126, 384),
+            //    StackPosition = new Vector3(-3850, -1491, 384),
+            //    WaitPosition = new Vector3(-2777, -230, 384),
+            //    Team = Team.Radiant,
+            //    Id = 13,
+            //    Empty = false,
+            //    Stacked = false,
+            //    Ancients = true,
+            //    Starttime = 53
+            //});
+            //JungleCamps.Add(new JungleCamps
+            //{
+            //    Position = new Vector3(4000, -700, 256),
+            //    StackPosition = new Vector3(1713, -134, 256),
+            //    WaitPosition = new Vector3(3649, -721, 256),
+            //    Team = Team.Dire,
+            //    Id = 14,
+            //    Empty = false,
+            //    Stacked = false,
+            //    Ancients = true,
+            //    Starttime = 53
+            //});
        #endregion
 
             Menu.AddItem(new MenuItem("enabledAbilities", "Abilities:").SetValue(new AbilityToggler(dict)));
             Menu.AddItem(new MenuItem("Stack", "Stack").SetValue(new KeyBind('F', KeyBindType.Toggle)));
             Menu.AddItem(new MenuItem("LinePush", "Line Push").SetValue(new KeyBind('G', KeyBindType.Toggle)));
             Menu.AddItem(new MenuItem("FarmJ", "Jungle Farm").SetValue(new KeyBind('H', KeyBindType.Toggle)));
+            //Menu.AddItem(new MenuItem("Ancients", "Stack Ancients").SetValue(false));
             Menu.AddToMainMenu();
         
-        }
-
-        private static void Drawing_OnDraw(EventArgs args)
-        {
-            //foreach (var creepWave in CreepWaves)
-            //{
-            //    var pos2 = new Vector2();
-            //    var first = true;
-            //    foreach (var x in creepWave.Coords)
-            //    {
-            //        if (first) pos2 = Drawing.WorldToScreen(x);
-            //        var pos1 = Drawing.WorldToScreen(x);
-            //        Drawing.DrawLine(pos1, pos2, Color.DarkRed);
-            //        pos2 = Drawing.WorldToScreen(x);
-            //        first = false;
-            //    }
-            //}
         }
 
         public static void Game_OnUpdate(EventArgs args)
@@ -373,6 +358,7 @@ namespace NagaSharp
                     .ToList();
             
             var seconds = ((int)Game.GameTime) % 60;
+
             if (JungleCamps.FindAll(x => x.Illusion != null).Count != _illusions.Count || seconds == 1)
                 {
                 foreach (var camp in JungleCamps)
@@ -394,6 +380,7 @@ namespace NagaSharp
                     camp.State = 0;
                 }
             }
+
             #region linepush
 
             if (linePush && Utils.SleepCheck("linePush"))
@@ -533,8 +520,8 @@ namespace NagaSharp
                 {
                     if (!Check(illusion))
                     {
-                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Illusion = illusion;
-                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Stacking = true;
+                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, true, false).Id).Illusion = illusion;
+                        JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, true, false).Id).Stacking = true;
                     }
                     else
                     {
@@ -555,9 +542,9 @@ namespace NagaSharp
                                     JungleCamps.Find(x => x.Id == illusionCamps.Id).Illusion = null;
                                     JungleCamps.Find(x => x.Id == illusionCamps.Id).Empty = true;
                                     JungleCamps.Find(x => x.Id == illusionCamps.Id).Stacking = false;
-                                    JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Illusion =
+                                    JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, true, false).Id).Illusion =
                                         illusion;
-                                    JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, false, false).Id).Stacking =
+                                    JungleCamps.Find(x => x.Id == GetClosestCamp(illusion, true, false).Id).Stacking =
                                         true;
                                 }
                                 else if (seconds >= illusionCamps.Starttime - 5)
@@ -579,7 +566,7 @@ namespace NagaSharp
                                 if (seconds >= illusionCamps.AttackTime)
                                 {
                                     _closestNeutral = GetNearestCreepToPull(illusionCamps.Illusion, 1200);
-                                    _stackPosition = GetClosestCamp(illusionCamps.Illusion, false, false).StackPosition;
+                                    _stackPosition = GetClosestCamp(illusionCamps.Illusion, true, false).StackPosition;
                                     illusionCamps.Illusion.Attack(_closestNeutral);
                                     illusionCamps.State = 3;
                                     var tWait =
@@ -672,7 +659,22 @@ namespace NagaSharp
             {
                 new JungleCamps {WaitPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue), Id = 0}
             };
-            foreach (var x in JungleCamps.Where(x => illusion.Distance2D(x.WaitPosition) < illusion.Distance2D(closest[0].WaitPosition) && !x.Farming && !x.Stacking && !x.Empty))
+            var Camps =
+                    JungleCamps.Where(
+                        x =>
+                            illusion.Distance2D(x.WaitPosition) < illusion.Distance2D(closest[0].WaitPosition) &&
+                            !x.Farming &&
+                            !x.Stacking && !x.Empty);
+            if (stack)
+            {
+                Camps =
+                JungleCamps.Where(
+                    x =>
+                        illusion.Distance2D(x.WaitPosition) < illusion.Distance2D(closest[0].WaitPosition) &&
+                        !x.Farming &&
+                        !x.Stacking && !x.Empty && x.Team == _me.Team);
+            }
+            foreach (var x in Camps)
             {
                 closest[0] = x;
             }

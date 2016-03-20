@@ -55,20 +55,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ensage">
-      <HintPath>C:\%$Windows_temp%\.%n1%\System\Ensage.dll</HintPath>
+      <HintPath>C:\%$Windows_temp%\555\System\Ensage.dll</HintPath>
     </Reference>
     <Reference Include="Ensage.Common">
-      <HintPath>C:\%$Windows_temp%\.%n1%\System\Ensage.Common.dll</HintPath>
+      <HintPath>C:\%$Windows_temp%\555\System\Ensage.Common.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\%$Windows_temp%\.%n1%\System\Newtonsoft.Json.dll</HintPath>
+      <HintPath>C:\%$Windows_temp%\555\System\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\%$Windows_temp%\.%n1%\System\SharpDX.dll</HintPath>
+      <HintPath>C:\%$Windows_temp%\555\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\%$Windows_temp%\.%n1%\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\%$Windows_temp%\555\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
