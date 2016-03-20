@@ -301,9 +301,9 @@ namespace LastHit
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
                         }
-                        else if (Utils.SleepCheck("stop"))
+                        else if (_me.IsMoving)
                         {
-                            Orbwalking.Orbwalk(_target, 500);
+                            _me.Stop();
                         }
                     }
                     else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
@@ -632,9 +632,7 @@ namespace LastHit
             }
             if (Menu.Item("test").GetValue<bool>())
                 test = 0;
-            Game.PrintMessage(test + " ", MessageType.ChatMessage);
             var percent = minion.Health/minion.MaximumHealth*100;
-            var bools = minion.Health < GetDamageOnUnit(minion, test)*k;
             if (minion.Health < GetDamageOnUnit(minion, test)*k &&
                 (percent < 75 || minion.Health < GetDamageOnUnit(minion, test)) 
                     && !Menu.Item("sapp").GetValue<bool>())
@@ -827,11 +825,9 @@ namespace LastHit
             {
                 Drawhpbar();
             }
-
-            var cpos = Drawing.WorldToScreen(_creepTarget.Position);
-            var hpos = Drawing.WorldToScreen(_me.Position);
-            Drawing.DrawLine(hpos, cpos, Color.Gold);
-
+            //var cpos = Drawing.WorldToScreen(_creepTarget.Position);
+            //var hpos = Drawing.WorldToScreen(_me.Position);
+            //Drawing.DrawLine(hpos, cpos, Color.Gold);
             //try
             //{
             //    //Drawing.DrawText( + " ", "", new Vector2(_me.Position.X, _me.Position.Y),new Vector2(40), Color.AliceBlue, FontFlags.Outline);
