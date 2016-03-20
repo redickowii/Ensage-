@@ -52,7 +52,7 @@ namespace Stack
                 Id = 1,
                 Empty = false,
                 Stacked = false,
-                Starttime = 55
+                Starttime = 56
             });
             Camps.Add(new JungleCamps
             {
@@ -64,7 +64,7 @@ namespace Stack
                 Id = 2,
                 Empty = false,
                 Stacked = false,
-                Starttime = 55
+                Starttime = 56
             });
             Camps.Add(new JungleCamps
             {
@@ -294,7 +294,7 @@ namespace Stack
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
                             creepscount = CreepCount(unit, 800);
-                            var creeps = creepscount > 6 ? creepscount*75/1000 : 0;
+                            var creeps = creepscount >= 6 ? creepscount*75/1000 : 0;
                             float distance = 0;
                             if (unit.AttackRange < unit.Distance2D(closestNeutral))
                             {
@@ -302,8 +302,8 @@ namespace Stack
                             }
                             camp.AttackTime =
                                 (int)
-                                    (camp.Starttime - creeps - unit.GetTurnTime(camp.StackPosition) -
-                                     distance - (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0));
+                                    Math.Round(camp.Starttime - creeps - distance -
+                                               (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0));
                             camp.State = 3;
                             unit.Move(PositionCalc(unit, closestNeutral));
                         }
@@ -313,13 +313,7 @@ namespace Stack
                         if (_seconds >= camp.AttackTime)
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
-                            float distance = 0;
-                            if (unit.AttackRange < unit.Distance2D(closestNeutral))
-                            {
-                                distance = (unit.Distance2D(closestNeutral) - unit.AttackRange)/unit.MovementSpeed;
-                            }
-                            var tWait = (distance + (unit.IsRanged ? unit.SecondsPerAttack - unit.BaseAttackTime/3 : 0))*
-                                        1000 + Game.Ping;
+                            var tWait = (unit.SecondsPerAttack - unit.BaseAttackTime/3) * 1000 + Game.Ping;
                             unit.Attack(closestNeutral);
                             Utils.Sleep(tWait, "twait" + unit.Handle);
                             camp.State = 4;
