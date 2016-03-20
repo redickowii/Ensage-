@@ -561,7 +561,6 @@ namespace LastHit
         {
             try
             {
-                var attackRange = source.GetAttackRange();
                 var lowestHp =
                     ObjectManager.GetEntities<Unit>()
                         .Where(
@@ -575,7 +574,7 @@ namespace LastHit
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                                  || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                                 && x.Distance2D(source) < attackRange + _outrange)
+                                 && x.Distance2D(source) < _attackRange + _outrange)
                         .OrderBy(creep => creep.Health)
                         .DefaultIfEmpty(null)
                         .FirstOrDefault();
@@ -621,66 +620,59 @@ namespace LastHit
 
         private static Unit KillableCreep(bool islaneclear, Unit minion, ref bool wait)
         {
-            try
+            var missilespeed = GetProjectileSpeed(_me);
+            var k = _me.IsRanged == false ? 2 : 1.5;
+            var time = _me.IsRanged == false
+                ? 0
+                : _aPoint * 2 + _me.GetTurnTime(minion.Position) + _me.Distance2D(minion) / missilespeed;
+            double test = 0;
+            if (time >= minion.SecondsPerAttack)
             {
-                var missilespeed = GetProjectileSpeed(_me);
-                var k = _me.IsRanged == false ? 2 : 1.5;
-                var time = _me.IsRanged == false
-                    ? 0
-                    : _aPoint * 2 + _me.GetTurnTime(minion.Position) + _me.Distance2D(minion) / missilespeed;
-                double test = 0;
-                if (time >= minion.SecondsPerAttack)
-                {
-                    test = time * minion.AttacksPerSecond * minion.MinimumDamage;
-                }
+                test = minion.MinimumDamage;
+            }
+            if (Menu.Item("test").GetValue<bool>())
+                test = 0;
+            Game.PrintMessage(test + " ", MessageType.ChatMessage);
+            var percent = minion.Health/minion.MaximumHealth*100;
+            var bools = minion.Health < GetDamageOnUnit(minion, test)*k;
+            if (minion.Health < GetDamageOnUnit(minion, test)*k &&
+                (percent < 75 || minion.Health < GetDamageOnUnit(minion, test)) 
+                    && !Menu.Item("sapp").GetValue<bool>())
+            {
+                if (_me.CanAttack())
+                    return minion;
+            }
+            else if (islaneclear)
+            {
+                return minion;
+            }
+
+            else if (Menu.Item("denied").GetValue<bool>())
+            {
+                var minion2 = GetAllLowestHpCreep(_me);
+                test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
                 if (Menu.Item("test").GetValue<bool>())
                     test = 0;
-
-                if (minion.Health < GetDamageOnUnit(_creepTarget, test)*k &&
-                    (minion.Health/minion.MaximumHealth < 0.75 ||
-                        minion.Health < GetDamageOnUnit(_creepTarget, test)) 
-                        && !Menu.Item("sapp").GetValue<bool>())
+                if (minion2.Health < GetDamageOnUnit(minion2, test)*k*0.75 &&
+                    minion2.Health <= minion2.MaximumHealth/2 &&
+                    minion2.Team == _me.Team)
                 {
                     if (_me.CanAttack())
-                        return minion;
+                        return minion2;
                 }
-                else if (islaneclear)
-                {
-                    return minion;
-                }
-
-                else if (Menu.Item("denied").GetValue<bool>())
-                {
-                    var minion2 = GetAllLowestHpCreep(_me);
-                    test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                    if (Menu.Item("test").GetValue<bool>())
-                        test = 0;
-                    if (minion2.Health < GetDamageOnUnit(minion2, test)*k*0.75 &&
-                        minion2.Health <= minion2.MaximumHealth/2 &&
-                        minion2.Team == _me.Team)
-                    {
-                        if (_me.CanAttack())
-                            return minion2;
-                    }
-                }
-
-                else if(!Menu.Item("AOC").GetValue<bool>()) return null;
-                {
-                    var minion2 = GetAllLowestHpCreep(_me);
-                    test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                    if (Menu.Item("test").GetValue<bool>())
-                        test = 0;
-                    if (minion2.Health <= minion2.MaximumHealth / 2
-                        && minion2.Health > GetDamageOnUnit(minion2, test) * k * 0.25
-                        && minion2.Team == _me.Team)
-                        if (_me.CanAttack())
-                            return minion2;
-                }
-                return null;
             }
-            catch (Exception)
+
+            else if(!Menu.Item("AOC").GetValue<bool>()) return null;
             {
-                //
+                var minion2 = GetAllLowestHpCreep(_me);
+                test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
+                if (Menu.Item("test").GetValue<bool>())
+                    test = 0;
+                if (minion2.Health <= minion2.MaximumHealth / 2
+                    && minion2.Health > GetDamageOnUnit(minion2, test) * k * 0.25
+                    && minion2.Team == _me.Team)
+                    if (_me.CanAttack())
+                        return minion2;
             }
             return null;
         }
@@ -812,8 +804,8 @@ namespace LastHit
             {
                 realDamage = realDamage / 2;
             }
-            if (realDamage > unit.MaximumHealth)
-                realDamage = unit.Health + 10;
+            //if (realDamage > unit.MaximumHealth)
+            //    realDamage = unit.Health + 10;
 
             return realDamage;
         }
@@ -836,9 +828,9 @@ namespace LastHit
                 Drawhpbar();
             }
 
-            //var cpos = Drawing.WorldToScreen(_creepTarget.Position);
-            //var hpos = Drawing.WorldToScreen(_me.Position);
-            //Drawing.DrawLine(hpos, cpos, Color.Gold);
+            var cpos = Drawing.WorldToScreen(_creepTarget.Position);
+            var hpos = Drawing.WorldToScreen(_me.Position);
+            Drawing.DrawLine(hpos, cpos, Color.Gold);
 
             //try
             //{
