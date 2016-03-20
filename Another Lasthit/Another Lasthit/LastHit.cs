@@ -399,7 +399,7 @@ namespace LastHit
                     hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(creep) / 2;
                     hbarpos.Y = start.Y;
                     var hpvarx = hbarpos.X;
-                    var a = Math.Floor(damge * HUDInfo.GetHPBarSizeX(creep) / creep.MaximumHealth);
+                    var a = (float)Math.Floor(damge * HUDInfo.GetHPBarSizeX(creep) / creep.MaximumHealth);
                     var position = hbarpos + new Vector2(hpvarx * hpperc + 10, -12);
                     if (creep.ClassID == ClassID.CDOTA_BaseNPC_Tower)
                     {
