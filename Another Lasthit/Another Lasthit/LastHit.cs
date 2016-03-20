@@ -294,12 +294,19 @@ namespace LastHit
                             if (!_me.IsAttacking())
                                 _me.Attack(_creepTarget);
                         }
-                        else if (_creepTarget.Health < getDamage*2 && _creepTarget.Health >= getDamage &&
+                        else if (_creepTarget.Health < getDamage*2 && _creepTarget.Health >= getDamage + 50 &&
                                  _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
                             _me.Hold();
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
+                        }
+                        else if (_creepTarget.Health < getDamage + 50 && _creepTarget.Health >= getDamage &&
+                        _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
+                        {
+                            _me.Hold();
+                            _me.Attack(_creepTarget);
+                            Utils.Sleep(_aPoint*9/5 + Game.Ping, "stop");
                         }
                     }
                     else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
@@ -391,7 +398,7 @@ namespace LastHit
                     hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(creep) / 2;
                     hbarpos.Y = start.Y;
                     var hpvarx = hbarpos.X;
-                    var a = (float) Math.Round(damge * HUDInfo.GetHPBarSizeX(creep) / creep.MaximumHealth);
+                    var a = Math.Floor(damge * HUDInfo.GetHPBarSizeX(creep) / creep.MaximumHealth);
                     var position = hbarpos + new Vector2(hpvarx * hpperc + 10, -12);
                     if (creep.ClassID == ClassID.CDOTA_BaseNPC_Tower)
                     {
@@ -616,57 +623,50 @@ namespace LastHit
 
         private static Unit KillableCreep(bool islaneclear, Unit minion, ref bool wait)
         {
-            var missilespeed = GetProjectileSpeed(_me);
-            var k = _me.IsRanged == false ? 2 : 1.5;
-            var time = _me.IsRanged == false
-                ? 0
-                : _aPoint * 2 + _me.GetTurnTime(minion.Position) + _me.Distance2D(minion) / missilespeed;
-            double test = 0;
-            if (time >= minion.SecondsPerAttack)
+            try
             {
-                test = minion.MinimumDamage;
-            }
-            if (Menu.Item("test").GetValue<bool>())
-                test = 0;
-            var percent = minion.Health/minion.MaximumHealth*100;
-            if (minion.Health < GetDamageOnUnit(minion, test)*k &&
-                (percent < 75 || minion.Health < GetDamageOnUnit(minion, test)) 
-                    && !Menu.Item("sapp").GetValue<bool>())
-            {
-                if (_me.CanAttack())
-                    return minion;
-            }
-            else if (islaneclear)
-            {
-                return minion;
-            }
-
-            else if (Menu.Item("denied").GetValue<bool>())
-            {
-                var minion2 = GetAllLowestHpCreep(_me);
-                test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                if (Menu.Item("test").GetValue<bool>())
-                    test = 0;
-                if (minion2.Health < GetDamageOnUnit(minion2, test)*k*0.75 &&
-                    minion2.Health <= minion2.MaximumHealth/2 &&
-                    minion2.Team == _me.Team)
+                var time = _me.IsRanged == false
+                ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
+                : _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position) + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
+                var percent = minion.Health / minion.MaximumHealth * 100;
+                if (minion.Health < GetDamageOnUnit(minion, 0) * 2 &&
+                    (percent < 75 || minion.Health < GetDamageOnUnit(minion, 0))
+                        && !Menu.Item("sapp").GetValue<bool>())
                 {
                     if (_me.CanAttack())
-                        return minion2;
+                        return minion;
                 }
-            }
+                else if (islaneclear)
+                {
+                    return minion;
+                }
 
-            else if(!Menu.Item("AOC").GetValue<bool>()) return null;
+                if (Menu.Item("denied").GetValue<bool>())
+                {
+                    var minion2 = GetAllLowestHpCreep(_me);
+                    if (minion2.Health <= GetDamageOnUnit(minion2, 0) * 1.5 &&
+                        minion2.Health <= minion2.MaximumHealth / 2 &&
+                        minion2.Team == _me.Team)
+                    {
+                        if (_me.CanAttack())
+                            return minion2;
+                    }
+                }
+
+                if (!Menu.Item("AOC").GetValue<bool>()) return null;
+                {
+                    var minion2 = GetAllLowestHpCreep(_me);
+                    if (minion2.Health <= minion2.MaximumHealth / 2
+                        && minion2.Health > GetDamageOnUnit(minion2, 0) * 1.5
+                        && minion2.Team == _me.Team)
+                        if (_me.CanAttack())
+                            return minion2;
+                }
+                return null;
+            }
+            catch (Exception)
             {
-                var minion2 = GetAllLowestHpCreep(_me);
-                test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
-                if (Menu.Item("test").GetValue<bool>())
-                    test = 0;
-                if (minion2.Health <= minion2.MaximumHealth / 2
-                    && minion2.Health > GetDamageOnUnit(minion2, test) * k * 0.25
-                    && minion2.Team == _me.Team)
-                    if (_me.CanAttack())
-                        return minion2;
+                //
             }
             return null;
         }
