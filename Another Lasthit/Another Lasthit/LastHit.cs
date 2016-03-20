@@ -59,6 +59,7 @@ namespace LastHit
             Menu.AddItem(new MenuItem("kitekey", "Kite mode").SetValue(new KeyBind('H', KeyBindType.Press)));
             Menu.AddItem(new MenuItem("bonuswindup", "Bonus WindUp time on kitting").SetValue(new Slider(500, 100, 2000)));
             Menu.AddItem(new MenuItem("hpleftcreep", "Mark hp ?").SetValue(true));
+            Menu.AddItem(new MenuItem("sapp", "Sapport").SetValue(false));
             Menu.AddItem(new MenuItem("usespell", "Use spell ?").SetValue(true));
             Menu.AddItem(new MenuItem("harassheroes", "Harass in lasthit mode ?").SetValue(true));
             Menu.AddItem(new MenuItem("denied", "Deny creep ?").SetValue(true));
@@ -283,13 +284,7 @@ namespace LastHit
                     var time = _me.IsRanged == false
                     ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
                     : _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position) + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
-
-                    var time2 = _me.IsRanged == false
-                    ? _aPoint / 1000
-                    : _aPoint / 1000 + _me.Distance2D(_creepTarget) / GetProjectileSpeed(_me);
-
                     var getDamage = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time));
-                    var getDamage2 = GetDamageOnUnit(_creepTarget, Healthpredict(_creepTarget, time2));
                     if (_creepTarget.Distance2D(_me) <= _attackRange)
                     {
                         if (_creepTarget.Health < getDamage ||
@@ -299,12 +294,16 @@ namespace LastHit
                             if (!_me.IsAttacking())
                                 _me.Attack(_creepTarget);
                         }
-                        else if (_creepTarget.Health < getDamage * 2 && _creepTarget.Health >= getDamage &&
-                            _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
+                        else if (_creepTarget.Health < getDamage*2 && _creepTarget.Health >= getDamage &&
+                                 _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
                             _me.Hold();
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
+                        }
+                        else if (Utils.SleepCheck("stop"))
+                        {
+                            Orbwalking.Orbwalk(_target, 500);
                         }
                     }
                     else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
@@ -361,7 +360,7 @@ namespace LastHit
         {
             try
             {
-                var enemies =
+                var creeps =
                 ObjectManager.GetEntities<Unit>()
                     .Where(
                         x =>
@@ -373,45 +372,67 @@ namespace LastHit
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Building
                              || x.ClassID == ClassID.CDOTA_BaseNPC_Creature) && x.IsAlive && x.IsVisible
-                            && x.Team != _me.Team && x.Distance2D(_me) < _attackRange + _outrange);
-                foreach (var enemy in enemies)
+                             && x.Distance2D(_me) < _attackRange + _outrange);
+                foreach (var creep in creeps)
                 {
-                    var health = enemy.Health;
-                    var maxHealth = enemy.MaximumHealth;
+                    if ((Menu.Item("sapp").GetValue<bool>() && _me.Team != creep.Team) ||
+                        (!Menu.Item("sapp").GetValue<bool>() && _me.Team == creep.Team))
+                        continue;
+                    var health = creep.Health;
+                    var maxHealth = creep.MaximumHealth;
                     if (health == maxHealth) continue;
-                    var damge = (float) GetDamageOnUnit(enemy, 0);
-                    var hpleft = health;
-                    var hpperc = hpleft / maxHealth;
+                    var damge = (float) GetDamageOnUnit(creep, 0);
+                    var hpperc = health / maxHealth;
 
-                    var hbarpos = HUDInfo.GetHPbarPosition(enemy);
+                    var hbarpos = HUDInfo.GetHPbarPosition(creep);
 
                     Vector2 screenPos;
-                    var enemyPos = enemy.Position + new Vector3(0, 0, enemy.HealthBarOffset);
+                    var enemyPos = creep.Position + new Vector3(0, 0, creep.HealthBarOffset);
                     if (!Drawing.WorldToScreen(enemyPos, out screenPos)) continue;
 
                     var start = screenPos;
 
-                    hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(enemy) / 2;
+                    hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(creep) / 2;
                     hbarpos.Y = start.Y;
                     var hpvarx = hbarpos.X;
-                    var a = (float) Math.Round(damge * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
+                    var a = (float) Math.Round(damge * HUDInfo.GetHPBarSizeX(creep) / creep.MaximumHealth);
                     var position = hbarpos + new Vector2(hpvarx * hpperc + 10, -12);
+                    if (creep.ClassID == ClassID.CDOTA_BaseNPC_Tower)
+                    {
+                        hbarpos.Y = start.Y - HUDInfo.GetHpBarSizeY(creep) * 6;
+                        position = hbarpos + new Vector2(hpvarx * hpperc - 5, -1);
+                    }
+                    else if (creep.ClassID == ClassID.CDOTA_BaseNPC_Barracks)
+                    {
+                        hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(creep);
+                        hbarpos.Y = start.Y - HUDInfo.GetHpBarSizeY(creep) * 6;
+                        position = hbarpos + new Vector2(hpvarx * hpperc + 10, -1);
+                    }
+                    else if (creep.ClassID == ClassID.CDOTA_BaseNPC_Building)
+                    {
+                        hbarpos.X = start.X - HUDInfo.GetHPBarSizeX(creep) /2;
+                        hbarpos.Y = start.Y - HUDInfo.GetHpBarSizeY(creep);
+                        position = hbarpos + new Vector2(hpvarx * hpperc + 10, -1);
+                    }
+
                     Drawing.DrawRect(
                         position,
-                        new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4),
-                        enemy.Health > damge
-                            ? enemy.Health > damge * 2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
+                        new Vector2(a, HUDInfo.GetHpBarSizeY(creep) - 4),
+                        creep.Health > damge
+                            ? creep.Health > damge * 2 ? new Color(180, 205, 205, 40) : new Color(255, 0, 0, 60)
                             : new Color(127, 255, 0, 80));
-                    Drawing.DrawRect(position, new Vector2(a, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
+                    Drawing.DrawRect(position, new Vector2(a, HUDInfo.GetHpBarSizeY(creep) - 4), Color.Black, true);
+
+
                     if (!Menu.Item("test").GetValue<bool>()) continue;
                     var time = _me.IsRanged == false
                     ? _aPoint * 2 / 1000 + _me.GetTurnTime(_creepTarget.Position)
-                    : _aPoint * 2 / 1000 + _me.GetTurnTime(enemy.Position) + _me.Distance2D(enemy) / GetProjectileSpeed(_me);
-                    var damgeprediction = Healthpredict(enemy, time);
-                    var b = (float) Math.Round(damgeprediction * 1 * HUDInfo.GetHPBarSizeX(enemy) / enemy.MaximumHealth);
+                    : _aPoint * 2 / 1000 + _me.GetTurnTime(creep.Position) + _me.Distance2D(creep) / GetProjectileSpeed(_me);
+                    var damgeprediction = Healthpredict(creep, time);
+                    var b = (float) Math.Round(damgeprediction * 1 * HUDInfo.GetHPBarSizeX(creep) / creep.MaximumHealth);
                     var position2 = position + new Vector2(a, 0);
-                    Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.YellowGreen);
-                    Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(enemy) - 4), Color.Black, true);
+                    Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(creep) - 4), Color.YellowGreen);
+                    Drawing.DrawRect(position2, new Vector2(b, HUDInfo.GetHpBarSizeY(creep) - 4), Color.Black, true);
                 }
             }
             catch (Exception)
@@ -603,6 +624,7 @@ namespace LastHit
             try
             {
                 var missilespeed = GetProjectileSpeed(_me);
+                var k = _me.IsRanged == false ? 2 : 1.5;
                 var time = _me.IsRanged == false
                     ? 0
                     : _aPoint * 2 + _me.GetTurnTime(minion.Position) + _me.Distance2D(minion) / missilespeed;
@@ -613,42 +635,48 @@ namespace LastHit
                 }
                 if (Menu.Item("test").GetValue<bool>())
                     test = 0;
-                if (minion.Health < GetDamageOnUnit(_creepTarget, test) * 2 &&
-                    minion.Health/minion.MaximumHealth < 0.75)
+
+                if (minion.Health < GetDamageOnUnit(_creepTarget, test)*k &&
+                    (minion.Health/minion.MaximumHealth < 0.75 ||
+                        minion.Health < GetDamageOnUnit(_creepTarget, test)) 
+                        && !Menu.Item("sapp").GetValue<bool>())
                 {
                     if (_me.CanAttack())
                         return minion;
                 }
-                if (islaneclear)
+                else if (islaneclear)
                 {
                     return minion;
                 }
 
-                if (Menu.Item("denied").GetValue<bool>())
+                else if (Menu.Item("denied").GetValue<bool>())
                 {
                     var minion2 = GetAllLowestHpCreep(_me);
                     test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
                     if (Menu.Item("test").GetValue<bool>())
                         test = 0;
-                    if (minion2.Health < GetDamageOnUnit(minion2, test) * 1.5 && minion2.Team == _me.Team)
+                    if (minion2.Health < GetDamageOnUnit(minion2, test)*k*0.75 &&
+                        minion2.Health <= minion2.MaximumHealth/2 &&
+                        minion2.Team == _me.Team)
                     {
                         if (_me.CanAttack())
                             return minion2;
                     }
                 }
 
-                if (!Menu.Item("AOC").GetValue<bool>()) return null;
+                else if(!Menu.Item("AOC").GetValue<bool>()) return null;
                 {
                     var minion2 = GetAllLowestHpCreep(_me);
                     test = time * minion2.AttacksPerSecond * minion2.MinimumDamage;
                     if (Menu.Item("test").GetValue<bool>())
                         test = 0;
-                    if (!(minion2.Health > GetDamageOnUnit(minion2, test)) ||
-                        minion2.Health >= minion2.MaximumHealth / 2 || minion2.Team != _me.Team)
-                        return null;
-                    if (_me.CanAttack())
-                        return minion2;
+                    if (minion2.Health <= minion2.MaximumHealth / 2
+                        && minion2.Health > GetDamageOnUnit(minion2, test) * k * 0.25
+                        && minion2.Team == _me.Team)
+                        if (_me.CanAttack())
+                            return minion2;
                 }
+                return null;
             }
             catch (Exception)
             {
@@ -785,7 +813,7 @@ namespace LastHit
                 realDamage = realDamage / 2;
             }
             if (realDamage > unit.MaximumHealth)
-                realDamage = unit.MaximumHealth;
+                realDamage = unit.Health + 10;
 
             return realDamage;
         }
@@ -807,12 +835,11 @@ namespace LastHit
             {
                 Drawhpbar();
             }
-            //var units = ObjectManager.GetEntities<Unit>().Where(x => x.Distance2D(_me) < 1000);
-            //foreach (var unit in units)
-            //{
-            //    var upos = Drawing.WorldToScreen(unit.Position);
-            //    Drawing.DrawText(_me.NetworkActivity + " ", "", new Vector2(upos.X - 40, upos.Y - 20), new Vector2(30), Color.White, FontFlags.Outline);
-            //}
+
+            //var cpos = Drawing.WorldToScreen(_creepTarget.Position);
+            //var hpos = Drawing.WorldToScreen(_me.Position);
+            //Drawing.DrawLine(hpos, cpos, Color.Gold);
+
             //try
             //{
             //    //Drawing.DrawText( + " ", "", new Vector2(_me.Position.X, _me.Position.Y),new Vector2(40), Color.AliceBlue, FontFlags.Outline);
