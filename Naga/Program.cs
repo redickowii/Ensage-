@@ -160,7 +160,7 @@ namespace NagaSharp
                 Id = 2,
                 Empty = false,
                 Stacked = false,
-                Starttime = 55
+                Starttime = 56
             });
             JungleCamps.Add(new JungleCamps
             {
