@@ -295,19 +295,12 @@ namespace LastHit
                             if (!_me.IsAttacking())
                                 _me.Attack(_creepTarget);
                         }
-                        else if (_creepTarget.Health < getDamage*2 && _creepTarget.Health >= getDamage + 50 &&
+                        else if (_creepTarget.Health < getDamage*2 && _creepTarget.Health >= getDamage &&
                                  _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
                         {
                             _me.Hold();
                             _me.Attack(_creepTarget);
                             Utils.Sleep(_aPoint + Game.Ping, "stop");
-                        }
-                        else if (_creepTarget.Health < getDamage + 50 && _creepTarget.Health >= getDamage &&
-                        _creepTarget.Team != _me.Team && Utils.SleepCheck("stop"))
-                        {
-                            _me.Hold();
-                            _me.Attack(_creepTarget);
-                            Utils.Sleep(_aPoint*9/5 + Game.Ping, "stop");
                         }
                     }
                     else if (_me.Distance2D(_creepTarget) >= _attackRange && Utils.SleepCheck("walk"))
