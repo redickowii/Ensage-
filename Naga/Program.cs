@@ -760,9 +760,10 @@ namespace NagaSharp
 
         private static Unit GetClosestCreep(CreepWaves creepWave)
         {
-            float[] distance = {float.MaxValue};
+            float[] distance = { float.MaxValue };
             Unit closest = null;
-
+            try
+            {
                 var creeps = creepWave.Creeps;
                 foreach (var creep in creeps.Where(creep => creep.IsValidTarget() && distance[0] > creepWave.Illusion.Distance2D(creep.Position))
                     )
@@ -770,17 +771,23 @@ namespace NagaSharp
                     distance[0] = creepWave.Illusion.Distance2D(creep.Position);
                     closest = creep;
                 }
-            return closest ?? ObjectManager
-                .GetEntities<Unit>(
-                ).Where(
-                    x => x.IsAlive && x.IsVisible && x.IsValidTarget() && x.Team != _me.Team
-                         && (x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Tower
-                             || x.ClassID == ClassID.CDOTA_BaseNPC_Building
-                             ) && x.Distance2D(creepWave.Position) < 2000)
-                .OrderBy(x => x.Distance2D(creepWave.Illusion))
-                .DefaultIfEmpty(null)
-                .FirstOrDefault();
+                return closest ?? ObjectManager
+                    .GetEntities<Unit>(
+                    ).Where(
+                        x => x.IsAlive && x.IsVisible && x.IsValidTarget() && x.Team != _me.Team
+                             && (x.ClassID == ClassID.CDOTA_BaseNPC_Barracks
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Tower
+                                 || x.ClassID == ClassID.CDOTA_BaseNPC_Building
+                                 ) && x.Distance2D(creepWave.Position) < 2000)
+                    .OrderBy(x => x.Distance2D(creepWave.Illusion))
+                    .DefaultIfEmpty(null)
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                //
+            }
+            return closest;
         }
 
         private static Unit GetNearestCreepToPull(Hero illusion, int dis)
