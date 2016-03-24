@@ -278,6 +278,7 @@ namespace Stack
                 camp.Unit = null;
                 camp.State = 0;
             }
+            if (!Camps.Any(camp => camp.Stacked && camp.Unit != null)) return;
             foreach (var camp in Camps.Where(camp => camp.Stacked && camp.Unit != null))
             {
                 var unit = camp.Unit;
@@ -586,17 +587,17 @@ namespace Stack
             }
         }
 
-        static void Drawing_OnPostReset(EventArgs args)
+        private static void Drawing_OnPostReset(EventArgs args)
         {
             _text.OnResetDevice();
         }
 
-        static void Drawing_OnPreReset(EventArgs args)
+        private static void Drawing_OnPreReset(EventArgs args)
         {
             _text.OnLostDevice();
         }
 
-        static void Drawing_OnEndScene(EventArgs args)
+        private static void Drawing_OnEndScene(EventArgs args)
         {
             if (Drawing.Direct3DDevice9 == null || Drawing.Direct3DDevice9.IsDisposed 
                 || !Game.IsInGame || !Menu.Item("Stack").GetValue<KeyBind>().Active)
