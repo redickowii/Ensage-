@@ -41,16 +41,16 @@ namespace Stack
         private static readonly List<JungleCamps> Camps = new List<JungleCamps>();
         private static int _seconds;
         private static Font _text;
+        public static Line _line = new Line(Drawing.Direct3DDevice9);
 
         private static void Main(string[] args)
         {
-
             _text = new Font(
                Drawing.Direct3DDevice9,
                new FontDescription
                {
                    FaceName = "Monospace",
-                   Height = 40,
+                   Height = 35,
                    OutputPrecision = FontPrecision.Default,
                    Quality = FontQuality.ClearType
                });
@@ -251,13 +251,14 @@ namespace Stack
             Drawing.OnPostReset += Drawing_OnPostReset;
             Drawing.OnEndScene += Drawing_OnEndScene;
 
+            Menu.AddItem(new MenuItem("FPS", "More Fps").SetValue(false));
             Menu.AddItem(new MenuItem("Stack", "Stack").SetValue(new KeyBind('F', KeyBindType.Toggle)));
             Menu.AddItem(new MenuItem("drawline", "Draw line?").SetValue(false));
             Menu.AddToMainMenu();
             OnLoadMessage();
             _me = ObjectManager.LocalHero;
         }
-
+        
         private static void Game_Stack(EventArgs args)
         {
             if (!Menu.Item("Stack").GetValue<KeyBind>().Active || !Game.IsInGame || _me == null || Game.IsPaused ||
@@ -522,10 +523,67 @@ namespace Stack
             //}
         }
 
-        public static void DrawShadowText(string stext, int x, int y, Color color, Font f)
+        private static void DrawShadowText(string stext, int x, int y, Color color, Font f)
         {
             f.DrawText(null, stext, x + 1, y + 1, Color.Black);
             f.DrawText(null, stext, x, y, color);
+        }
+
+        private static void DrawFilledBox(float x, float y, float w, float h, Color color)
+        {
+            var vLine = new Vector2[2];
+
+            _line.GLLines = true;
+            _line.Antialias = false;
+            _line.Width = w;
+
+            vLine[0].X = x + w / 2;
+            vLine[0].Y = y;
+            vLine[1].X = x + w / 2;
+            vLine[1].Y = y + h;
+
+            _line.Begin();
+            _line.Draw(vLine, color);
+            _line.End();
+        }
+
+        private static void RoundedRectangle(float x, float y, float w, float h, int iSmooth, Color color)
+        {
+            var pt = new Vector2[4];
+            var vLine = new Vector2[2];
+            // Get all corners 
+            pt[0].X = x + (w - iSmooth);
+            pt[0].Y = y + (h - iSmooth);
+
+            pt[1].X = x + iSmooth;
+            pt[1].Y = y + (h - iSmooth);
+
+            pt[2].X = x + iSmooth;
+            pt[2].Y = y + iSmooth;
+
+            pt[3].X = x + w - iSmooth;
+            pt[3].Y = y + iSmooth;
+
+            DrawFilledBox(x+1, y + iSmooth, w-1, h - iSmooth * 2, color);
+            DrawFilledBox(x + iSmooth, y+1, w - iSmooth * 2, h-1, color);
+            float fDegree = 0;
+            _line.Width = 1;
+            for (var i = 0; i < 4; i++)
+            {
+                for (var k = fDegree; k < fDegree + Math.PI * 2 / 4f; k += (float) (1 * (Math.PI / 180.0f)))
+                {
+                    vLine[0].X = pt[i].X;
+                    vLine[0].Y = pt[i].Y;
+                    vLine[1].X = pt[i].X + (float) (Math.Cos(k) * iSmooth);
+                    vLine[1].Y = pt[i].Y + (float) (Math.Sin(k) * iSmooth);
+                    // Draw quarter circles on every corner
+                    _line.Begin();
+                    _line.Draw(vLine, color);
+                    _line.End();
+                }
+
+                fDegree += (float) (Math.PI * 2) / 4; // quarter circle offset 
+            }
         }
 
         static void Drawing_OnPostReset(EventArgs args)
@@ -554,8 +612,13 @@ namespace Stack
                     text = "✔";
                     color = Color.DarkGreen;
                 }
+                var alpha3 = Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40) ? 50 : 0;
                 if (position.Y < 840 && position.Y > 43)
-                DrawShadowText(text, (int) position.X + 8, (int) position.Y - 3, color, _text);
+                {
+                    if (!Menu.Item("FPS").GetValue<bool>())
+                        RoundedRectangle(position.X, position.Y, 30, 30, 10, new Color(100, 100 + alpha3, 100 - alpha3));
+                    DrawShadowText(text, (int) position.X + 5, (int) position.Y - 4, color, _text);
+                }
             }
         }
 
@@ -576,8 +639,7 @@ namespace Stack
             foreach (var camp in Camps)
             {
                 var position = Drawing.WorldToScreen(camp.Position);
-                var alpha3 = Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40) ? 100 : 0;
-                RoundedRectangle(position.X, position.Y, 40, 40, 10, new Color(100, 100, 100 + alpha3));
+                var alpha3 = Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 30, 30) ? 100 : 0;
                 if (camp.Unit != null && Menu.Item("drawline").GetValue<bool>())
                 {
                     //unittext = camp.Unit.Handle.ToString();
@@ -788,43 +850,5 @@ namespace Stack
             return new Vector3((int) x, (int) y, posA.Z);
         }
 
-        public static void RoundedRectangle(float x, float y, float w, float h, int iSmooth, Color color)
-        {
-            var pt = new Vector2[4];
-
-            // Get all corners 
-            pt[0].X = x + (w - iSmooth);
-            pt[0].Y = y + (h - iSmooth);
-
-            pt[1].X = x + iSmooth;
-            pt[1].Y = y + (h - iSmooth);
-
-            pt[2].X = x + iSmooth;
-            pt[2].Y = y + iSmooth;
-
-            pt[3].X = x + w - iSmooth;
-            pt[3].Y = y + iSmooth;
-
-            // Draw cross 
-            Drawing.DrawRect(new Vector2(x, y + iSmooth), new Vector2(w, h - iSmooth*2), color);
-
-            Drawing.DrawRect(new Vector2(x + iSmooth, y), new Vector2(w - iSmooth*2, h), color);
-
-            float fDegree = 0;
-
-            for (var i = 0; i < 4; i++)
-            {
-                for (var k = fDegree; k < fDegree + Math.PI*2/4f; k += (float) (1*(Math.PI/180.0f)))
-                {
-                    // Draw quarter circles on every corner
-                    Drawing.DrawLine(
-                        new Vector2(pt[i].X, pt[i].Y),
-                        new Vector2(pt[i].X + (float) (Math.Cos(k)*iSmooth), pt[i].Y + (float) (Math.Sin(k)*iSmooth)),
-                        color);
-                }
-
-                fDegree += (float) (Math.PI*2)/4; // quarter circle offset 
-            }
-        }
     }
 }
