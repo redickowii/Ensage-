@@ -6,6 +6,7 @@ using Ensage.Common;
 using Ensage.Common.Extensions;
 using Ensage.Common.Menu;
 using SharpDX;
+using SharpDX.Direct3D9;
 
 namespace Stack
 {
@@ -39,9 +40,21 @@ namespace Stack
         private static MenuItem _subMenu1, _subMenu0;
         private static readonly List<JungleCamps> Camps = new List<JungleCamps>();
         private static int _seconds;
+        private static Font _text;
 
         private static void Main(string[] args)
         {
+
+            _text = new Font(
+               Drawing.Direct3DDevice9,
+               new FontDescription
+               {
+                   FaceName = "Monospace",
+                   Height = 40,
+                   OutputPrecision = FontPrecision.Default,
+                   Quality = FontQuality.ClearType
+               });
+
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(-1708, -4284, 256),
@@ -69,7 +82,7 @@ namespace Stack
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(1656, -3714, 384),
-                StackPosition = new Vector3(48, -4225, 384),
+                StackPosition = new Vector3(1449, -5699, 384),
                 WaitPosition = new Vector3(1637, -4009, 384),
                 WaitPositionN = new Vector3(1647, -4651, 384),
                 Team = 2,
@@ -81,7 +94,7 @@ namespace Stack
             Camps.Add(new JungleCamps
             {
                 Position = new Vector3(3016, -4692, 384),
-                StackPosition = new Vector3(3952, -6417, 384),
+                StackPosition = new Vector3(5032, -4826, 384),
                 WaitPosition = new Vector3(3146, -5071, 384),
                 WaitPositionN = new Vector3(3088, -5345, 384),
                 Team = 2,
@@ -221,6 +234,9 @@ namespace Stack
             Drawing.OnDraw -= Drawing_OnDraw;
             Game.OnWndProc -= Game_OnWndProc;
             Game.OnUpdate -= Game_Stack;
+            Drawing.OnPreReset -= Drawing_OnPreReset;
+            Drawing.OnPostReset -= Drawing_OnPostReset;
+            Drawing.OnEndScene -= Drawing_OnEndScene;
             _load = false;
         }
 
@@ -231,6 +247,9 @@ namespace Stack
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnWndProc += Game_OnWndProc;
             Game.OnUpdate += Game_Stack;
+            Drawing.OnPreReset += Drawing_OnPreReset;
+            Drawing.OnPostReset += Drawing_OnPostReset;
+            Drawing.OnEndScene += Drawing_OnEndScene;
 
             Menu.AddItem(new MenuItem("Stack", "Stack").SetValue(new KeyBind('F', KeyBindType.Toggle)));
             Menu.AddItem(new MenuItem("drawline", "Draw line?").SetValue(false));
@@ -502,7 +521,39 @@ namespace Stack
             //    }
             //}
         }
+        public static void DrawShadowText(string stext, int x, int y, Color color, Font f)
+        {
+            f.DrawText(null, stext, x + 1, y + 1, Color.Black);
+            f.DrawText(null, stext, x, y, color);
+        }
+        static void Drawing_OnPostReset(EventArgs args)
+        {
+            _text.OnResetDevice();
+        }
 
+        static void Drawing_OnPreReset(EventArgs args)
+        {
+            _text.OnLostDevice();
+        }
+        static void Drawing_OnEndScene(EventArgs args)
+        {
+            if (Drawing.Direct3DDevice9 == null || Drawing.Direct3DDevice9.IsDisposed || !Game.IsInGame)
+                return;
+
+            foreach (var camp in Camps)
+            {
+                var position = Drawing.WorldToScreen(camp.Position);
+                var text = "✖";
+                var color = Color.DarkRed;
+                if (camp.Stacked)
+                {
+                    text = "✔";
+                    color = Color.DarkGreen;
+                }
+                if (position.Y < 840 && position.Y > 43)
+                DrawShadowText(text, (int) position.X + 8, (int) position.Y - 3, color, _text);
+            }
+        }
         private static void Drawing_OnDraw(EventArgs args)
         {
             //try
@@ -521,26 +572,20 @@ namespace Stack
                 var position = Drawing.WorldToScreen(camp.Position);
                 var alpha3 = Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40) ? 100 : 0;
                 RoundedRectangle(position.X, position.Y, 40, 40, 10, new Color(100, 100, 100 + alpha3));
-                var text = "✖";
-                var unittext = "Null";
-                var color = Color.DarkRed;
-                if (camp.Stacked)
-                {
-                    text = "✔";
-                    color = Color.DarkGreen;
-                }
                 if (camp.Unit != null && Menu.Item("drawline").GetValue<bool>())
                 {
-                    unittext = camp.Unit.Handle.ToString();
-                    Drawing.DrawLine(position, Drawing.WorldToScreen(camp.Unit.Position), Color.Black);
+                    //unittext = camp.Unit.Handle.ToString();
+                    Drawing.DrawLine(position, Drawing.WorldToScreen(camp.Unit.Position), Color.GreenYellow);
                     //Drawing.DrawText(camp.Unit.ClassID.ToString(), "", new Vector2(position.X + 38, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
                 }
-                Drawing.DrawText(text, "", new Vector2(position.X + 8, position.Y - 3), new Vector2(40), color,
-                    FontFlags.Outline);
+                //Drawing.DrawText(text, "", new Vector2(position.X + 8, position.Y - 3), new Vector2(40), color,
+                //    FontFlags.Outline);
                 //Drawing.DrawLine(position, Drawing.WorldToScreen(camp.WaitPosition), Color.DarkRed);
                 //Drawing.DrawLine(Drawing.WorldToScreen(camp.StackPosition), Drawing.WorldToScreen(camp.WaitPosition), Color.DarkRed);
                 //Drawing.DrawLine(Drawing.WorldToScreen(camp.WaitPositionN), Drawing.WorldToScreen(camp.WaitPosition), Color.DarkGreen);
                 //Drawing.DrawText(camp.Id.ToString(), "", new Vector2(position.X - 20, position.Y - 3), new Vector2(40), color, FontFlags.Outline);
+                //var mposition = Game.MouseScreenPosition;
+                //Drawing.DrawText(mposition.ToString(), "", new Vector2(mposition.X - 20, mposition.Y - 3), new Vector2(40), Color.DarkGreen, FontFlags.Outline);
             }
         }
 
