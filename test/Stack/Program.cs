@@ -521,11 +521,13 @@ namespace Stack
             //    }
             //}
         }
+
         public static void DrawShadowText(string stext, int x, int y, Color color, Font f)
         {
             f.DrawText(null, stext, x + 1, y + 1, Color.Black);
             f.DrawText(null, stext, x, y, color);
         }
+
         static void Drawing_OnPostReset(EventArgs args)
         {
             _text.OnResetDevice();
@@ -535,9 +537,11 @@ namespace Stack
         {
             _text.OnLostDevice();
         }
+
         static void Drawing_OnEndScene(EventArgs args)
         {
-            if (Drawing.Direct3DDevice9 == null || Drawing.Direct3DDevice9.IsDisposed || !Game.IsInGame)
+            if (Drawing.Direct3DDevice9 == null || Drawing.Direct3DDevice9.IsDisposed 
+                || !Game.IsInGame || !Menu.Item("Stack").GetValue<KeyBind>().Active)
                 return;
 
             foreach (var camp in Camps)
@@ -554,6 +558,7 @@ namespace Stack
                 DrawShadowText(text, (int) position.X + 8, (int) position.Y - 3, color, _text);
             }
         }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             //try
@@ -567,6 +572,7 @@ namespace Stack
             //catch (Exception)
             //{
             //}
+            if (!Menu.Item("Stack").GetValue<KeyBind>().Active) return;
             foreach (var camp in Camps)
             {
                 var position = Drawing.WorldToScreen(camp.Position);
