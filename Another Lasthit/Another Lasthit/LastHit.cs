@@ -175,8 +175,8 @@ namespace LastHit
                     return;
                 }
                 // Auto Attack Checker
-                _autoAttackAfterSpell = Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt();
-                _autoAttack = Game.GetConsoleVar("dota_player_units_auto_attack").GetInt();
+                //_autoAttackAfterSpell = Game.GetConsoleVar("dota_player_units_auto_attack_after_spell").GetInt();
+                //_autoAttack = Game.GetConsoleVar("dota_player_units_auto_attack").GetInt();
                 // Auto Attack Checker
                 _lastRange = _me.GetAttackRange();
                 _isloaded = true;
@@ -274,7 +274,7 @@ namespace LastHit
 
             if (Game.IsKeyDown(Menu.Item("harass").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
-                Autoattack(0, 0);
+                //Autoattack(0, 0);
                 _creepTarget = GetLowestHpCreep(_me, null);
                 _creepTarget = KillableCreep(false, _creepTarget, ref wait);
                 if (Menu.Item("usespell").GetValue<bool>() && Utils.SleepCheck("cooldown"))
@@ -326,7 +326,7 @@ namespace LastHit
             }
             else if (Game.IsKeyDown(Menu.Item("farmKey").GetValue<KeyBind>().Key) && Utils.SleepCheck("cast"))
             {
-                Autoattack(0, 0);
+                //Autoattack(0, 0);
                 _creepTarget = GetLowestHpCreep(_me, null);
                 _creepTarget = KillableCreep(true, _creepTarget, ref wait);
                 if (_creepTarget != null && _creepTarget.IsValid && _creepTarget.IsVisible && _creepTarget.IsAlive)
@@ -349,7 +349,7 @@ namespace LastHit
             }
             else
             {
-                Autoattack(_autoAttack, _autoAttackAfterSpell);
+                //Autoattack(_autoAttack, _autoAttackAfterSpell);
             }
         }
 
