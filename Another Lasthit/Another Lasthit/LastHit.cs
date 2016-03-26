@@ -207,10 +207,10 @@ namespace LastHit
                 _target = null;
             }
 
-            _q = _me.Spellbook.SpellQ;
-            _w = _me.Spellbook.SpellW;
-            _e = _me.Spellbook.SpellE;
-            _r = _me.Spellbook.SpellR;
+            _q = _me.Spellbook.Spell1;
+            _w = _me.Spellbook.Spell2;
+            _e = _me.Spellbook.Spell3;
+            _r = _me.Spellbook.Spell4;
             double apoint = 0;
             apoint = _me.ClassID == ClassID.CDOTA_Unit_Hero_ArcWarden
                 ? 0.3
