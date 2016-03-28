@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
 using Ensage.Common.Menu;
-using Ensage.Common.Objects;
 using SharpDX;
-using SharpDX.Direct3D9;
 
 namespace LastHit
 {
@@ -1094,8 +1091,7 @@ namespace LastHit
                             .First(x => x.ClassID == ClassID.CDOTA_Unit_Hero_Bloodseeker)
                             .Spellbook.Spell1.Level - 1)*0.05 + 1.25;
             }
-
-            if (_summonsUnits.Any(x => x.Handle != unit.Handle))
+            if (_summonsUnits!= null && _summonsUnits.Any(x => x.Handle != unit.Handle))
             {
                 if (_creepTarget == null || (_creepTarget.Handle != _creepTargetS.Handle && _me.Handle != unit.Handle))
                 {
@@ -1139,6 +1135,7 @@ namespace LastHit
             }
             if (realDamage > minion.MaximumHealth)
                 realDamage = minion.Health + 10;
+            
             return realDamage;
         }
 
