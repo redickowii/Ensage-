@@ -46,7 +46,7 @@ namespace LastHit
         private static Hero _me;
         private static Ability _q, _w, _e, _r;
         private static double _aPoint;
-        private static int _outrange, _autoAttack, _stringList, _i;
+        private static int _outrange, _autoAttack = 1, _stringList = 0, _i;
         private static bool _isloaded, _check = true, _checkAA = false;
         private static List<DictionaryUnit> _creeps = new List<DictionaryUnit>();
         private static float _lastRange, _ias, _attackRange;
