@@ -75,7 +75,7 @@ namespace LastHit
             subMenu.AddItem(new MenuItem("harassheroes_sub", "Harass in lasthit mode ?").SetValue(true));
             subMenu.AddItem(new MenuItem("denied_sub", "Deny creep ?").SetValue(true));
             subMenu.AddItem(new MenuItem("AOC_sub", "Atteck own creeps ?").SetValue(false));
-            subMenu.AddItem(new MenuItem("autoD", "Auto denie").SetValue(false).SetTooltip("Dont work properly!!!"));
+            subMenu.AddItem(new MenuItem("autoD", "Auto lasthit").SetValue(false).SetTooltip("Dont work properly!!!"));
             subMenu.AddItem(new MenuItem("autoF", "Auto farm").SetValue(false).SetTooltip("Dont work properly!!!"));
             Menu.AddSubMenu(subMenu);
 
@@ -1157,18 +1157,18 @@ namespace LastHit
             {
                 Drawhpbar();
             }
-            try
-            {
-                var cpos = Drawing.WorldToScreen(_creepTarget.Position);
-                var c2pos = Drawing.WorldToScreen(_creepTargetS.Position);
-                var hpos = Drawing.WorldToScreen(_me.Position);
-                Drawing.DrawLine(hpos, cpos, Color.Gold);
-                Drawing.DrawLine(hpos, c2pos, Color.Red);
-            }
-            catch (Exception)
-            {
-                //
-            }
+            //try
+            //{
+            //    var cpos = Drawing.WorldToScreen(_creepTarget.Position);
+            //    var c2pos = Drawing.WorldToScreen(_creepTargetS.Position);
+            //    var hpos = Drawing.WorldToScreen(_me.Position);
+            //    Drawing.DrawLine(hpos, cpos, Color.Gold);
+            //    Drawing.DrawLine(hpos, c2pos, Color.Red);
+            //}
+            //catch (Exception)
+            //{
+            //    //
+            //}
 
             //try
             //{
