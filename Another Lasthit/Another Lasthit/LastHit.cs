@@ -231,24 +231,20 @@ namespace LastHit
             {
                 foreach (var summonsUnit in _summonsUnits)
                 {
-                    var aPoint = summonsUnit.SecondsPerAttack - summonsUnit.BaseAttackTime / 3;
                     var attackRange = summonsUnit.AttackRange;
                     _creepTargetS = GetLowestHpCreep(summonsUnit, null);
                     _creepTargetS = KillableCreep(summonsUnit, false, _creepTargetS, ref wait, true, 3);
                     if (_creepTargetS != null && _creepTargetS.IsValid && _creepTargetS.IsVisible &&
                         _creepTargetS.IsAlive)
                     {
-                        var time = summonsUnit.IsRanged == false
-                            ? aPoint*2
-                            : aPoint*2 + summonsUnit.Distance2D(_creepTargetS)/GetProjectileSpeed(summonsUnit);
-                        var getDamage = GetDamageOnUnit(summonsUnit, _creepTargetS, Healthpredict(_creepTargetS, time));
+                        var getDamage = GetDamageOnUnit(summonsUnit, _creepTargetS, 0);
                         if (_creepTargetS.Distance2D(summonsUnit) <= attackRange)
                         {
                             if ((_creepTargetS.Health < getDamage ||
                                  _creepTargetS.Health < getDamage && _creepTargetS.Team == _me.Team &&
                                  (Menu.Item("denied_sub").GetValue<bool>() || Menu.Item("AOC_sub").GetValue<bool>())) && Utils.SleepCheck(summonsUnit.Handle + "attack"))
                             {
-                                if (!summonsUnit.IsAttacking())
+                                if (!summonsUnit.IsAttacking() || !Utils.SleepCheck(summonsUnit.Handle + "harass"))
                                 {
                                     summonsUnit.Attack(_creepTargetS);
                                     Utils.Sleep(300 + Game.Ping, summonsUnit.Handle + "attack");
@@ -1105,7 +1101,8 @@ namespace LastHit
                 {
                     foreach (var summonsUnit in _summonsUnits.Where(x => x.Handle != unit.Handle))
                     {
-                        if (summonsUnit.CanAttack() && Math.Abs(summonsUnit.Distance2D(minion) - unit.Distance2D(minion)) < 50)
+                        if (summonsUnit.CanAttack() && (Math.Abs(summonsUnit.Distance2D(minion) - summonsUnit.AttackRange) < 50 
+                            || Math.Abs(summonsUnit.Distance2D(minion) - unit.Distance2D(minion)) < 50))
                             bonusdamage2 = bonusdamage2 + summonsUnit.MinimumDamage + summonsUnit.BonusDamage;
                     }
                 }
