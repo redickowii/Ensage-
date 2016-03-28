@@ -334,7 +334,12 @@ namespace Stack
                         if (_seconds >= camp.AttackTime)
                         {
                             closestNeutral = GetNearestCreepToPull(unit, 800);
-                            var tWait = (unit.SecondsPerAttack - unit.BaseAttackTime/3) * 1000 + Game.Ping;
+                            float distance = 0;
+                            if (unit.AttackRange < unit.Distance2D(closestNeutral))
+                            {
+                                distance = (unit.Distance2D(closestNeutral) - unit.AttackRange) / unit.MovementSpeed;
+                            }
+                            var tWait = (distance + unit.SecondsPerAttack - unit.BaseAttackTime/3) * 1000 + Game.Ping;
                             unit.Attack(closestNeutral);
                             Utils.Sleep(tWait, "twait" + unit.Handle);
                             camp.State = 4;
