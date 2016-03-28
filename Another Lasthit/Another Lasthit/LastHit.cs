@@ -72,8 +72,8 @@ namespace LastHit
 
             var subMenu = new Menu("Summons", "Summons", false);
             subMenu.AddItem(new MenuItem("enable", "Enable").SetValue(false).SetTooltip("Test!"));
-            subMenu.AddItem(new MenuItem("harassheroes_sub", "Harass in lasthit mode ?").SetValue(true));
-            subMenu.AddItem(new MenuItem("denied_sub", "Deny creep ?").SetValue(true));
+            subMenu.AddItem(new MenuItem("harassheroes_sub", "Harass in lasthit mode ?").SetValue(false));
+            subMenu.AddItem(new MenuItem("denied_sub", "Deny creep ?").SetValue(false));
             subMenu.AddItem(new MenuItem("AOC_sub", "Atteck own creeps ?").SetValue(false));
             subMenu.AddItem(new MenuItem("autoD", "Auto lasthit").SetValue(false).SetTooltip("Dont work properly!!!"));
             subMenu.AddItem(new MenuItem("autoF", "Auto farm").SetValue(false).SetTooltip("Dont work properly!!!"));
@@ -268,10 +268,15 @@ namespace LastHit
                     }
                     else
                     {
-                        if (Menu.Item("harassheroes_sub").GetValue<bool>())
+                        if (Menu.Item("harassheroes_sub").GetValue<bool>() && Utils.SleepCheck(summonsUnit.Handle + "harass"))
                         {
                             var target = _me.BestAATarget();
+                            if (target == null)
+                            {
+                                target = _me.ClosestToMouseTarget(1000);
+                            }
                             summonsUnit.Attack(target);
+                            Utils.Sleep(1000 + Game.Ping, summonsUnit.Handle + "harass");
                         }
                     }
                 }
@@ -281,7 +286,7 @@ namespace LastHit
                 foreach (var summonsUnit in _summonsUnits)
                 {
                     _creepTargetS = GetLowestHpCreep(summonsUnit, null);
-                    _creepTargetS = KillableCreep(summonsUnit, false, _creepTargetS, ref wait, true, 3);
+                    _creepTargetS = KillableCreep(summonsUnit, false, _creepTargetS, ref wait, true, 30);
                     if (_creepTargetS != null && _creepTargetS.IsValid && _creepTargetS.IsVisible &&
                         _creepTargetS.IsAlive && Utils.SleepCheck(summonsUnit.Handle + "attack"))
                     {
