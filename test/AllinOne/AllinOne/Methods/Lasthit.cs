@@ -366,7 +366,8 @@ namespace AllinOne.Methods
         {
             try
             {
-                foreach (var creep in Var.Creeps.OrderByDescending(creep => creep.Health))
+                foreach (var creep in Var.Creeps.Where(x => x.Team != Var.Me.Team)
+                    .OrderByDescending(creep => creep.Health))
                 {
                     double damage = 0;
                     switch (Var.Me.ClassID)
@@ -385,11 +386,10 @@ namespace AllinOne.Methods
                             break;
 
                         case ClassID.CDOTA_Unit_Hero_Bristleback:
-                            if (Var.W.Level > 0 && Var.W.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
+                            if (Var.W.Level > 0 && Var.W.CanBeCasted() /*&& Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange()*/)
                             {
                                 double quillSprayDmg = 0;
-                                if (
-                                    creep.Modifiers.Any(
+                                if (creep.Modifiers.Any(
                                         x =>
                                             x.Name == "modifier_bristleback_quill_spray_stack" ||
                                             x.Name == "modifier_bristleback_quill_spray"))
@@ -401,7 +401,7 @@ namespace AllinOne.Methods
                                         (Var.W.Level - 1) * 2;
                                 damage = ((Var.W.Level - 1) * 20 + 20 + quillSprayDmg) *
                                          (1 - 0.06 * creep.Armor / (1 + 0.06 * creep.Armor));
-                                if (damage > creep.Health && Var.W.CastRange < Var.Me.Distance2D(creep))
+                                if (damage > creep.Health && Var.W.CastRange > Var.Me.Distance2D(creep))
                                 {
                                     Var.W.UseAbility();
                                     Common.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "cast");
