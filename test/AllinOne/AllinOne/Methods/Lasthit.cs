@@ -386,7 +386,7 @@ namespace AllinOne.Methods
                             break;
 
                         case ClassID.CDOTA_Unit_Hero_Bristleback:
-                            if (Var.W.Level > 0 && Var.W.CanBeCasted() /*&& Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange()*/)
+                            if (Var.W.Level > 0 && Var.W.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
                             {
                                 double quillSprayDmg = 0;
                                 if (creep.Modifiers.Any(

@@ -163,15 +163,23 @@ namespace AllinOne.Methods
 
         public static bool SleepCheck(string s)
         {
-            if (Var.SleepDic.Any(x => x.Text == s))
+            try
             {
-                var sleep = Var.SleepDic.First(x => x.Text == s);
-                if (Math.Abs(DateTime.UtcNow.ToFileTime() - sleep.Time) >= sleep.Period)
+                if (Var.SleepDic.Any(x => x.Text == s))
                 {
-                    Var.SleepDic.Remove(sleep);
-                    return true;
+                    var sleep = Var.SleepDic.First(x => x.Text == s);
+                    if (Math.Abs(DateTime.UtcNow.ToFileTime() - sleep.Time) >= sleep.Period)
+                    {
+                        Var.SleepDic.Remove(sleep);
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
+            }
+            catch (Exception)
+            {
+                if (MenuVar.ShowErrors)
+                    Console.WriteLine("SleepCheck Error");
             }
             return true;
         }
