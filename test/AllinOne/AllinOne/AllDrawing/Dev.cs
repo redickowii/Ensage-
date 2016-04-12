@@ -12,8 +12,17 @@
     {
         private static readonly Dictionary<Unit, ParticleEffect> EffectsLine = new Dictionary<Unit, ParticleEffect>();
 
+        private static bool _load = false;
+
         public static void DevInfo()
         {
+            if (!_load)
+            {
+                var var = Game.GetConsoleVar("dota_unit_draw_paths");
+                var.RemoveFlags(ConVarFlags.Cheat);
+                var.SetValue(1);
+                _load = true;
+            }
             try
             {
                 var vLine = new Vector2[2];
@@ -81,8 +90,18 @@
 
         public static void DevInfoDispose()
         {
-            EffectsLine.ForEach(x => x.Value.Dispose());
-            EffectsLine.Clear();
+            if (EffectsLine.Count > 0)
+            {
+                EffectsLine.ForEach(x => x.Value.Dispose());
+                EffectsLine.Clear();
+            }
+            if (_load)
+            {
+                var var = Game.GetConsoleVar("dota_unit_draw_paths");
+                var.RemoveFlags(ConVarFlags.Cheat);
+                var.SetValue(0);
+                _load = false;
+            }
         }
     }
 }

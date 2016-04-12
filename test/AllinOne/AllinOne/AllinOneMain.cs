@@ -30,14 +30,24 @@ namespace AllinOne
             if (args.Msg == (ulong) Utils.WindowsMessages.WM_LBUTTONDOWN && MenuVar.StackKey)
             {
                 foreach (var camp in from camp in Var.Camps
-                                     let position = Drawing.WorldToScreen(camp.Position)
-                                     where Utils.IsUnderRectangle(Game.MouseScreenPosition, position.X, position.Y, 40, 40)
+                                     let Position = Drawing.WorldToScreen(camp.Position)
+                                     where Utils.IsUnderRectangle(Game.MouseScreenPosition, Position.X, Position.Y, 40, 40)
                                      select camp)
                 {
                     camp.Stacked = camp.Stacked == false ? true : false;
                     camp.Unit = null;
                 }
             }
+        }
+
+        private static Vector3 PositionCalc(Hero me, Hero target, float M)
+        {
+            var l = (me.Distance2D(target) - M) / M;
+            var posA = me.Position;
+            var posB = target.Position;
+            var x = (posA.X + l * posB.X) / (1 + l);
+            var y = (posA.Y + l * posB.Y) / (1 + l);
+            return new Vector3((int) x, (int) y, posA.Z);
         }
 
         public static void Game_OnUpdate(EventArgs args)
@@ -67,6 +77,11 @@ namespace AllinOne
                 Methods.ShowMeMore.ClearEffectsVisible();
             }
 
+            if (MenuVar.DodgeEnable)
+            {
+                Methods.ShowMeMore.Dodge();
+            }
+
             foreach (var hero in EnemyHeroes.Heroes)
             {
                 Methods.ShowMeMore.DrawShowMeMoreSpells(hero);
@@ -77,13 +92,13 @@ namespace AllinOne
                 if (ObjectManager.Runes.TopRune != null && Common.SleepCheck("TopRunes"))
                 {
                     ObjectManager.Runes.ChatTop();
-                    Common.Sleep(110000, "TopRunes");
+                    Common.Sleep(30000, "TopRunes");
                 }
 
                 if (ObjectManager.Runes.BotRune != null && Common.SleepCheck("BotRunes"))
                 {
                     ObjectManager.Runes.ChatBot();
-                    Common.Sleep(110000, "BotRunes");
+                    Common.Sleep(30000, "BotRunes");
                 }
             }
 

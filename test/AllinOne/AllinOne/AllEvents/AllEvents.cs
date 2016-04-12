@@ -38,6 +38,8 @@
             EnemyHeroes.AbilityDictionary = new Dictionary<float, List<Ability>>();
             AllyHeroes.ItemDictionary = new Dictionary<float, List<Item>>();
             EnemyHeroes.ItemDictionary = new Dictionary<float, List<Item>>();
+
+            Methods.ShowMeMore.EffectForSpells = new Dictionary<Unit, ParticleEffect>();
             MainMenu.Load();
             MenuVar.ShowAttackRange = MainMenu.MenuSettings.Item("showatkrange");
             MenuVar.ShowExpRange = MainMenu.MenuSettings.Item("expRange");

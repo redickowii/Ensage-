@@ -93,6 +93,8 @@
         public static MenuItem ShowExpRange;
         public static MenuItem ShowAttackRange;
         public static MenuItem CameraDistance;
+        public static bool DodgeEnable;
+        public static int DodgeFrequency;
 
         #endregion Settings
 
@@ -153,6 +155,7 @@
             ShowMenu.Update();
             JungleStackMenu.Update();
             LastHitMenu.Update();
+            SettingsMenu.Update();
             DevMenu.Update();
         }
 

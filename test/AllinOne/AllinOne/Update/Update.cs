@@ -34,6 +34,7 @@ namespace AllinOne.Update
                     Var.RadiusHeroParticleEffect.ForEach(x => x.Value.ForceDispose());
                     Var.RadiusHeroParticleEffect.Clear();
                     Dev.DevInfoDispose();
+                    Game.ExecuteCommand("cl_particle_stop_all");
                     Clear = true;
                 }
             }
