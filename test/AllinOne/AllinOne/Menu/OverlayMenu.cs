@@ -12,6 +12,7 @@ namespace AllinOne.Menu
     internal class OverlayMenu
     {
         private static Slider Height = new Slider(4, 3, 25);
+        private static Slider RuneScale = new Slider(25, 5, 40);
 
         public static void Load()
         {
@@ -47,12 +48,13 @@ namespace AllinOne.Menu
             subsubMenu.AddItem(new MenuItem("showtopoverlayenemyulttext", "Show Enemy top Ult Text?").SetValue(false));
             subMenu.AddSubMenu(subsubMenu);
 
-            subMenu.AddItem(new MenuItem("showtopoverlayenemy", "Show Enemy top Owerlay?").SetValue(false));
+            subMenu.AddItem(new MenuItem("showtopoverlayenemy", "Show enemy top owerlay?").SetValue(false));
             MainMenu.Overlay.AddSubMenu(subMenu);
 
             subMenu = new Menu("Runes", "runes", false);
-            subMenu.AddItem(new MenuItem("showrunesmimimap", "Show Runes on mimimap?").SetValue(true).SetTooltip("Show Rune icon on minimap."));
-            subMenu.AddItem(new MenuItem("showruneschat", "Show Runes in chat?").SetValue(false).SetTooltip("Show Rune in chat."));
+            subMenu.AddItem(new MenuItem("showrunesmimimap", "Show runes on mimimap?").SetValue(true).SetTooltip("Show rune icon on minimap."));
+            subMenu.AddItem(new MenuItem("showruneschat", "Show runes in chat?").SetValue(false).SetTooltip("Show rune in chat."));
+            subMenu.AddItem(new MenuItem("runescale", "Rune scale").SetValue(RuneScale));
             MainMenu.Overlay.AddSubMenu(subMenu);
 
             subMenu = new Menu("Tower Range", "towerrange", false);
@@ -80,6 +82,7 @@ namespace AllinOne.Menu
 
             MenuVar.ShowRunesMinimap = MainMenu.Overlay.Item("showrunesmimimap").GetValue<bool>();
             MenuVar.ShowRunesChat = MainMenu.Overlay.Item("showruneschat").GetValue<bool>();
+            MenuVar.RuneScale = MainMenu.Overlay.Item("runescale").GetValue<Slider>().Value;
 
             MenuVar.HealthHeightAlly = MainMenu.Overlay.Item("OHHA").GetValue<Slider>().Value;
             MenuVar.ManaHeightAlly = MainMenu.Overlay.Item("OMHA").GetValue<Slider>().Value;

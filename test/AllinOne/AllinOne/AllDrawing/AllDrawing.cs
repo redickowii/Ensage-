@@ -52,18 +52,23 @@
 
             #region Lasthit
 
-            if (MenuVar.LastHitEnable || MenuVar.ShowHp)
+            if (MenuVar.LastHitEnable)
             {
-                Lasthit.Drawhpbar();
+                if (MenuVar.ShowHp)
+                    Lasthit.Drawhpbar();
             }
 
             #endregion Lasthit
 
             #region JungleStack
 
-            if (MenuVar.StackKey)
+            if (MenuVar.StackKey && MenuVar.DrawStackLine)
             {
                 JungleDraw.DrawLine();
+            }
+            else
+            {
+                JungleDraw.Clear();
             }
 
             #endregion JungleStack

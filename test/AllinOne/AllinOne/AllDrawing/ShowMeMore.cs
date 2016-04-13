@@ -41,7 +41,7 @@
             var miniicon = Common.MinimapIcon(hero);
             var icon = Common.HeroIcon(hero);
             var size = new Vector2(50, 30);
-            var minisize = new Vector2(28, 28);
+            var minisize = new Vector2(MenuVar.MiniScale, MenuVar.MiniScale);
             if (hero.IsVisible || !hero.IsAlive)
             {
                 Mapicon.Remove(hero);
@@ -59,7 +59,7 @@
                 if (!Drawing.WorldToScreen(hero.Position, out newPos)) return;
                 Drawing.DrawRect(newPos, size, Drawing.GetTexture(icon));
                 if (MenuVar.ShowLastPosMini)
-                    Drawing.DrawRect(Common.WorldToMinimap(hero.Position, hero), minisize, Drawing.GetTexture(miniicon));
+                    Drawing.DrawRect(Common.WorldToMinimap(hero.Position, hero) - minisize / 3, minisize, Drawing.GetTexture(miniicon));
             }
         }
 

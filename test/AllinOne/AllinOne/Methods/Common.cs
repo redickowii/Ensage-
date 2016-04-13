@@ -250,17 +250,17 @@ namespace AllinOne.Methods
             }
         }
 
-        public static Vector2 WorldToMinimap(Vector3 vector, Entity iconEntity)
+        public static Vector2 WorldToMinimap(Vector3 vector, Entity iconEntity = null)
         {
-            if (iconEntity.IsVisible || !iconEntity.IsAlive) return new Vector2();
+            if (iconEntity != null && (iconEntity.IsVisible || !iconEntity.IsAlive)) return new Vector2();
             int x = (int) Math.Floor((vector.X + 7500) * MinimapWidth / 15000);
             int y = (int) Math.Floor((vector.Y + 7000) * MinimapHeight / 14000);
             return new Vector2(x + MinimapCorner, Drawing.Height - y - MinimapCorner - 7);
         }
 
-        public static Vector2 WorldToMinimap(Vector2 vector, Entity iconEntity)
+        public static Vector2 WorldToMinimap(Vector2 vector, Entity iconEntity = null)
         {
-            if (iconEntity.IsVisible || !iconEntity.IsAlive) return new Vector2();
+            if (iconEntity != null && (iconEntity.IsVisible || !iconEntity.IsAlive)) return new Vector2();
             int x = (int) Math.Floor((vector.X + 7500) * MinimapWidth / 15000);
             int y = (int) Math.Floor((vector.Y + 7000) * MinimapHeight / 14000);
             return new Vector2(x + MinimapCorner, Drawing.Height - y - MinimapCorner - 7);

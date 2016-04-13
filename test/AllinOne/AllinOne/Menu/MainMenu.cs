@@ -61,6 +61,7 @@
 
         public static bool ShowRunesMinimap;
         public static bool ShowRunesChat;
+        public static int RuneScale;
 
         public static bool OwnTowers;
         public static bool EnemiesTowers;
@@ -85,6 +86,7 @@
         public static bool ShowLastPosMini;
         public static bool ShowRoshanTimer;
         public static bool VisiblebyEnemy;
+        public static int MiniScale;
 
         #endregion ShowMeMore
 

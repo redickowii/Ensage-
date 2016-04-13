@@ -167,9 +167,11 @@ namespace AllinOne.AllDrawing
         private static void DrawVisionChecker(Hero hero, Vector2 pos, Vector2 size, int height = 4)
         {
             string text;
+            var color = Color.White;
             if (!hero.IsVisibleToEnemies && hero.Team == Var.Me.Team)
             {
                 text = "under vision";
+                color = Color.Green;
             }
             else
             {
@@ -178,11 +180,11 @@ namespace AllinOne.AllDrawing
                 {
                     SInfo[handle] = new StatusInfo(hero, Game.GameTime);
                 }
-                text = SInfo[handle].GetTime(hero.Handle.ToString());
+                text = SInfo[handle].GetTime();
             }
             Draw.DrawLine(pos + new Vector2(0, size.Y), new Vector2(size.X, height * 3), new Color(0, 0, 0, 180));
 
-            Draw.DrawText(text, (int) pos.X + 3, (int) (pos.Y + size.Y), Color.White, Fonts.VisibleFont);
+            Draw.DrawText(text, (int) pos.X + 3, (int) (pos.Y + size.Y), color, Fonts.VisibleFont);
         }
 
         private static Vector2 GetTopPanelPosition(Hero hero)
@@ -374,16 +376,10 @@ namespace AllinOne.AllDrawing
             return !_hero.IsValid ? "heh" : _hero.IsInvisible() ? "invis" : _hero.IsVisible ? "visible" : "in fog";
         }
 
-        public string GetTime(string s)
+        public string GetTime()
         {
-            if (_status == null)
-                _status = GetStatus();
-            var curStat = _status;
-            if (Common.SleepCheck("StatusInfo" + s))
-            {
-                curStat = GetStatus();
-                Common.Sleep(1000, "StatusInfo" + s);
-            }
+            var curStat = GetStatus();
+
             if (_status != GetStatus())
             {
                 _time = Game.GameTime;

@@ -24,7 +24,7 @@ namespace AllinOne.Methods
 
         public static double RoshanSeconds;
 
-        private static Unit _arrowUnit;
+        public static Unit _arrowUnit;
 
         private static Vector3 _arrowPos;
 
@@ -43,7 +43,9 @@ namespace AllinOne.Methods
             new ShowMeMoreStruct("modifier_kunkka_torrent_thinker",
                 "hero_kunkka/kunkka_spell_torrent_pool", 225),
             new ShowMeMoreStruct("modifier_leshrac_split_earth_thinker",
-                "hero_leshrac/leshrac_split_earth_b", 225)
+                "hero_leshrac/leshrac_split_earth_b", 225),
+            new ShowMeMoreStruct("modifier_skywrath_mage_mystic_flare",
+                "hero_skywrath_mage/skywrath_mage_mystic_flare", 200)
         };
 
         public static void Maphack()
@@ -172,25 +174,24 @@ namespace AllinOne.Methods
                 case ClassID.CDOTA_Unit_Hero_Mirana:
                     if (_arrowUnit != null && !Common.SleepCheck("DrawArrrow") && Common.SleepCheck("arrrowwait"))
                     {
+                        spell = hero.Spellbook.Spell2;
+                        if (spell == null || spell.CanBeCasted()) return;
                         if (_arrowUnit.IsValid && _arrowUnit.IsVisible)
                         {
-                            if (!EffectForSpells.ContainsKey(_arrowUnit))
+                            if (!EffectForSpells.ContainsKey(hero))
                             {
                                 var effect = new ParticleEffect(Particles.Partlist[83], _arrowUnit.Position);
                                 effect.SetControlPoint(1, _arrowUnit.Position);
                                 effect.SetControlPoint(2,
                                     Common.FindVector(_arrowPos, Common.FindRet(_arrowPos, _arrowUnit.Position), 3000 - _arrowUnit.Speed * _arrowUnit.CreateTime));
-                                EffectForSpells.Add(_arrowUnit, effect);
+                                EffectForSpells.Add(hero, effect);
                             }
                         }
                     }
-                    else if (Common.SleepCheck("DrawArrrow") &&
-                        _arrowUnit != null &&
-                        EffectForSpells.ContainsKey(_arrowUnit))
+                    else if (Common.SleepCheck("DrawArrrow") && EffectForSpells.ContainsKey(hero))
                     {
-                        EffectForSpells[_arrowUnit].ForceDispose();
-                        EffectForSpells.Remove(_arrowUnit);
-                        _arrowUnit = null;
+                        EffectForSpells[hero].ForceDispose();
+                        EffectForSpells.Remove(hero);
                     }
                     break;
 
@@ -199,17 +200,16 @@ namespace AllinOne.Methods
                     spell = hero.Spellbook.Spell1;
                     if (spell == null || spell.CanBeCasted()) return;
                     cd = Math.Floor(spell.Cooldown / spell.GetCooldown(spell.Level - 1) * 1000);
-                    //Console.WriteLine(cd);
                     if (cd < 990)
                     {
-                        if (!EffectForSpells.ContainsKey(hero) && cd > 90)
+                        if (!EffectForSpells.ContainsKey(hero) && cd > 900)
                         {
                             var effect = new ParticleEffect(Particles.Partlist[83], hero.Position);
                             effect.SetControlPoint(1, hero.Position);
                             effect.SetControlPoint(2, Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius));
                             EffectForSpells.Add(hero, effect);
                         }
-                        else if ((!hero.IsAlive || cd <= 90) && EffectForSpells.ContainsKey(hero))
+                        else if ((!hero.IsAlive || cd <= 900) && EffectForSpells.ContainsKey(hero))
                         {
                             EffectForSpells[hero].ForceDispose();
                             EffectForSpells.Remove(hero);
@@ -247,6 +247,11 @@ namespace AllinOne.Methods
                 {
                     SpellRadius.Remove(x.Key);
                 }
+                temp = EffectForSpells;
+                foreach (var x in temp.Where(x => x.Value.IsDestroyed))
+                {
+                    EffectForSpells.Remove(x.Key);
+                }
             }
             catch (Exception)
             {
@@ -257,7 +262,7 @@ namespace AllinOne.Methods
         public static void Dodge()
         {
             if (!Common.SleepCheck("DodgeWait")) return;
-            if (SpellRadius.Count > 0)
+            if (SpellRadius.Count(x => !x.Value.IsDestroyed) > 0)
             {
                 foreach (var spell in SpellRadius)
                 {
@@ -265,7 +270,7 @@ namespace AllinOne.Methods
                 }
                 Common.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
             }
-            if (EffectForSpells.Count > 0)
+            if (EffectForSpells.Count(x => !x.Value.IsDestroyed) > 0)
             {
                 foreach (var effect in EffectForSpells)
                 {
@@ -274,19 +279,19 @@ namespace AllinOne.Methods
                     switch (effect.Key.ClassID)
                     {
                         case ClassID.CDOTA_Unit_Hero_Pudge:
-                            LineDodge(pos1, pos2, 130);
+                            LineDodge(pos1, pos2, 100 + Var.Me.HullRadius + 30, 1600);
                             break;
 
                         case ClassID.CDOTA_Unit_Hero_Windrunner:
-                            LineDodge(pos1, pos2, 170);
+                            LineDodge(pos1, pos2, 125 + Var.Me.HullRadius + 30, 3000, 600);
                             break;
 
                         case ClassID.CDOTA_Unit_Hero_Mirana:
-                            LineDodge(pos1, pos2, 130);
+                            LineDodge(pos1, pos2, 100 + Var.Me.HullRadius + 30, 857);
                             break;
 
                         case ClassID.CDOTA_Unit_Hero_Puck:
-                            LineDodge(pos1, pos2, 255);
+                            LineDodge(pos1, pos2, 225 + Var.Me.HullRadius + 30, 650);
                             break;
                     }
                 }
@@ -294,42 +299,43 @@ namespace AllinOne.Methods
             }
         }
 
-        public static void LineDodge(Vector3 pos1, Vector3 pos2, float radius)
+        public static void LineDodge(Vector3 pos1, Vector3 pos2, float radius, float speed, float delay = 0)
         {
-            var me = Var.Me;
-
             var calc1 =
-                Math.Floor(Math.Sqrt(Math.Pow(pos2.X - me.Position.X, 2) + Math.Pow(pos2.Y - me.Position.Y, 2)));
+                Math.Floor(Math.Sqrt(Math.Pow(pos2.X - Var.Me.Position.X, 2) + Math.Pow(pos2.Y - Var.Me.Position.Y, 2)));
             var calc2 =
-                Math.Floor(Math.Sqrt(Math.Pow(pos1.X - me.Position.X, 2) + Math.Pow(pos1.Y - me.Position.Y, 2)));
+                Math.Floor(Math.Sqrt(Math.Pow(pos1.X - Var.Me.Position.X, 2) + Math.Pow(pos1.Y - Var.Me.Position.Y, 2)));
             var calc4 = Math.Floor(Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2)));
 
             var perpendicular =
                 Math.Floor(
-                    Math.Abs((pos2.X - pos1.X) * (pos1.Y - me.Position.Y) -
-                             (pos1.X - me.Position.X) * (pos2.Y - pos1.Y)) /
+                    Math.Abs((pos2.X - pos1.X) * (pos1.Y - Var.Me.Position.Y) -
+                             (pos1.X - Var.Me.Position.X) * (pos2.Y - pos1.Y)) /
                     Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2)));
-            var k = ((pos2.Y - pos1.Y) * (me.Position.X - pos1.X) - (pos2.X - pos1.X) * (me.Position.Y - pos1.Y)) /
+            var k = ((pos2.Y - pos1.Y) * (Var.Me.Position.X - pos1.X) - (pos2.X - pos1.X) * (Var.Me.Position.Y - pos1.Y)) /
                     (Math.Pow(pos2.Y - pos1.Y, 2) + Math.Pow(pos2.X - pos1.X, 2));
-            var x4 = me.Position.X - k * (pos2.Y - pos1.Y);
-            var z4 = me.Position.Y + k * (pos2.X - pos1.X);
+            var x4 = Var.Me.Position.X - k * (pos2.Y - pos1.Y);
+            var z4 = Var.Me.Position.Y + k * (pos2.X - pos1.X);
             var calc3 =
-                (Math.Floor(Math.Sqrt(Math.Pow(x4 - me.Position.X, 2) + Math.Pow(z4 - me.Position.Y, 2))));
-            var dodgex = x4 + (radius / calc3) * (me.Position.X - x4);
-            var dodgey = z4 + (radius / calc3) * (me.Position.Y - z4);
+                (Math.Floor(Math.Sqrt(Math.Pow(x4 - Var.Me.Position.X, 2) + Math.Pow(z4 - Var.Me.Position.Y, 2))));
+            var dodgex = x4 + (radius / calc3) * (Var.Me.Position.X - x4);
+            var dodgey = z4 + (radius / calc3) * (Var.Me.Position.Y - z4);
 
             if (perpendicular < radius && calc1 < calc4 && calc2 < calc4)
             {
-                var dodgevector = new Vector3((float) dodgex, (float) dodgey, me.Position.Z);
-                var dodgevector2 = new Vector3((float) (x4 + ((radius / 2.3) / calc3) * (me.Position.X - x4)),
-                    (float) (z4 + ((radius / 2.3) / calc3) * (me.Position.Y - z4)), me.Position.Z);
-                if (me.Distance2D(dodgevector) <= 5)
+                var dodgevector = new Vector3((float) dodgex, (float) dodgey, Var.Me.Position.Z);
+                var dodgevector2 = new Vector3((float) (x4 + ((radius / 2.3) / calc3) * (Var.Me.Position.X - x4)),
+                    (float) (z4 + ((radius / 2.3) / calc3) * (Var.Me.Position.Y - z4)), Var.Me.Position.Z);
+
+                delay = Var.Me.Distance2D(pos1) / speed * 1000 + delay;
+                var turntime = Var.Me.GetTurnTime(dodgevector);
+                if (turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed * 1000 + Game.Ping > delay)
                 {
-                    //
+                    //Common.Print("AAAAAAAAAAAAAAA");
                 }
-                else
+                else if (Var.Me.Distance2D(dodgevector) > 5)
                 {
-                    me.Move(dodgevector);
+                    Var.Me.Move(dodgevector);
                 }
             }
         }

@@ -90,7 +90,7 @@
         public static void ChatBot()
         {
             var color = "#FF0000";
-            switch (TopRune.RuneType)
+            switch (BotRune.RuneType)
             {
                 case RuneType.Illusion:
                     color = "#cca300";

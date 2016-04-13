@@ -1,4 +1,7 @@
-﻿namespace AllinOne.AllDrawing
+﻿using AllinOne.Menu;
+using AllinOne.Methods;
+
+namespace AllinOne.AllDrawing
 {
     using Ensage;
     using SharpDX;
@@ -25,13 +28,14 @@
         {
             try
             {
+                var runescale = new Vector2(MenuVar.RuneScale, MenuVar.RuneScale);
                 var botRune = AllinOne.ObjectManager.Runes.BotRune;
                 var topRune = AllinOne.ObjectManager.Runes.TopRune;
                 if (botRune != null)
-                    Drawing.DrawRect(new Vector2(193, 970), new Vector2(28, 28),
+                    Drawing.DrawRect(Common.WorldToMinimap(botRune.Position) - runescale / 3, runescale,
                         Drawing.GetTexture(RuneType[botRune.RuneType]));
                 if (topRune != null)
-                    Drawing.DrawRect(new Vector2(100, 895), new Vector2(28, 28),
+                    Drawing.DrawRect(Common.WorldToMinimap(topRune.Position) - runescale / 3, runescale,
                         Drawing.GetTexture(RuneType[topRune.RuneType]));
             }
             catch (Exception)

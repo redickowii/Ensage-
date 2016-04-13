@@ -54,7 +54,7 @@
                         }
                         else
                         {
-                            rr = new ParticleEffect(Particles.Partlist[81], camp.Unit.Position);
+                            rr = camp.Unit.AddParticleEffect(Particles.Partlist[81]);
                             rr.SetControlPoint(1, camp.Unit.Position);
                             rr.SetControlPoint(2, camp.Position);
                             CampUnitLine.Add(camp.Unit, rr);
@@ -71,6 +71,15 @@
             {
                 if (MenuVar.ShowErrors)
                     Console.WriteLine("Draw Line Stack Error");
+            }
+        }
+
+        public static void Clear()
+        {
+            if (CampUnitLine.Count > 0)
+            {
+                CampUnitLine.ForEach(x => x.Value.Dispose());
+                CampUnitLine.Clear();
             }
         }
     }
