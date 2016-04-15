@@ -1,8 +1,5 @@
-﻿using Ensage.Common.Extensions;
-
-namespace AllinOne
+﻿namespace AllinOne
 {
-    using AllinOne.AllDrawing;
     using AllinOne.AllEvents;
     using AllinOne.Menu;
     using AllinOne.Methods;
@@ -11,44 +8,14 @@ namespace AllinOne
     using AllinOne.Variables;
     using Ensage;
     using Ensage.Common;
+    using Ensage.Common.Extensions;
     using SharpDX;
     using System;
     using System.Linq;
 
     internal class AllinOneMain
     {
-        public static void Init()
-        {
-            Events.OnLoad += AllinOneEvents.OnLoad;
-            Events.OnClose += AllinOneEvents.OnClose;
-        }
-
-        public static void Game_OnWndProc(WndEventArgs args)
-        {
-            if (!OnUpdate.CanUpdate()) return;
-
-            if (args.Msg == (ulong) Utils.WindowsMessages.WM_LBUTTONDOWN && MenuVar.StackKey)
-            {
-                foreach (var camp in from camp in Var.Camps
-                                     let Position = Drawing.WorldToScreen(camp.Position)
-                                     where Utils.IsUnderRectangle(Game.MouseScreenPosition, Position.X, Position.Y, 40, 40)
-                                     select camp)
-                {
-                    camp.Stacked = camp.Stacked == false ? true : false;
-                    camp.Unit = null;
-                }
-            }
-        }
-
-        private static Vector3 PositionCalc(Hero me, Hero target, float M)
-        {
-            var l = (me.Distance2D(target) - M) / M;
-            var posA = me.Position;
-            var posB = target.Position;
-            var x = (posA.X + l * posB.X) / (1 + l);
-            var y = (posA.Y + l * posB.Y) / (1 + l);
-            return new Vector3((int) x, (int) y, posA.Z);
-        }
+        #region Methods
 
         public static void Game_OnUpdate(EventArgs args)
         {
@@ -87,7 +54,7 @@ namespace AllinOne
                 Methods.ShowMeMore.DrawShowMeMoreSpells(hero);
             }
 
-            if (MenuVar.ShowRunesChat && (int) Game.GameTime / 60 % 2 == 0)
+            if (MenuVar.ShowRunesChat /*&& (int) Game.GameTime / 60 % 2 == 0*/)
             {
                 if (ObjectManager.Runes.TopRune != null && Common.SleepCheck("TopRunes"))
                 {
@@ -163,5 +130,40 @@ namespace AllinOne
                 }
             }
         }
+
+        public static void Game_OnWndProc(WndEventArgs args)
+        {
+            if (!OnUpdate.CanUpdate()) return;
+
+            if (args.Msg == (ulong) Utils.WindowsMessages.WM_LBUTTONDOWN && MenuVar.StackKey)
+            {
+                foreach (var camp in from camp in Var.Camps
+                                     let Position = Drawing.WorldToScreen(camp.Position)
+                                     where Utils.IsUnderRectangle(Game.MouseScreenPosition, Position.X, Position.Y, 40, 40)
+                                     select camp)
+                {
+                    camp.Stacked = camp.Stacked == false ? true : false;
+                    camp.Unit = null;
+                }
+            }
+        }
+
+        public static void Init()
+        {
+            Events.OnLoad += AllinOneEvents.OnLoad;
+            Events.OnClose += AllinOneEvents.OnClose;
+        }
+
+        private static Vector3 PositionCalc(Hero me, Hero target, float M)
+        {
+            var l = (me.Distance2D(target) - M) / M;
+            var posA = me.Position;
+            var posB = target.Position;
+            var x = (posA.X + l * posB.X) / (1 + l);
+            var y = (posA.Y + l * posB.Y) / (1 + l);
+            return new Vector3((int) x, (int) y, posA.Z);
+        }
+
+        #endregion Methods
     }
 }

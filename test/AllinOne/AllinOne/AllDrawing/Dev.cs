@@ -10,9 +10,15 @@
 
     internal class Dev
     {
+        #region Fields
+
         private static readonly Dictionary<Unit, ParticleEffect> EffectsLine = new Dictionary<Unit, ParticleEffect>();
 
         private static bool _load = false;
+
+        #endregion Fields
+
+        #region Methods
 
         public static void DevInfo()
         {
@@ -103,5 +109,7 @@
                 _load = false;
             }
         }
+
+        #endregion Methods
     }
 }

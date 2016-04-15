@@ -4,24 +4,25 @@
     using AllinOne.Methods;
     using AllinOne.Variables;
     using Ensage;
-    using Ensage.Common.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     internal class EnemyHeroes
     {
+        #region Fields
+
         public static Dictionary<float, List<Ability>> AbilityDictionary;
 
         public static List<Hero> Heroes;
 
+        public static List<Hero> Illusions;
+        public static Dictionary<float, List<Item>> ItemDictionary;
         public static Hero[] UsableHeroes;
 
-        public static List<Hero> Illusions;
+        #endregion Fields
 
-        public static Dictionary<float, List<Item>> ItemDictionary;
+        #region Methods
 
         public static void Update()
         {
@@ -116,5 +117,7 @@
                     Console.WriteLine("Update Illusions Error");
             }
         }
+
+        #endregion Methods
     }
 }

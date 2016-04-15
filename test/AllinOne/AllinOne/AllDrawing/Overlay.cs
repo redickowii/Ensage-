@@ -1,8 +1,6 @@
-﻿using AllinOne.Menu;
-using AllinOne.ObjectManager.Heroes;
-
-namespace AllinOne.AllDrawing
+﻿namespace AllinOne.AllDrawing
 {
+    using AllinOne.Menu;
     using AllinOne.Methods;
     using AllinOne.Variables;
     using Ensage;
@@ -34,25 +32,27 @@ namespace AllinOne.AllDrawing
             }
         }
 
-        public static void DrawTopOverlayHealth(List<Hero> heroes, int height)
+        public static void DrawTopOverlayHealth(List<Hero> heroes, int height, Color colorF)
         {
             foreach (var hero in heroes.Where(x => x.IsAlive))
             {
                 var position = GetTopPanelPosition(hero) + GetPos(hero, 1);
                 var size = GetTopPanelSize(hero);
+                var colorE = new Color(102, 0, 0, (int) colorF.A);
                 var healthdelta = new Vector2(hero.Health * size.X / hero.MaximumHealth, 0);
-                DrawTopPanel(position, size, healthdelta, new Color(0, 102, 0, 200), new Color(102, 0, 0, 200), height);
+                DrawTopPanel(position, size, healthdelta, colorF, colorE, height);
             }
         }
 
-        public static void DrawTopOverlayMana(List<Hero> heroes, int height)
+        public static void DrawTopOverlayMana(List<Hero> heroes, int height, Color colorF)
         {
             foreach (var hero in heroes.Where(x => x.IsAlive))
             {
                 var position = GetTopPanelPosition(hero) + GetPos(hero, 2);
                 var size = GetTopPanelSize(hero);
+                var colorE = new Color(128, 128, 128, (int) colorF.A);
                 var manaDelta = new Vector2(hero.Mana * size.X / hero.MaximumMana, 0);
-                DrawTopPanel(position, size, manaDelta, new Color(0, 0, 255, 200), Color.Gray, height);
+                DrawTopPanel(position, size, manaDelta, colorF, colorE, height);
             }
         }
 
@@ -67,11 +67,11 @@ namespace AllinOne.AllDrawing
         //    }
         //}
 
-        public static void DrawTopOverlayUltimateCooldownLine(List<Hero> heroes, int height)
+        public static void DrawTopOverlayUltimateCooldownLine(List<Hero> heroes, int height, int alpha)
         {
             foreach (var hero in heroes)
             {
-                var colorE = Color.Gray;
+                var colorE = new Color(128, 128, 128, alpha);
                 var ultimate = hero.Spellbook.SpellR;
                 if (ultimate != null && ultimate.Level > 0)
                 {
@@ -79,19 +79,19 @@ namespace AllinOne.AllDrawing
                     var position = GetTopPanelPosition(hero) + y;
                     var size = GetTopPanelSize(hero);
                     var delta = GetTopPanelSize(hero);
-                    Color colorF = new Color(0, 230, 0, 200);
+                    Color colorF = new Color(0, 230, 0, alpha);
                     if (ultimate.Cooldown > 0)
                     {
                         var e = ultimate.Cooldown / Common.GetCooldown(hero, ultimate);
                         switch (ultimate.AbilityState)
                         {
                             case AbilityState.NotEnoughMana:
-                                colorF = new Color(0, 102, 255, 200);
+                                colorF = new Color(0, 102, 255, alpha);
                                 delta = new Vector2(size.X * (1 - e), 0);
                                 break;
 
                             case AbilityState.OnCooldown:
-                                colorF = new Color((int) (255 * e), (int) (255 * (1 - e)), 0, 200);
+                                colorF = new Color((int) (255 * e), (int) (255 * (1 - e)), 0, alpha);
                                 delta = new Vector2(size.X * (1 - e), 0);
                                 break;
                         }
@@ -103,7 +103,7 @@ namespace AllinOne.AllDrawing
             }
         }
 
-        public static void DrawTopOverlayUltimateCooldownText(List<Hero> heroes)
+        public static void DrawTopOverlayUltimateCooldownText(List<Hero> heroes, int alpha)
         {
             foreach (var hero in heroes)
             {
@@ -112,41 +112,41 @@ namespace AllinOne.AllDrawing
                 {
                     var position = GetTopPanelPosition(hero);
                     var size = GetTopPanelSize(hero);
-                    Color colortext = new Color(255, 255, 0, 200);
+                    Color colortext = new Color(255, 255, 0, alpha);
                     var cooldown = (int) Math.Round(ultimate.Cooldown + 0.5);
                     float r;
                     if (ultimate.AbilityState == AbilityState.NotEnoughMana)
-                        colortext = new Color(0, 102, 255, 200);
+                        colortext = new Color(0, 102, 255, alpha);
                     string text = cooldown.ToString();
                     if (cooldown / 100 > 0)
                     {
                         r = size.X / 2 - 11;
-                        Draw.DrawLine(position + new Vector2(r - 1, 25), new Vector2(28, 16), Color.Black);
+                        Draw.DrawLine(position + new Vector2(r - 1, 25), new Vector2(28, 16), new Color(0, 0, 0, alpha));
                     }
                     else if (cooldown / 10 > 0)
                     {
                         r = size.X / 2 - 7;
-                        Draw.DrawLine(position + new Vector2(r - 1, 25), new Vector2(18, 16), Color.Black);
+                        Draw.DrawLine(position + new Vector2(r - 1, 25), new Vector2(18, 16), new Color(0, 0, 0, alpha));
                     }
                     else if (cooldown != 0)
                     {
                         r = size.X / 2 - 3;
-                        Draw.DrawLine(position + new Vector2(r - 3, 25), new Vector2(12, 16), Color.Black);
+                        Draw.DrawLine(position + new Vector2(r - 3, 25), new Vector2(12, 16), new Color(0, 0, 0, alpha));
                     }
                     else
                     {
-                        colortext = new Color(0, 255, 0, 200);
+                        colortext = new Color(0, 255, 0, alpha);
                         if (Math.Abs(Common.GetCooldown(hero, ultimate)) <= 0)
                         {
                             text = ultimate.Level.ToString();
                             r = size.X / 2 - 3;
-                            Draw.DrawLine(position + new Vector2(r - 1, 26), new Vector2(12, 15), Color.Black);
+                            Draw.DrawLine(position + new Vector2(r - 1, 26), new Vector2(12, 15), new Color(0, 0, 0, alpha));
                         }
                         else
                         {
                             text = "Ready";
                             r = size.X / 2 - 20;
-                            Draw.DrawLine(position + new Vector2(r - 1, 25), new Vector2(48, 16), Color.Black);
+                            Draw.DrawLine(position + new Vector2(r - 1, 25), new Vector2(48, 16), new Color(0, 0, 0, alpha));
                         }
                     }
                     Draw.DrawText(text, (int) (position.X + r), (int) (position.Y + 23), colortext, Fonts.UltFont);
@@ -185,21 +185,6 @@ namespace AllinOne.AllDrawing
             Draw.DrawLine(pos + new Vector2(0, size.Y), new Vector2(size.X, height * 3), new Color(0, 0, 0, 180));
 
             Draw.DrawText(text, (int) pos.X + 3, (int) (pos.Y + size.Y), color, Fonts.VisibleFont);
-        }
-
-        private static Vector2 GetTopPanelPosition(Hero hero)
-        {
-            Vector2 vector2;
-            var handle = hero.Handle;
-            if (TopPos.TryGetValue(handle, out vector2)) return vector2;
-            vector2 = HUDInfo.GetTopPanelPosition(hero);
-            TopPos.Add(handle, vector2);
-            return vector2;
-        }
-
-        private static Vector2 GetTopPanelSize(Hero hero)
-        {
-            return new Vector2((float) HUDInfo.GetTopPanelSizeX(hero) - 2, (float) HUDInfo.GetTopPanelSizeY(hero));
         }
 
         private static Vector2 GetPos(Entity hero, int s)
@@ -338,6 +323,21 @@ namespace AllinOne.AllDrawing
                     }
             }
             return new Vector2();
+        }
+
+        private static Vector2 GetTopPanelPosition(Hero hero)
+        {
+            Vector2 vector2;
+            var handle = hero.Handle;
+            if (TopPos.TryGetValue(handle, out vector2)) return vector2;
+            vector2 = HUDInfo.GetTopPanelPosition(hero);
+            TopPos.Add(handle, vector2);
+            return vector2;
+        }
+
+        private static Vector2 GetTopPanelSize(Hero hero)
+        {
+            return new Vector2((float) HUDInfo.GetTopPanelSizeX(hero) - 2, (float) HUDInfo.GetTopPanelSizeY(hero));
         }
 
         #endregion Methods

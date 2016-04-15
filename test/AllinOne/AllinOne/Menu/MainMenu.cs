@@ -1,123 +1,24 @@
 ﻿namespace AllinOne.Menu
 {
-    using AllinOne.CameraDistance;
-    using AllinOne.Variables;
     using Ensage.Common.Menu;
 
     using SharpDX;
 
-    internal class MenuVar
-    {
-        #region Lasthit
-
-        public static bool LastHitEnable;
-        public static int AutoAttackMode;
-        public static bool ShowHp;
-        public static bool Sapport;
-        public static bool UseSpell;
-        public static bool Harass;
-        public static bool Denie;
-        public static bool Aoc;
-        public static int Outrange;
-        public static int BonusWindUp;
-
-        public static bool Test;
-
-        public static bool SummonsEnable;
-        public static bool SummonsHarass;
-        public static bool SummonsDenie;
-        public static bool SummonsAoc;
-        public static bool SummonsAutoLasthit;
-        public static bool SummonsAutoFarm;
-
-        public static uint LastHitKey;
-        public static uint FarmKey;
-        public static uint CombatKey;
-        public static uint KiteKey;
-
-        #endregion Lasthit
-
-        #region Jungle
-
-        public static bool StackKey;
-        public static bool MoreFps;
-        public static bool DrawStackLine;
-
-        #endregion Jungle
-
-        #region Overlay
-
-        public static bool ShowTopOverlayAllyHp;
-        public static bool ShowTopOverlayAllyMp;
-        public static bool ShowTopOverlayAllyUltLine;
-        public static bool ShowTopOverlayAllyUltText;
-        public static bool ShowTopOverlayAlly;
-
-        public static bool ShowTopOverlayEnemyHp;
-        public static bool ShowTopOverlayEnemyMp;
-        public static bool ShowTopOverlayEnemyUltLine;
-        public static bool ShowTopOverlayEnemyUltText;
-        public static bool ShowTopOverlayEnemy;
-
-        public static bool ShowRunesMinimap;
-        public static bool ShowRunesChat;
-        public static int RuneScale;
-
-        public static bool OwnTowers;
-        public static bool EnemiesTowers;
-
-        public static int HealthHeightAlly;
-        public static int ManaHeightAlly;
-        public static int UltimateHeightAlly;
-        public static int HealthHeightEnemy;
-        public static int ManaHeightEnemy;
-        public static int UltimateHeightEnemy;
-
-        #endregion Overlay
-
-        #region ShowMeMore
-
-        public static bool ShowIllusions;
-        public static int IllusionsEffectMenu;
-        public static int HeroEffectMenu;
-        public static MenuItem TestEffectMenu;
-        public static bool Maphack;
-        public static bool ShowLastPos;
-        public static bool ShowLastPosMini;
-        public static bool ShowRoshanTimer;
-        public static bool VisiblebyEnemy;
-        public static int MiniScale;
-
-        #endregion ShowMeMore
-
-        #region Settings
-
-        public static MenuItem ShowExpRange;
-        public static MenuItem ShowAttackRange;
-        public static MenuItem CameraDistance;
-        public static bool DodgeEnable;
-        public static int DodgeFrequency;
-
-        #endregion Settings
-
-        #region Dev
-
-        public static bool OnOff;
-        public static bool ShowErrors;
-        public static bool ShowInfo;
-
-        #endregion Dev
-    }
-
     internal class MainMenu
     {
+        #region Fields
+
+        public static Menu Dev;
         public static Menu Menu;
         public static Menu MenuLastHit;
+        public static Menu MenuSettings;
         public static Menu MenuStack;
         public static Menu Overlay;
-        public static Menu MenuSettings;
         public static Menu ShowMeMore;
-        public static Menu Dev;
+
+        #endregion Fields
+
+        #region Methods
 
         public static void Load()
         {
@@ -151,16 +52,6 @@
             Menu.AddToMainMenu();
         }
 
-        public static void Update()
-        {
-            OverlayMenu.Update();
-            ShowMenu.Update();
-            JungleStackMenu.Update();
-            LastHitMenu.Update();
-            SettingsMenu.Update();
-            DevMenu.Update();
-        }
-
         public static void UnLoad()
         {
             if (Menu == null)
@@ -171,5 +62,127 @@
             Menu.RemoveFromMainMenu();
             Menu = null;
         }
+
+        public static void Update()
+        {
+            OverlayMenu.Update();
+            ShowMenu.Update();
+            JungleStackMenu.Update();
+            LastHitMenu.Update();
+            SettingsMenu.Update();
+            DevMenu.Update();
+        }
+
+        #endregion Methods
+    }
+
+    internal class MenuVar
+    {
+        #region Lasthit
+
+        public static bool Aoc;
+        public static int AutoAttackMode;
+        public static int BonusWindUp;
+        public static uint CombatKey;
+        public static bool Denie;
+        public static uint FarmKey;
+        public static bool Harass;
+        public static uint KiteKey;
+        public static bool LastHitEnable;
+        public static uint LastHitKey;
+        public static int Outrange;
+        public static bool Sapport;
+        public static bool ShowHp;
+        public static bool SummonsAoc;
+        public static bool SummonsAutoFarm;
+        public static bool SummonsAutoLasthit;
+        public static bool SummonsDenie;
+        public static bool SummonsEnable;
+        public static bool SummonsHarass;
+        public static bool Test;
+        public static bool UseSpell;
+
+        #endregion Lasthit
+
+        #region Jungle
+
+        public static bool DrawStackLine;
+        public static bool MoreFps;
+        public static bool StackKey;
+
+        #endregion Jungle
+
+        #region Overlay
+
+        public static int HealthHeightAlly;
+        public static int HealthHeightEnemy;
+        public static int ManaHeightAlly;
+        public static int ManaHeightEnemy;
+        public static int OverlayAlpha;
+        public static int OverlayHealthAllyBlue;
+        public static int OverlayHealthAllyGreen;
+        public static int OverlayHealthAllyRed;
+        public static int OverlayHealthEnemyBlue;
+        public static int OverlayHealthEnemyGreen;
+        public static int OverlayHealthEnemyRed;
+        public static int OverlayManaAllyBlue;
+        public static int OverlayManaAllyGreen;
+        public static int OverlayManaAllyRed;
+        public static int OverlayManaEnemyBlue;
+        public static int OverlayManaEnemyGreen;
+        public static int OverlayManaEnemyRed;
+        public static int RuneScale;
+        public static bool ShowRunesChat;
+        public static bool ShowRunesMinimap;
+        public static bool ShowTopOverlayAlly;
+        public static bool ShowTopOverlayAllyHp;
+        public static bool ShowTopOverlayAllyMp;
+        public static bool ShowTopOverlayAllyUltLine;
+        public static bool ShowTopOverlayAllyUltText;
+        public static bool ShowTopOverlayEnemy;
+        public static bool ShowTopOverlayEnemyHp;
+        public static bool ShowTopOverlayEnemyMp;
+        public static bool ShowTopOverlayEnemyUltLine;
+        public static bool ShowTopOverlayEnemyUltText;
+        public static int UltimateHeightAlly;
+        public static int UltimateHeightEnemy;
+
+        #endregion Overlay
+
+        #region ShowMeMore
+
+        public static bool EnemiesTowers;
+        public static int HeroEffectMenu;
+        public static int IllusionsEffectMenu;
+        public static bool Maphack;
+        public static int MiniScale;
+        public static bool OwnTowers;
+        public static bool ShowIllusions;
+        public static bool ShowLastPos;
+        public static bool ShowLastPosMini;
+        public static bool ShowRoshanTimer;
+        public static MenuItem TestEffectMenu;
+        public static bool TrueSight;
+        public static bool VisiblebyEnemy;
+
+        #endregion ShowMeMore
+
+        #region Settings
+
+        public static MenuItem CameraDistance;
+        public static bool DodgeEnable;
+        public static int DodgeFrequency;
+        public static MenuItem ShowAttackRange;
+        public static MenuItem ShowExpRange;
+
+        #endregion Settings
+
+        #region Dev
+
+        public static bool OnOff;
+        public static bool ShowErrors;
+        public static bool ShowInfo;
+
+        #endregion Dev
     }
 }

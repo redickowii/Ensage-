@@ -3,12 +3,13 @@
     using AllinOne.Methods;
     using AllinOne.Variables;
     using Ensage;
-    using Ensage.Common;
     using System.Collections.Generic;
     using System.Linq;
 
     internal class AllyHeroes
     {
+        #region Fields
+
         public static Dictionary<float, List<Ability>> AbilityDictionary;
 
         public static List<Hero> Heroes;
@@ -16,6 +17,10 @@
         public static Dictionary<float, List<Item>> ItemDictionary;
 
         public static Hero[] UsableHeroes;
+
+        #endregion Fields
+
+        #region Methods
 
         public static void Update()
         {
@@ -75,5 +80,7 @@
                 AbilityDictionary.Add(handle, abilitylist);
             }
         }
+
+        #endregion Methods
     }
 }

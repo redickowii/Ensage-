@@ -1,17 +1,13 @@
 ﻿namespace AllinOne.AllDrawing
 {
-    using AllinOne.ObjectManager;
     using AllinOne.Variables;
-    using Ensage;
     using SharpDX;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     internal class MyHero
     {
+        #region Methods
+
         public static void RadiusHeroParticleEffect(string s, float range, Color color, bool xx)
         {
             if (xx && !Var.RadiusHeroParticleEffect.ContainsKey(s))
@@ -57,5 +53,7 @@
                 Var.RadiusHeroParticleEffect[s] = null;
             }
         }
+
+        #endregion Methods
     }
 }

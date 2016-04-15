@@ -2,313 +2,16 @@
 {
     using AllinOne.Methods;
     using Ensage;
+    using Ensage.Common.Menu;
     using SharpDX;
     using SharpDX.Direct3D9;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-
-    public struct ShowMeMoreStruct
-    {
-        #region Fields
-
-        public readonly string Effect;
-        public readonly string Modifier;
-        public readonly int Range;
-
-        #endregion Fields
-
-        #region Constructors
-
-        public ShowMeMoreStruct(string modifier, string effect, int range)
-        {
-            Modifier = modifier;
-            Effect = effect;
-            Range = range;
-        }
-
-        #endregion Constructors
-    }
-
-    public class DictionarySleep
-    {
-        #region Properties
-
-        public float Period { get; set; }
-        public string Text { get; set; }
-
-        public long Time { get; set; }
-
-        #endregion Properties
-    }
-
-    public class DictionaryUnit
-    {
-        #region Properties
-
-        public List<Ht> Ht { get; set; }
-        public Unit Unit { get; set; }
-
-        #endregion Properties
-
-        #region Methods
-
-        public bool AHealth(Entity unit)
-        {
-            if (unit.Handle != Unit.Handle) return false;
-            if (Ht.Any(x => x.Health - unit.Health < 10)) return true;
-            Ht.Add(new Ht { Health = unit.Health, Time = Game.GameTime, ACreeps = Lasthit.Attack(unit) });
-            return true;
-        }
-
-        #endregion Methods
-    }
-
-    public class Ht
-    {
-        #region Properties
-
-        public int ACreeps { get; set; }
-        public float Health { get; set; }
-        public float Time { get; set; }
-
-        #endregion Properties
-    }
-
-    public class JungleCamps
-    {
-        #region Properties
-
-        public bool Ancients { get; set; }
-        public int AttackTime { get; set; }
-        public int Creepscount { get; set; }
-        public bool Empty { get; set; }
-        public int Id { get; set; }
-        public Vector3 Position { get; set; }
-        public bool Stacked { get; set; }
-        public Vector3 StackPosition { get; set; }
-        public int Starttime { get; set; }
-        public int State { get; set; }
-        public int Team { get; set; }
-        public Unit Unit { get; set; }
-        public Vector3 WaitPosition { get; set; }
-        public Vector3 WaitPositionN { get; set; }
-
-        #endregion Properties
-    }
-
-    internal class AllDodge
-    {
-        #region Fields
-
-        public static readonly List<string> BlinkAbilities = new List<string>
-        {
-            "item_blink",
-            "mirana_leap",
-            "antimage_blink",
-            "magnataur_skewer",
-            "item_force_staff",
-            "queenofpain_blink",
-            "morphling_waveform",
-            "sandking_burrowstrike",
-            "faceless_void_time_walk",
-            "phantom_lancer_doppelwalk",
-            "earth_spirit_rolling_boulder",
-            "ember_spirit_activate_fire_remnant"
-        };
-
-        public static readonly List<string> DefVsDamage = new List<string>
-        {
-            "nyx_assassin_spiked_carapace",
-            "templar_assassin_refraction",
-            "treant_living_armor",
-            "abaddon_aphotic_shield",
-            "item_blade_mail"
-        };
-
-        public static readonly List<string> DefVsDisable = new List<string>
-        {
-            "slark_dark_pact",
-            "juggernaut_blade_fury",
-            "life_stealer_rage",
-            "omniknight_repel",
-            "phantom_lancer_doppelwalk"
-        };
-
-        public static readonly List<string> DefVsMagic = new List<string>
-        {
-            "item_glimmer_cape",
-            "item_hood_of_defiance",
-            "oracle_fates_edict",
-            "ember_spirit_flame_guard",
-            "life_stealer_rage",
-            "juggernaut_blade_fury",
-            "omniknight_repel",
-            "pugna_nether_ward",
-            "item_pipe"
-        };
-
-        public static readonly List<string> DefVsPhys = new List<string>
-        {
-            "item_ghost",
-            "pugna_decrepify",
-            "windrunner_windrun",
-            "winter_wyvern_cold_embrace",
-            "lich_frost_armor",
-            "arc_warden_magnetic_field",
-            "item_crimson_guard",
-            "item_shivas_guard",
-            "item_buckler"
-        };
-
-        public static readonly List<string> Diffusal = new List<string>
-        {
-            "item_diffusal_blade",
-            "item_diffusal_blade_2",
-        };
-
-        public static readonly List<string> Eul = new List<string>
-        {
-            "item_cyclone"
-        };
-
-        public static readonly List<string> Fist = new List<string>
-        {
-            "ember_spirit_sleight_of_fist"
-        };
-
-        public static readonly List<string> Greaves = new List<string>
-        {
-            "item_guardian_greaves"
-        };
-
-        public static readonly List<string> IgnoresMagicImmunity = new List<string>
-        {
-            "item_abyssal_blade"
-        };
-
-        public static readonly List<string> InstaDisable = new List<string>
-        {
-            "item_sheepstick",
-            "item_orchid",
-            "puck_waning_rift",
-            "dragon_knight_dragon_tail",
-            "lion_voodoo",
-            "shadow_shaman_voodoo",
-            "shadow_shaman_shackles",
-            "rubick_telekinesis",
-            "skywrath_mage_ancient_seal",
-            "keeper_of_the_light_mana_leak",
-            "crystal_maiden_frostbite",
-            "ember_spirit_searing_chains",
-            "item_abyssal_blade"
-        };
-
-        public static readonly List<string> Invis = new List<string>
-        {
-            "bounty_hunter_wind_walk",
-            "clinkz_wind_walk",
-            "sandking_sand_storm",
-            "templar_assassin_meld",
-            "weaver_shukuchi",
-            "item_glimmer_cape",
-            "item_invis_sword",
-            "item_silver_edge"
-        };
-
-        public static readonly List<string> Invul = new List<string>
-        {
-            "shadow_demon_disruption",
-            "obsidian_destroyer_astral_imprisonment",
-            "bane_nightmare"
-        };
-
-        public static readonly List<string> Lotus = new List<string>
-        {
-            "item_lotus_orb"
-        };
-
-        public static readonly List<string> Manta = new List<string>
-        {
-            "item_manta"
-        };
-
-        public static readonly List<string> OffVsPhys = new List<string>
-        {
-            "item_ethereal_blade",
-            "item_heavens_halberd",
-            "item_solar_crest",
-            "pugna_decrepify",
-            "item_rod_of_atos",
-            "keeper_of_the_light_blinding_light",
-            "razor_static_link",
-            "brewmaster_drunken_haze",
-            "tinker_laser"
-        };
-
-        public static readonly List<string> Shift = new List<string>
-        {
-            "puck_phase_shift"
-        };
-
-        public static readonly List<string> SnowBall = new List<string>
-        {
-            "tusk_snowball"
-        };
-
-        #endregion Fields
-    }
-
-    internal class Fonts
-    {
-        #region Fields
-
-        public static Font RoshanFont = new Font(
-            Drawing.Direct3DDevice9,
-            new FontDescription
-            {
-                FaceName = "Tahoma",
-                Height = 15,
-                OutputPrecision = FontPrecision.Default,
-                Quality = FontQuality.Default
-            });
-
-        public static Font StackFont = new Font(
-                    Drawing.Direct3DDevice9,
-            new FontDescription
-            {
-                FaceName = "Monospace",
-                Height = 35,
-                OutputPrecision = FontPrecision.Default,
-                Quality = FontQuality.ClearType
-            });
-
-        public static Font UltFont = new Font(
-            Drawing.Direct3DDevice9,
-            new FontDescription
-            {
-                FaceName = "Monospace",
-                Height = 20,
-                OutputPrecision = FontPrecision.Outline,
-                Quality = FontQuality.ClearType
-            });
-
-        public static Font VisibleFont = new Font(
-                    Drawing.Direct3DDevice9,
-            new FontDescription
-            {
-                FaceName = "Monospace",
-                Height = 12,
-                OutputPrecision = FontPrecision.Outline,
-                Quality = FontQuality.ClearType
-            });
-
-        #endregion Fields
-    }
+    using System.Threading;
 
     internal class Particles
     {
-        #region Fields
-
         public static readonly List<string> Partlist = new List<string>
         {
             @"particles\ui_mouseactions\ambient_gizmo.vpcf",
@@ -447,6 +150,25 @@
             @"particles\ui_mouseactions\waypoint_flag.vpcf"
         };
 
+        public static Dictionary<int, List<string>> IllusionsEffect = new Dictionary<int, List<string>>
+        {
+            { 0, new List<string> { "particles/items2_fx/smoke_of_deceit_buff.vpcf"}},
+            { 1, new List<string> { "particles/items2_fx/shadow_amulet_active_ground_proj.vpcf" }},
+            { 2, new List<string> { "particles/items_fx/diffusal_slow.vpcf"}},
+            { 3, new List<string>
+            {
+                "particles/items_fx/diffusal_slow.vpcf",
+                "particles/items2_fx/shadow_amulet_active_ground_proj.vpcf",
+                "particles/items2_fx/smoke_of_deceit_buff.vpcf"
+            }},
+            { 4, new List<string>
+            {
+                "particles/showcase_fx/showcase_fx_base_1.vpcf",
+                "particles/showcase_fx/showcase_fx_base_2.vpcf",
+                "particles/showcase_fx/showcase_fx_base_3.vpcf"
+            }}
+        };
+
         public static Dictionary<int, List<string>> HeroEffect = new Dictionary<int, List<string>>
         {
             //{ 0, new List<string> { "particles/units/heroes/hero_batrider/batrider_stickynapalm_stack.vpcf"}},
@@ -484,54 +206,32 @@
             { 12, new List<string> { "particles/hw_fx/candy_carrying_stack.vpcf" }}, //effect.SetControlPoint(2, new Vector3(1, 4, 0));
             { 13, new List<string> { "particles/items_fx/aura_shivas.vpcf" }}
         };
-
-        public static Dictionary<int, List<string>> IllusionsEffect = new Dictionary<int, List<string>>
-        {
-            { 0, new List<string> { "particles/items2_fx/smoke_of_deceit_buff.vpcf"}},
-            { 1, new List<string> { "particles/items2_fx/shadow_amulet_active_ground_proj.vpcf" }},
-            { 2, new List<string> { "particles/items_fx/diffusal_slow.vpcf"}},
-            { 3, new List<string>
-            {
-                "particles/items_fx/diffusal_slow.vpcf",
-                "particles/items2_fx/shadow_amulet_active_ground_proj.vpcf",
-                "particles/items2_fx/smoke_of_deceit_buff.vpcf"
-            }},
-            { 4, new List<string>
-            {
-                "particles/showcase_fx/showcase_fx_base_1.vpcf",
-                "particles/showcase_fx/showcase_fx_base_2.vpcf",
-                "particles/showcase_fx/showcase_fx_base_3.vpcf"
-            }}
-        };
-
-        #endregion Fields
     }
 
     internal class Var
     {
-        #region Fields
-
-        public static int AutoAttackMode;
-        public static bool AutoAttackTypeDef;
-        public static List<Unit> Creeps;
+        public static int Seconds;
+        public static bool Loaded;
+        public static List<DictionarySleep> SleepDic = new List<DictionarySleep>();
         public static List<DictionaryUnit> CreepsDic = new List<DictionaryUnit>();
+        public static Dictionary<string, ParticleEffect> OwnTowerRange;
+        public static Dictionary<string, ParticleEffect> EnemyTowerRange;
+        public static Dictionary<Unit, List<Unit>> Summons;
+        public static List<Unit> StackableSummons = new List<Unit>();
+        public static List<Unit> Creeps;
+        public static Dictionary<string, ParticleEffect> RadiusHeroParticleEffect;
         public static Unit CreeptargetH;
         public static Unit CreeptargetS;
-        public static bool DisableAaKeyPressed;
-        public static double HeroAPoint;
-        public static bool Loaded;
-        public static Hero Me;
         public static Ability Q, W, E, R;
-        public static Dictionary<string, ParticleEffect> RadiusHeroParticleEffect;
-        public static int Seconds;
-        public static List<DictionarySleep> SleepDic = new List<DictionarySleep>();
-        public static List<Unit> StackableSummons = new List<Unit>();
-        public static Dictionary<Unit, List<Unit>> Summons;
-        public static bool SummonsAutoAttackTypeDef;
-        public static bool SummonsDisableAaKeyPressed;
         public static Hero Target;
-
-        #endregion Fields
+        public static Hero Me;
+        public static int AutoAttackMode;
+        public static bool DisableAaKeyPressed;
+        public static bool AutoAttackTypeDef;
+        public static bool SummonsDisableAaKeyPressed;
+        public static bool SummonsAutoAttackTypeDef;
+        public static bool TowerLoad;
+        public static double HeroAPoint;
 
         #region ListJungleCamps
 
@@ -706,5 +406,111 @@
             }};
 
         #endregion ListJungleCamps
+    }
+
+    internal class Fonts
+    {
+        public static Font StackFont = new Font(
+            Drawing.Direct3DDevice9,
+            new FontDescription
+            {
+                FaceName = "Monospace",
+                Height = 35,
+                OutputPrecision = FontPrecision.Default,
+                Quality = FontQuality.ClearType
+            });
+
+        public static Font VisibleFont = new Font(
+            Drawing.Direct3DDevice9,
+            new FontDescription
+            {
+                FaceName = "Monospace",
+                Height = 12,
+                OutputPrecision = FontPrecision.Outline,
+                Quality = FontQuality.ClearType
+            });
+
+        public static Font UltFont = new Font(
+            Drawing.Direct3DDevice9,
+            new FontDescription
+            {
+                FaceName = "Monospace",
+                Height = 20,
+                OutputPrecision = FontPrecision.Outline,
+                Quality = FontQuality.ClearType
+            });
+
+        public static Font RoshanFont = new Font(
+            Drawing.Direct3DDevice9,
+            new FontDescription
+            {
+                FaceName = "Tahoma",
+                Height = 15,
+                OutputPrecision = FontPrecision.Default,
+                Quality = FontQuality.Default
+            });
+    }
+
+    public class DictionarySleep
+    {
+        public string Text { get; set; }
+
+        public long Time { get; set; }
+
+        public float Period { get; set; }
+    }
+
+    public class DictionaryUnit
+    {
+        public Unit Unit { get; set; }
+
+        public List<Ht> Ht { get; set; }
+
+        public bool AHealth(Entity unit)
+        {
+            if (unit.Handle != Unit.Handle) return false;
+            if (Ht.Any(x => x.Health - unit.Health < 10)) return true;
+            Ht.Add(new Ht { Health = unit.Health, Time = Game.GameTime, ACreeps = Lasthit.Attack(unit) });
+            return true;
+        }
+    }
+
+    public class Ht
+    {
+        public float Health { get; set; }
+        public float Time { get; set; }
+        public int ACreeps { get; set; }
+    }
+
+    public class JungleCamps
+    {
+        public Unit Unit { get; set; }
+        public Vector3 Position { get; set; }
+        public Vector3 StackPosition { get; set; }
+        public Vector3 WaitPosition { get; set; }
+        public Vector3 WaitPositionN { get; set; }
+        public int Team { get; set; }
+        public int Id { get; set; }
+        public bool Stacked { get; set; }
+        public bool Ancients { get; set; }
+        public bool Empty { get; set; }
+        public int State { get; set; }
+        public int AttackTime { get; set; }
+        public int Creepscount { get; set; }
+        public int Starttime { get; set; }
+    }
+
+    public struct ShowMeMoreStruct
+    {
+        public readonly string Modifier;
+        public readonly string Effect;
+        public readonly int Range;
+
+        public ShowMeMoreStruct(string modifier, string effect, int range)
+        {
+            Modifier = modifier;
+            Effect = effect;
+            Range = range;
+        }
     }
 }

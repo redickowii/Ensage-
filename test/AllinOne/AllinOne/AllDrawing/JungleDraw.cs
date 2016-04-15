@@ -12,7 +12,22 @@
 
     internal class JungleDraw
     {
+        #region Fields
+
         private static readonly Dictionary<Unit, ParticleEffect> CampUnitLine = new Dictionary<Unit, ParticleEffect>();
+
+        #endregion Fields
+
+        #region Methods
+
+        public static void Clear()
+        {
+            if (CampUnitLine.Count > 0)
+            {
+                CampUnitLine.ForEach(x => x.Value.Dispose());
+                CampUnitLine.Clear();
+            }
+        }
 
         public static void DrawCamp()
         {
@@ -74,13 +89,6 @@
             }
         }
 
-        public static void Clear()
-        {
-            if (CampUnitLine.Count > 0)
-            {
-                CampUnitLine.ForEach(x => x.Value.Dispose());
-                CampUnitLine.Clear();
-            }
-        }
+        #endregion Methods
     }
 }

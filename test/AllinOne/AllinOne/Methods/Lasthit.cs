@@ -15,6 +15,31 @@ namespace AllinOne.Methods
     {
         #region TEST
 
+        public static int Attack(Entity unit)
+        {
+            var count = 0;
+            try
+            {
+                var creeps =
+                    ObjectManager.GetEntities<Unit>()
+                        .Where(
+                            x =>
+                                x.Distance2D(unit) <= x.AttackRange + 100 && x.IsAttacking() && x.IsAlive &&
+                                x.Handle != unit.Handle && x.Team != unit.Team)
+                        .ToList();
+                count += (from creep in creeps
+                          let angle = creep.Rotation < 0 ? Math.Abs(creep.Rotation) : 360 - creep.Rotation
+                          where Math.Abs(angle - creep.FindAngleForTurnTime(unit.Position)) <= 3
+                          select creep).Count();
+            }
+            catch (Exception)
+            {
+                if (MenuVar.ShowErrors)
+                    Console.WriteLine("Attack Count Error");
+            }
+            return count;
+        }
+
         public static void Attack_Calc()
         {
             if (!ObjectManager.GetEntities<Unit>().Any(x => x.Distance2D(Var.Me) <= 2000 && x.IsAlive && x.Health > 0))
@@ -43,41 +68,6 @@ namespace AllinOne.Methods
             //    Common.Sleep(2000, "Test");
             //}
             Clear();
-        }
-
-        private static void Clear()
-        {
-            if (!Common.SleepCheck("Clear")) return;
-            var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive).ToList();
-            Var.CreepsDic = (from creep in creeps
-                             where Var.CreepsDic.Any(x => x.Unit.Handle == creep.Handle)
-                             select Var.CreepsDic.Find(x => x.Unit.Handle == creep.Handle)).ToList();
-            Common.Sleep(10000, "Clear");
-        }
-
-        public static int Attack(Entity unit)
-        {
-            var count = 0;
-            try
-            {
-                var creeps =
-                    ObjectManager.GetEntities<Unit>()
-                        .Where(
-                            x =>
-                                x.Distance2D(unit) <= x.AttackRange + 100 && x.IsAttacking() && x.IsAlive &&
-                                x.Handle != unit.Handle && x.Team != unit.Team)
-                        .ToList();
-                count += (from creep in creeps
-                          let angle = creep.Rotation < 0 ? Math.Abs(creep.Rotation) : 360 - creep.Rotation
-                          where Math.Abs(angle - creep.FindAngleForTurnTime(unit.Position)) <= 3
-                          select creep).Count();
-            }
-            catch (Exception)
-            {
-                if (MenuVar.ShowErrors)
-                    Console.WriteLine("Attack Count Error");
-            }
-            return count;
         }
 
         public static double Healthpredict(Unit unit, double time)
@@ -111,6 +101,16 @@ namespace AllinOne.Methods
             return 0;
         }
 
+        private static void Clear()
+        {
+            if (!Common.SleepCheck("Clear")) return;
+            var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive).ToList();
+            Var.CreepsDic = (from creep in creeps
+                             where Var.CreepsDic.Any(x => x.Unit.Handle == creep.Handle)
+                             select Var.CreepsDic.Find(x => x.Unit.Handle == creep.Handle)).ToList();
+            Common.Sleep(10000, "Clear");
+        }
+
         private static void UpdateCreeps()
         {
             try
@@ -139,6 +139,11 @@ namespace AllinOne.Methods
         #endregion TEST
 
         #region Main
+
+        public static void Combat()
+        {
+            Orbwalking.Orbwalk(Var.Target, attackmodifiers: true);
+        }
 
         public static void Drawhpbar()
         {
@@ -215,70 +220,58 @@ namespace AllinOne.Methods
             }
         }
 
-        public static void SummonLastHit()
+        public static void Farm()
         {
-            if (Var.Summons.Count == 0) return;
-            if (!Var.SummonsDisableAaKeyPressed)
+            if (!Common.SleepCheck("cast")) return;
+            if (!Var.DisableAaKeyPressed)
             {
-                Common.AutoattackSummons(0);
-                Var.SummonsDisableAaKeyPressed = true;
-                Var.SummonsAutoAttackTypeDef = false;
+                Common.Autoattack(0);
+                Var.DisableAaKeyPressed = true;
+                Var.AutoAttackTypeDef = false;
             }
-            foreach (var summon in Var.Summons)
+            Var.CreeptargetH = KillableCreep(Var.Me, false, false, 99);
+            if (Var.CreeptargetH != null && Var.CreeptargetH.IsValid && Var.CreeptargetH.IsVisible && Var.CreeptargetH.IsAlive)
             {
-                var attackRange = summon.Key.AttackRange;
-                Var.CreeptargetS = KillableCreep(summon.Key, false, true, 3);
-                if (Var.CreeptargetS != null && Var.CreeptargetS.IsValid && Var.CreeptargetS.IsVisible &&
-                    Var.CreeptargetS.IsAlive &&
-                    Var.CreeptargetS.Health < GetDamageOnUnit(summon.Key, Var.CreeptargetS, 0) * 3)
-                {
-                    var getDamage = GetDamageOnUnit(summon.Key, Var.CreeptargetS, 0);
-                    if (Var.CreeptargetS.Distance2D(summon.Key) <= attackRange)
-                    {
-                        if (Var.CreeptargetS.Health < getDamage)
-                        {
-                            if (summon.Key.NetworkActivity != NetworkActivity.Attack &&
-                                Common.SleepCheck(summon.Key.Handle + "attack") ||
-                                !Common.SleepCheck(summon.Key.Handle + "harass"))
-                                summon.Key.Attack(Var.CreeptargetS);
-                            Common.Sleep(summon.Key.SecondsPerAttack * 1000 + Game.Ping, summon.Key.Handle + "attack");
-                        }
-                        else if (Var.CreeptargetS.Health > getDamage && Common.SleepCheck(summon.Key.Handle + "stop"))
-                        {
-                            summon.Key.Hold();
-                            Common.Sleep(300 + Game.Ping, summon.Key.Handle + "stop");
-                        }
-                    }
-                    else if (summon.Key.Distance2D(Var.CreeptargetS) >= attackRange &&
-                                Common.SleepCheck(summon.Key.Handle + "walk"))
-                    {
-                        summon.Key.Move(Var.CreeptargetS.Position);
-                        Common.Sleep(300 + Game.Ping, summon.Key.Handle + "walk");
-                    }
-                }
-                else if (MenuVar.SummonsHarass && summon.Key.Distance2D(Var.Target) < 1000 &&
-                            Common.SleepCheck(summon.Key.Handle + "harass"))
-                {
-                    summon.Key.Attack(Var.Target);
-                    Common.Sleep(1000 + Game.Ping, summon.Key.Handle + "harass");
-                }
+                if (MenuVar.UseSpell && Common.SleepCheck("cooldown"))
+                    SpellCast();
+                Orbwalking.Orbwalk(Var.CreeptargetH);
             }
         }
 
-        public static void SummonFarm()
+        public static List<Unit> GetNearestCreep(Unit source, float range)
         {
-            if (Var.Summons.Count == 0) return;
-            foreach (var summon in Var.Summons)
+            try
             {
-                Var.CreeptargetS = KillableCreep(summon.Key, false, true, 99);
-
-                if (Var.CreeptargetS != null && Var.CreeptargetS.IsValid && Var.CreeptargetS.IsVisible &&
-                    Var.CreeptargetS.IsAlive && Common.SleepCheck(summon.Key.Handle + "attack"))
-                {
-                    summon.Key.Attack(Var.CreeptargetS);
-                    Common.Sleep(summon.Key.SecondsPerAttack * 300 + Game.Ping, summon.Key.Handle + "attack");
-                }
+                return ObjectManager.GetEntities<Unit>()
+                        .Where(
+                            x =>
+                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Additive ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Barracks ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Building ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creature) &&
+                                 x.IsAlive && x.IsVisible && x.Distance2D(source) < range)
+                                 .OrderBy(creep => creep.Health)
+                                 .ToList();
             }
+            catch (Exception)
+            {
+                if (MenuVar.ShowErrors)
+                    Console.WriteLine("GetNearestCreep Error");
+            }
+            return null;
+        }
+
+        public static void Kite()
+        {
+            Orbwalking.Orbwalk(
+                Var.Target,
+                attackmodifiers: true,
+                bonusWindupMs: MenuVar.BonusWindUp);
         }
 
         public static void LastHit()
@@ -331,274 +324,70 @@ namespace AllinOne.Methods
             }
         }
 
-        public static void Farm()
+        public static void SummonFarm()
         {
-            if (!Common.SleepCheck("cast")) return;
-            if (!Var.DisableAaKeyPressed)
+            if (Var.Summons.Count == 0) return;
+            foreach (var summon in Var.Summons)
             {
-                Common.Autoattack(0);
-                Var.DisableAaKeyPressed = true;
-                Var.AutoAttackTypeDef = false;
-            }
-            Var.CreeptargetH = KillableCreep(Var.Me, false, false, 99);
-            if (Var.CreeptargetH != null && Var.CreeptargetH.IsValid && Var.CreeptargetH.IsVisible && Var.CreeptargetH.IsAlive)
-            {
-                if (MenuVar.UseSpell && Common.SleepCheck("cooldown"))
-                    SpellCast();
-                Orbwalking.Orbwalk(Var.CreeptargetH);
-            }
-        }
+                Var.CreeptargetS = KillableCreep(summon.Key, false, true, 99);
 
-        public static void Combat()
-        {
-            Orbwalking.Orbwalk(Var.Target, attackmodifiers: true);
-        }
-
-        public static void Kite()
-        {
-            Orbwalking.Orbwalk(
-                Var.Target,
-                attackmodifiers: true,
-                bonusWindupMs: MenuVar.BonusWindUp);
-        }
-
-        private static void SpellCast()
-        {
-            try
-            {
-                foreach (var creep in Var.Creeps.Where(x => x.Team != Var.Me.Team)
-                    .OrderByDescending(creep => creep.Health))
+                if (Var.CreeptargetS != null && Var.CreeptargetS.IsValid && Var.CreeptargetS.IsVisible &&
+                    Var.CreeptargetS.IsAlive && Common.SleepCheck(summon.Key.Handle + "attack"))
                 {
-                    double damage = 0;
-                    switch (Var.Me.ClassID)
+                    summon.Key.Attack(Var.CreeptargetS);
+                    Common.Sleep(summon.Key.SecondsPerAttack * 300 + Game.Ping, summon.Key.Handle + "attack");
+                }
+            }
+        }
+
+        public static void SummonLastHit()
+        {
+            if (Var.Summons.Count == 0) return;
+            if (!Var.SummonsDisableAaKeyPressed)
+            {
+                Common.AutoattackSummons(0);
+                Var.SummonsDisableAaKeyPressed = true;
+                Var.SummonsAutoAttackTypeDef = false;
+            }
+            foreach (var summon in Var.Summons)
+            {
+                var attackRange = summon.Key.AttackRange;
+                Var.CreeptargetS = KillableCreep(summon.Key, false, true, 3);
+                if (Var.CreeptargetS != null && Var.CreeptargetS.IsValid && Var.CreeptargetS.IsVisible &&
+                    Var.CreeptargetS.IsAlive &&
+                    Var.CreeptargetS.Health < GetDamageOnUnit(summon.Key, Var.CreeptargetS, 0) * 3)
+                {
+                    var getDamage = GetDamageOnUnit(summon.Key, Var.CreeptargetS, 0);
+                    if (Var.CreeptargetS.Distance2D(summon.Key) <= attackRange)
                     {
-                        case ClassID.CDOTA_Unit_Hero_Zuus:
-                            if (Var.Q.Level > 0 && Var.Q.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
-                            {
-                                damage = ((Var.Q.Level - 1) * 15 + 85) * (1 - creep.MagicDamageResist);
-                                if (damage > creep.Health)
-                                {
-                                    Var.Q.UseAbility(creep);
-                                    Common.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Common.Sleep(Var.Q.GetCooldown(Var.Q.Level) * 1000 + 50 + Game.Ping, "cooldown");
-                                }
-                            }
-                            break;
-
-                        case ClassID.CDOTA_Unit_Hero_Bristleback:
-                            if (Var.W.Level > 0 && Var.W.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
-                            {
-                                double quillSprayDmg = 0;
-                                if (creep.Modifiers.Any(
-                                        x =>
-                                            x.Name == "modifier_bristleback_quill_spray_stack" ||
-                                            x.Name == "modifier_bristleback_quill_spray"))
-                                    quillSprayDmg =
-                                        creep.Modifiers.Find(
-                                            x =>
-                                                x.Name == "modifier_bristleback_quill_spray_stack" ||
-                                                x.Name == "modifier_bristleback_quill_spray").StackCount * 30 +
-                                        (Var.W.Level - 1) * 2;
-                                damage = ((Var.W.Level - 1) * 20 + 20 + quillSprayDmg) *
-                                         (1 - 0.06 * creep.Armor / (1 + 0.06 * creep.Armor));
-                                if (damage > creep.Health && Var.W.CastRange > Var.Me.Distance2D(creep))
-                                {
-                                    Var.W.UseAbility();
-                                    Common.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Common.Sleep(Var.W.GetCooldown(Var.W.Level) * 1000 + 50 + Game.Ping, "cooldown");
-                                }
-                            }
-                            break;
-
-                        case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
-                            if (Var.Q.Level > 0 && Var.Q.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
-                            {
-                                var time = 300 + Var.Me.Distance2D(creep) / Var.Q.GetProjectileSpeed();
-                                if (time < creep.SecondsPerAttack * 1000)
-                                    damage = ((Var.Q.Level - 1) * 40 + 60) * (1 - 0.06 * creep.Armor / (1 + 0.06 * creep.Armor));
-                                if (damage > creep.Health)
-                                {
-                                    Var.Q.UseAbility(creep);
-                                    Common.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Common.Sleep(6 * 1000 + Game.Ping, "cooldown");
-                                }
-                            }
-                            break;
-
-                        case ClassID.CDOTA_Unit_Hero_Pudge:
-                            if (Var.W.Level > 0)
-                            {
-                                if (Var.CreeptargetH != null && creep.Handle == Var.CreeptargetH.Handle &&
-                                    Var.Me.Distance2D(creep) <= MyHeroInfo.AttackRange())
-                                {
-                                    damage = GetDamageOnUnit(Var.Me, creep, 0);
-                                    if (damage > creep.Health && !Var.W.IsToggled && Var.Me.IsAttacking())
-                                    {
-                                        Var.W.ToggleAbility();
-                                        Common.Sleep(200 + Game.Ping, "cooldown");
-                                    }
-                                }
-                                if (Var.W.IsToggled)
-                                {
-                                    Var.W.ToggleAbility();
-                                    Common.Sleep((float) Var.HeroAPoint + Game.Ping, "cooldown");
-                                }
-                            }
-                            break;
+                        if (Var.CreeptargetS.Health < getDamage)
+                        {
+                            if (summon.Key.NetworkActivity != NetworkActivity.Attack &&
+                                Common.SleepCheck(summon.Key.Handle + "attack") ||
+                                !Common.SleepCheck(summon.Key.Handle + "harass"))
+                                summon.Key.Attack(Var.CreeptargetS);
+                            Common.Sleep(summon.Key.SecondsPerAttack * 1000 + Game.Ping, summon.Key.Handle + "attack");
+                        }
+                        else if (Var.CreeptargetS.Health > getDamage && Common.SleepCheck(summon.Key.Handle + "stop"))
+                        {
+                            summon.Key.Hold();
+                            Common.Sleep(300 + Game.Ping, summon.Key.Handle + "stop");
+                        }
+                    }
+                    else if (summon.Key.Distance2D(Var.CreeptargetS) >= attackRange &&
+                                Common.SleepCheck(summon.Key.Handle + "walk"))
+                    {
+                        summon.Key.Move(Var.CreeptargetS.Position);
+                        Common.Sleep(300 + Game.Ping, summon.Key.Handle + "walk");
                     }
                 }
-            }
-            catch (Exception)
-            {
-                //
-            }
-        }
-
-        private static Unit KillableCreep(Unit unit, bool islaneclear, bool summon, double x)
-        {
-            try
-            {
-                Unit minion, miniondenie;
-                if (summon)
+                else if (MenuVar.SummonsHarass && summon.Key.Distance2D(Var.Target) < 1000 &&
+                            Common.SleepCheck(summon.Key.Handle + "harass"))
                 {
-                    minion = Var.Summons[unit].DefaultIfEmpty(null).FirstOrDefault(s => s.Team != Var.Me.Team);
-                    miniondenie = Var.Summons[unit].DefaultIfEmpty(null).FirstOrDefault(s => s.Team == Var.Me.Team);
+                    summon.Key.Attack(Var.Target);
+                    Common.Sleep(1000 + Game.Ping, summon.Key.Handle + "harass");
                 }
-                else
-                {
-                    minion = GetLowestHpCreep(unit, Common.GetOutRange(unit));
-                    miniondenie = GetMyLowestHpCreep(unit, Common.GetOutRange(unit));
-                }
-                if (minion == null && miniondenie == null) return null;
-                var percent = minion.Health / minion.MaximumHealth * 100;
-                if ((miniondenie.Health > GetDamageOnUnit(unit, miniondenie, 0) ||
-                    minion.Health < GetDamageOnUnit(unit, minion, 0) + 30) &&
-                    (percent < 90 || GetDamageOnUnit(unit, minion, 0) > minion.MaximumHealth) &&
-                    minion.Health < GetDamageOnUnit(unit, minion, 0) * x && !MenuVar.Sapport)
-                {
-                    if (unit.CanAttack())
-                        return minion;
-                }
-                else if (islaneclear)
-                {
-                    return minion;
-                }
-
-                if (MenuVar.Denie && !summon || MenuVar.SummonsDenie && summon)
-                {
-                    if (miniondenie.Health <= GetDamageOnUnit(unit, miniondenie, 0) * x * 0.75 &&
-                        miniondenie.Health <= miniondenie.MaximumHealth / 2 &&
-                        miniondenie.Team == unit.Team)
-                    {
-                        if (unit.CanAttack())
-                            return miniondenie;
-                    }
-                }
-
-                if (MenuVar.Aoc && !summon || MenuVar.SummonsAoc && summon)
-                {
-                    if (miniondenie.Health <= miniondenie.MaximumHealth / 2 &&
-                        miniondenie.Health > GetDamageOnUnit(unit, miniondenie, 0) * x * 0.75 &&
-                        miniondenie.Team == unit.Team)
-                        if (unit.CanAttack())
-                            return miniondenie;
-                }
-                return null;
             }
-            catch (Exception)
-            {
-                //
-            }
-            return null;
-        }
-
-        public static List<Unit> GetNearestCreep(Unit source, float range)
-        {
-            try
-            {
-                return ObjectManager.GetEntities<Unit>()
-                        .Where(
-                            x =>
-                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Additive ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Barracks ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Building ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creature) &&
-                                 x.IsAlive && x.IsVisible && x.Distance2D(source) < range)
-                                 .OrderBy(creep => creep.Health)
-                                 .ToList();
-            }
-            catch (Exception)
-            {
-                if (MenuVar.ShowErrors)
-                    Console.WriteLine("GetNearestCreep Error");
-            }
-            return null;
-        }
-
-        private static Unit GetLowestHpCreep(Unit source, float range)
-        {
-            try
-            {
-                var lowestHp =
-                    ObjectManager.GetEntities<Unit>()
-                        .Where(
-                            x =>
-                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Additive ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Barracks ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Building ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creature) &&
-                                 x.IsAlive && x.IsVisible && x.Team != source.Team &&
-                                 x.Distance2D(source) < range)
-                        .OrderBy(creep => creep.Health)
-                        .DefaultIfEmpty(null)
-                        .FirstOrDefault();
-                return lowestHp;
-            }
-            catch (Exception)
-            {
-                if (MenuVar.ShowErrors)
-                    Console.WriteLine("GetLowestHpCreep Error");
-            }
-            return null;
-        }
-
-        private static Unit GetMyLowestHpCreep(Unit source, float range)
-        {
-            try
-            {
-                return ObjectManager.GetEntities<Unit>()
-                        .Where(
-                            x =>
-                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Additive ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Barracks ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Building ||
-                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creature) &&
-                                 x.IsAlive && x.IsVisible && x.Team == source.Team &&
-                                 x.Distance2D(source) < range)
-                        .OrderBy(creep => creep.Health)
-                        .DefaultIfEmpty(null)
-                        .FirstOrDefault();
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error GetAllLowestHpCreep");
-            }
-            return null;
         }
 
         private static double GetDamageOnUnit(Unit unit, Unit minion, double bonusdamage)
@@ -925,6 +714,217 @@ namespace AllinOne.Methods
                 realDamage = unit.Health + 10;
 
             return realDamage;
+        }
+
+        private static Unit GetLowestHpCreep(Unit source, float range)
+        {
+            try
+            {
+                var lowestHp =
+                    ObjectManager.GetEntities<Unit>()
+                        .Where(
+                            x =>
+                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Additive ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Barracks ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Building ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creature) &&
+                                 x.IsAlive && x.IsVisible && x.Team != source.Team &&
+                                 x.Distance2D(source) < range)
+                        .OrderBy(creep => creep.Health)
+                        .DefaultIfEmpty(null)
+                        .FirstOrDefault();
+                return lowestHp;
+            }
+            catch (Exception)
+            {
+                if (MenuVar.ShowErrors)
+                    Console.WriteLine("GetLowestHpCreep Error");
+            }
+            return null;
+        }
+
+        private static Unit GetMyLowestHpCreep(Unit source, float range)
+        {
+            try
+            {
+                return ObjectManager.GetEntities<Unit>()
+                        .Where(
+                            x =>
+                                (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Additive ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Barracks ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Building ||
+                                 x.ClassID == ClassID.CDOTA_BaseNPC_Creature) &&
+                                 x.IsAlive && x.IsVisible && x.Team == source.Team &&
+                                 x.Distance2D(source) < range)
+                        .OrderBy(creep => creep.Health)
+                        .DefaultIfEmpty(null)
+                        .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error GetAllLowestHpCreep");
+            }
+            return null;
+        }
+
+        private static Unit KillableCreep(Unit unit, bool islaneclear, bool summon, double x)
+        {
+            try
+            {
+                Unit minion, miniondenie;
+                if (summon)
+                {
+                    minion = Var.Summons[unit].DefaultIfEmpty(null).FirstOrDefault(s => s.Team != Var.Me.Team);
+                    miniondenie = Var.Summons[unit].DefaultIfEmpty(null).FirstOrDefault(s => s.Team == Var.Me.Team);
+                }
+                else
+                {
+                    minion = GetLowestHpCreep(unit, Common.GetOutRange(unit));
+                    miniondenie = GetMyLowestHpCreep(unit, Common.GetOutRange(unit));
+                }
+                if (minion == null && miniondenie == null) return null;
+                var percent = minion.Health / minion.MaximumHealth * 100;
+                if ((miniondenie.Health > GetDamageOnUnit(unit, miniondenie, 0) ||
+                    minion.Health < GetDamageOnUnit(unit, minion, 0) + 30) &&
+                    (percent < 90 || GetDamageOnUnit(unit, minion, 0) > minion.MaximumHealth) &&
+                    minion.Health < GetDamageOnUnit(unit, minion, 0) * x && !MenuVar.Sapport)
+                {
+                    if (unit.CanAttack())
+                        return minion;
+                }
+                else if (islaneclear)
+                {
+                    return minion;
+                }
+
+                if (MenuVar.Denie && !summon || MenuVar.SummonsDenie && summon)
+                {
+                    if (miniondenie.Health <= GetDamageOnUnit(unit, miniondenie, 0) * x * 0.75 &&
+                        miniondenie.Health <= miniondenie.MaximumHealth / 2 &&
+                        miniondenie.Team == unit.Team)
+                    {
+                        if (unit.CanAttack())
+                            return miniondenie;
+                    }
+                }
+
+                if (MenuVar.Aoc && !summon || MenuVar.SummonsAoc && summon)
+                {
+                    if (miniondenie.Health <= miniondenie.MaximumHealth / 2 &&
+                        miniondenie.Health > GetDamageOnUnit(unit, miniondenie, 0) * x * 0.75 &&
+                        miniondenie.Team == unit.Team)
+                        if (unit.CanAttack())
+                            return miniondenie;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                //
+            }
+            return null;
+        }
+
+        private static void SpellCast()
+        {
+            try
+            {
+                foreach (var creep in Var.Creeps.Where(x => x.Team != Var.Me.Team)
+                    .OrderByDescending(creep => creep.Health))
+                {
+                    double damage = 0;
+                    switch (Var.Me.ClassID)
+                    {
+                        case ClassID.CDOTA_Unit_Hero_Zuus:
+                            if (Var.Q.Level > 0 && Var.Q.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
+                            {
+                                damage = ((Var.Q.Level - 1) * 15 + 85) * (1 - creep.MagicDamageResist);
+                                if (damage > creep.Health)
+                                {
+                                    Var.Q.UseAbility(creep);
+                                    Common.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
+                                    Common.Sleep(Var.Q.GetCooldown(Var.Q.Level) * 1000 + 50 + Game.Ping, "cooldown");
+                                }
+                            }
+                            break;
+
+                        case ClassID.CDOTA_Unit_Hero_Bristleback:
+                            if (Var.W.Level > 0 && Var.W.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
+                            {
+                                double quillSprayDmg = 0;
+                                if (creep.Modifiers.Any(
+                                        x =>
+                                            x.Name == "modifier_bristleback_quill_spray_stack" ||
+                                            x.Name == "modifier_bristleback_quill_spray"))
+                                    quillSprayDmg =
+                                        creep.Modifiers.Find(
+                                            x =>
+                                                x.Name == "modifier_bristleback_quill_spray_stack" ||
+                                                x.Name == "modifier_bristleback_quill_spray").StackCount * 30 +
+                                        (Var.W.Level - 1) * 2;
+                                damage = ((Var.W.Level - 1) * 20 + 20 + quillSprayDmg) *
+                                         (1 - 0.06 * creep.Armor / (1 + 0.06 * creep.Armor));
+                                if (damage > creep.Health && Var.W.CastRange > Var.Me.Distance2D(creep))
+                                {
+                                    Var.W.UseAbility();
+                                    Common.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "cast");
+                                    Common.Sleep(Var.W.GetCooldown(Var.W.Level) * 1000 + 50 + Game.Ping, "cooldown");
+                                }
+                            }
+                            break;
+
+                        case ClassID.CDOTA_Unit_Hero_PhantomAssassin:
+                            if (Var.Q.Level > 0 && Var.Q.CanBeCasted() && Var.Me.Distance2D(creep) > MyHeroInfo.AttackRange())
+                            {
+                                var time = 300 + Var.Me.Distance2D(creep) / Var.Q.GetProjectileSpeed();
+                                if (time < creep.SecondsPerAttack * 1000)
+                                    damage = ((Var.Q.Level - 1) * 40 + 60) * (1 - 0.06 * creep.Armor / (1 + 0.06 * creep.Armor));
+                                if (damage > creep.Health)
+                                {
+                                    Var.Q.UseAbility(creep);
+                                    Common.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
+                                    Common.Sleep(6 * 1000 + Game.Ping, "cooldown");
+                                }
+                            }
+                            break;
+
+                        case ClassID.CDOTA_Unit_Hero_Pudge:
+                            if (Var.W.Level > 0)
+                            {
+                                if (Var.CreeptargetH != null && creep.Handle == Var.CreeptargetH.Handle &&
+                                    Var.Me.Distance2D(creep) <= MyHeroInfo.AttackRange())
+                                {
+                                    damage = GetDamageOnUnit(Var.Me, creep, 0);
+                                    if (damage > creep.Health && !Var.W.IsToggled && Var.Me.IsAttacking())
+                                    {
+                                        Var.W.ToggleAbility();
+                                        Common.Sleep(200 + Game.Ping, "cooldown");
+                                    }
+                                }
+                                if (Var.W.IsToggled)
+                                {
+                                    Var.W.ToggleAbility();
+                                    Common.Sleep((float) Var.HeroAPoint + Game.Ping, "cooldown");
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                //
+            }
         }
 
         #endregion Main

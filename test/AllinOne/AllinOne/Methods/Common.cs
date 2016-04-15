@@ -1,13 +1,12 @@
-﻿using AllinOne.Menu;
-using Ensage.Common;
-using SharpDX;
-
-namespace AllinOne.Methods
+﻿namespace AllinOne.Methods
 {
+    using AllinOne.Menu;
     using AllinOne.ObjectManager;
     using AllinOne.Variables;
     using Ensage;
+    using Ensage.Common;
     using Ensage.Common.Extensions;
+    using SharpDX;
     using System;
     using System.Linq;
 
@@ -18,6 +17,8 @@ namespace AllinOne.Methods
         private static readonly int MinimapCorner = (int) Math.Floor(11.0 * Drawing.Height / 1080);
         private static readonly int MinimapHeight = (int) Math.Floor(260.0 * Drawing.Height / 1080);
         private static readonly int MinimapWidth = (int) Math.Floor(270.0 * Drawing.Height / 1080);
+
+        private static long _timestart;
 
         #endregion Fields
 
@@ -182,6 +183,20 @@ namespace AllinOne.Methods
                     Console.WriteLine("SleepCheck Error");
             }
             return true;
+        }
+
+        public static void Timing(string s = "start")
+        {
+            if (!SleepCheck("Timingsleep")) return;
+            if (s == "start")
+            {
+                _timestart = DateTime.UtcNow.ToFileTime();
+            }
+            else
+            {
+                Console.WriteLine((DateTime.UtcNow.ToFileTime() - _timestart) / 10000);
+                Sleep(500, "Timingsleep");
+            }
         }
 
         public static void UpdateAttackableSummons()

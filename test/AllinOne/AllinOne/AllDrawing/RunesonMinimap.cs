@@ -1,18 +1,16 @@
-﻿using AllinOne.Menu;
-using AllinOne.Methods;
-
-namespace AllinOne.AllDrawing
+﻿namespace AllinOne.AllDrawing
 {
+    using AllinOne.Menu;
+    using AllinOne.Methods;
     using Ensage;
     using SharpDX;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     internal class RunesOnMinimap
     {
+        #region Fields
+
         private static readonly Dictionary<RuneType, string> RuneType = new Dictionary<RuneType, string>
         {
             {Ensage.RuneType.Arcane,"materials/ensage_ui/runes/arcane.vmat" },
@@ -23,6 +21,10 @@ namespace AllinOne.AllDrawing
             {Ensage.RuneType.Invisibility,"materials/ensage_ui/runes/invis.vmat" },
             {Ensage.RuneType.Regeneration,"materials/ensage_ui/runes/regen.vmat" }
         };
+
+        #endregion Fields
+
+        #region Methods
 
         public static void Draw()
         {
@@ -43,5 +45,7 @@ namespace AllinOne.AllDrawing
                 //
             }
         }
+
+        #endregion Methods
     }
 }

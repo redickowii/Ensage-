@@ -1,11 +1,11 @@
-﻿using AllinOne.Variables;
-
-namespace AllinOne.Menu
+﻿namespace AllinOne.Menu
 {
     using Ensage.Common.Menu;
 
     internal class JungleStackMenu
     {
+        #region Methods
+
         public static void Load()
         {
             MainMenu.MenuStack.AddItem(new MenuItem("FPS", "More Fps").SetValue(true));
@@ -19,5 +19,7 @@ namespace AllinOne.Menu
             MenuVar.DrawStackLine = MainMenu.MenuStack.Item("drawline").GetValue<bool>();
             MenuVar.MoreFps = MainMenu.MenuStack.Item("FPS").GetValue<bool>();
         }
+
+        #endregion Methods
     }
 }

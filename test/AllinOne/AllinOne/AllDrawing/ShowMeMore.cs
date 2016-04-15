@@ -5,7 +5,6 @@
     using AllinOne.ObjectManager.Heroes;
     using AllinOne.Variables;
     using Ensage;
-    using Ensage.Common;
     using Ensage.Common.Extensions;
     using SharpDX;
     using System;
@@ -20,11 +19,11 @@
 
         public static readonly Dictionary<Unit, List<ParticleEffect>> EffectsTest = new Dictionary<Unit, List<ParticleEffect>>();
 
-        private static readonly Dictionary<Unit, ParticleEffect> BaraIndicator = new Dictionary<Unit, ParticleEffect>();
-
         public static readonly Dictionary<Entity, Vector3> Mapicon = new Dictionary<Entity, Vector3>();
 
         public static Dictionary<Entity, Vector3> Courier = new Dictionary<Entity, Vector3>();
+
+        private static readonly Dictionary<Unit, ParticleEffect> BaraIndicator = new Dictionary<Unit, ParticleEffect>();
 
         #endregion Fields
 

@@ -1,13 +1,18 @@
 ﻿namespace AllinOne.Menu
 {
-    using AllinOne.Variables;
     using Ensage.Common.Menu;
 
     internal class LastHitMenu
     {
+        #region Fields
+
         private static readonly StringList Attack = new StringList(new[] { "Never", "Standart", "Always" }, 1);
-        private static readonly Slider BonusWindUpSlider = new Slider(500, 100, 2000);
         private static readonly Slider BonusRange = new Slider(100, 100, 500);
+        private static readonly Slider BonusWindUpSlider = new Slider(500, 100, 2000);
+
+        #endregion Fields
+
+        #region Methods
 
         public static void Load()
         {
@@ -72,5 +77,7 @@
                 MenuVar.BonusWindUp = MainMenu.MenuLastHit.Item("bonuswindup").GetValue<Slider>().Value;
             }
         }
+
+        #endregion Methods
     }
 }

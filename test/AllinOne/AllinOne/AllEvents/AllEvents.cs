@@ -14,6 +14,35 @@
 
     internal class AllinOneEvents
     {
+        #region Methods
+
+        public static void OnClose(object sender, EventArgs e)
+        {
+            Game.OnUpdate -= AllinOneMain.Game_OnUpdate;
+            Game.OnUpdate -= OnUpdate.Update;
+            Game.OnWndProc -= AllinOneMain.Game_OnWndProc;
+            Game.OnWndProc -= Zoom.ChangeDistance;
+            Game.OnFireEvent -= Common.FireEvent;
+
+            Drawing.OnDraw -= Draw.Drawing;
+            Drawing.OnEndScene -= Draw.Drawing_OnEndScene;
+            Drawing.OnPostReset -= Draw.Drawing_OnPostReset;
+            Drawing.OnPreReset -= Draw.Drawing_OnPreReset;
+
+            ObjectManager.OnAddEntity -= AllDrawing.ShowMeMore.Update;
+
+            Var.Loaded = false;
+            MainMenu.UnLoad();
+            if (Var.RadiusHeroParticleEffect != null && Var.RadiusHeroParticleEffect.Count > 0)
+                foreach (var particleEffect in Var.RadiusHeroParticleEffect)
+                {
+                    if (particleEffect.Value != null)
+                        particleEffect.Value.Dispose();
+                }
+            Var.RadiusHeroParticleEffect = null;
+            Common.PrintEncolored("AllinOne UnLoaded", ConsoleColor.DarkRed);
+        }
+
         public static void OnLoad(object sender, EventArgs e)
         {
             if (Var.Loaded || ObjectManager.LocalHero == null)
@@ -22,11 +51,10 @@
             }
             Var.Me = ObjectManager.LocalHero;
             Var.RadiusHeroParticleEffect = new Dictionary<string, ParticleEffect>();
-            Var.OwnTowerRange = new Dictionary<string, ParticleEffect>();
-            Var.EnemyTowerRange = new Dictionary<string, ParticleEffect>();
+            Towers.TowerRange = new Dictionary<Entity, List<ParticleEffect>>();
+            Towers.TowerLoad = false;
             Var.Target = null;
             Var.Loaded = true;
-            Var.TowerLoad = false;
             Methods.ShowMeMore.RoshIsAlive = true;
             Var.Summons = new Dictionary<Unit, List<Unit>>();
             EnemyHeroes.Heroes = new List<Hero>();
@@ -64,31 +92,6 @@
             Common.PrintEncolored("AllinOne Loaded", ConsoleColor.DarkGreen);
         }
 
-        public static void OnClose(object sender, EventArgs e)
-        {
-            Game.OnUpdate -= AllinOneMain.Game_OnUpdate;
-            Game.OnUpdate -= OnUpdate.Update;
-            Game.OnWndProc -= AllinOneMain.Game_OnWndProc;
-            Game.OnWndProc -= Zoom.ChangeDistance;
-            Game.OnFireEvent -= Common.FireEvent;
-
-            Drawing.OnDraw -= Draw.Drawing;
-            Drawing.OnEndScene -= Draw.Drawing_OnEndScene;
-            Drawing.OnPostReset -= Draw.Drawing_OnPostReset;
-            Drawing.OnPreReset -= Draw.Drawing_OnPreReset;
-
-            ObjectManager.OnAddEntity -= AllDrawing.ShowMeMore.Update;
-
-            Var.Loaded = false;
-            MainMenu.UnLoad();
-            if (Var.RadiusHeroParticleEffect != null && Var.RadiusHeroParticleEffect.Count > 0)
-                foreach (var particleEffect in Var.RadiusHeroParticleEffect)
-                {
-                    if (particleEffect.Value != null)
-                        particleEffect.Value.Dispose();
-                }
-            Var.RadiusHeroParticleEffect = null;
-            Common.PrintEncolored("AllinOne UnLoaded", ConsoleColor.DarkRed);
-        }
+        #endregion Methods
     }
 }

@@ -115,24 +115,28 @@
             #region Top ovellay
 
             if (MenuVar.ShowTopOverlayEnemyHp)
-                Overlay.DrawTopOverlayHealth(EnemyHeroes.Heroes, MenuVar.HealthHeightEnemy);
+                Overlay.DrawTopOverlayHealth(EnemyHeroes.Heroes, MenuVar.HealthHeightEnemy,
+                    new Color(MenuVar.OverlayHealthEnemyRed, MenuVar.OverlayHealthEnemyGreen, MenuVar.OverlayHealthEnemyBlue, MenuVar.OverlayAlpha));
             if (MenuVar.ShowTopOverlayEnemyMp)
-                Overlay.DrawTopOverlayMana(EnemyHeroes.Heroes, MenuVar.ManaHeightEnemy);
+                Overlay.DrawTopOverlayMana(EnemyHeroes.Heroes, MenuVar.ManaHeightEnemy,
+                    new Color(MenuVar.OverlayManaEnemyRed, MenuVar.OverlayManaEnemyGreen, MenuVar.OverlayManaEnemyBlue, MenuVar.OverlayAlpha));
             if (MenuVar.ShowTopOverlayEnemyUltLine)
-                Overlay.DrawTopOverlayUltimateCooldownLine(EnemyHeroes.Heroes, MenuVar.UltimateHeightEnemy);
+                Overlay.DrawTopOverlayUltimateCooldownLine(EnemyHeroes.Heroes, MenuVar.UltimateHeightEnemy, MenuVar.OverlayAlpha);
             if (MenuVar.ShowTopOverlayEnemyUltText)
-                Overlay.DrawTopOverlayUltimateCooldownText(EnemyHeroes.Heroes);
+                Overlay.DrawTopOverlayUltimateCooldownText(EnemyHeroes.Heroes, MenuVar.OverlayAlpha);
             if (MenuVar.ShowTopOverlayEnemy)
                 Overlay.DrawTopOverlay(EnemyHeroes.Heroes);
 
             if (MenuVar.ShowTopOverlayAllyHp)
-                Overlay.DrawTopOverlayHealth(AllyHeroes.Heroes, MenuVar.HealthHeightAlly);
+                Overlay.DrawTopOverlayHealth(AllyHeroes.Heroes, MenuVar.HealthHeightAlly,
+                    new Color(MenuVar.OverlayHealthAllyRed, MenuVar.OverlayHealthAllyGreen, MenuVar.OverlayHealthAllyBlue, MenuVar.OverlayAlpha));
             if (MenuVar.ShowTopOverlayAllyMp)
-                Overlay.DrawTopOverlayMana(AllyHeroes.Heroes, MenuVar.ManaHeightAlly);
+                Overlay.DrawTopOverlayMana(AllyHeroes.Heroes, MenuVar.ManaHeightAlly,
+                    new Color(MenuVar.OverlayManaAllyRed, MenuVar.OverlayManaAllyGreen, MenuVar.OverlayManaAllyBlue, MenuVar.OverlayAlpha));
             if (MenuVar.ShowTopOverlayAllyUltLine)
-                Overlay.DrawTopOverlayUltimateCooldownLine(AllyHeroes.Heroes, MenuVar.UltimateHeightAlly);
+                Overlay.DrawTopOverlayUltimateCooldownLine(AllyHeroes.Heroes, MenuVar.UltimateHeightAlly, MenuVar.OverlayAlpha);
             if (MenuVar.ShowTopOverlayAllyUltText)
-                Overlay.DrawTopOverlayUltimateCooldownText(AllyHeroes.Heroes);
+                Overlay.DrawTopOverlayUltimateCooldownText(AllyHeroes.Heroes, MenuVar.OverlayAlpha);
             if (MenuVar.ShowTopOverlayAlly)
                 Overlay.DrawTopOverlay(AllyHeroes.Heroes);
 

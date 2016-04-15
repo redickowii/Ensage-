@@ -1,18 +1,18 @@
 ﻿namespace AllinOne.Menu
 {
     using AllinOne.CameraDistance;
-    using AllinOne.Menu;
     using Ensage.Common.Menu;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     internal class SettingsMenu
     {
+        #region Fields
+
         private static readonly Slider CameraDistance = new Slider(1500, 1134, 2000);
         private static readonly Slider Frequency = new Slider(50, 10, 1000);
+
+        #endregion Fields
+
+        #region Methods
 
         public static void Load()
         {
@@ -31,5 +31,7 @@
             MenuVar.DodgeEnable = MainMenu.MenuSettings.Item("dodge").GetValue<bool>();
             MenuVar.DodgeFrequency = MainMenu.MenuSettings.Item("dodgefrequency").GetValue<Slider>().Value;
         }
+
+        #endregion Methods
     }
 }

@@ -2,17 +2,21 @@
 {
     using AllinOne.Menu;
     using AllinOne.Update;
-    using AllinOne.Variables;
     using Ensage;
     using Ensage.Common.Menu;
-    using System;
 
     internal class Zoom
     {
+        #region Fields
+
         private const uint VkCtrl = 0x11;
         private const uint WmMousewheel = 0x020A;
-        private static readonly ConVar ZoomVar = Game.GetConsoleVar("dota_camera_distance");
         private static readonly ConVar RenderVar = Game.GetConsoleVar("r_farz");
+        private static readonly ConVar ZoomVar = Game.GetConsoleVar("dota_camera_distance");
+
+        #endregion Fields
+
+        #region Methods
 
         public static void ChangeDistance(WndEventArgs args)
         {
@@ -30,15 +34,6 @@
             args.Process = false;
         }
 
-        public static void Slider_ValueChanged(OnValueChangeEventArgs e)
-        {
-            Game.GetConsoleVar("fog_enable").SetValue(0);
-            ZoomVar.SetValue(e.GetNewValue<Slider>().Value);
-            RenderVar.SetValue(2 * e.GetNewValue<Slider>().Value);
-            ZoomVar.RemoveFlags(ConVarFlags.Cheat);
-            RenderVar.RemoveFlags(ConVarFlags.Cheat);
-        }
-
         public static void Load()
         {
             Game.GetConsoleVar("fog_enable").SetValue(0);
@@ -52,5 +47,16 @@
             var.RemoveFlags(ConVarFlags.Cheat);
             var.SetValue(0);
         }
+
+        public static void Slider_ValueChanged(OnValueChangeEventArgs e)
+        {
+            Game.GetConsoleVar("fog_enable").SetValue(0);
+            ZoomVar.SetValue(e.GetNewValue<Slider>().Value);
+            RenderVar.SetValue(2 * e.GetNewValue<Slider>().Value);
+            ZoomVar.RemoveFlags(ConVarFlags.Cheat);
+            RenderVar.RemoveFlags(ConVarFlags.Cheat);
+        }
+
+        #endregion Methods
     }
 }

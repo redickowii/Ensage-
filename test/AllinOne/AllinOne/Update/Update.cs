@@ -1,7 +1,6 @@
-﻿using AllinOne.AllDrawing;
-
-namespace AllinOne.Update
+﻿namespace AllinOne.Update
 {
+    using AllinOne.AllDrawing;
     using AllinOne.Menu;
     using AllinOne.Methods;
     using AllinOne.ObjectManager;
@@ -10,16 +9,18 @@ namespace AllinOne.Update
     using Ensage;
     using Ensage.Common;
     using Ensage.Common.Extensions;
-    using Ensage.Common.Menu;
-    using SharpDX.Direct3D9;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
 
     internal class OnUpdate
     {
+        #region Fields
+
         private static bool Clear;
+
+        #endregion Fields
+
+        #region Methods
 
         public static bool CanUpdate()
         {
@@ -27,10 +28,9 @@ namespace AllinOne.Update
             {
                 if (!Clear)
                 {
-                    ShowMeMore.Effects.ForEach(x => x.Value.ForceDispose());
-                    ShowMeMore.Effects.Clear();
+                    AllDrawing.ShowMeMore.Effects.ForEach(x => x.Value.ForEach(y => y.ForceDispose()));
+                    AllDrawing.ShowMeMore.Effects.Clear();
                     AllDrawing.ShowMeMore.ClearParticle();
-                    Towers.TowerDestroyed();
                     Var.RadiusHeroParticleEffect.ForEach(x => x.Value.ForceDispose());
                     Var.RadiusHeroParticleEffect.Clear();
                     Dev.DevInfoDispose();
@@ -66,7 +66,7 @@ namespace AllinOne.Update
             AllyHeroes.Update();
 
             if (MenuVar.Maphack)
-                ShowMeMore.Maphack();
+                Methods.ShowMeMore.Maphack();
 
             MenuVar.TestEffectMenu = MainMenu.Menu.Item("effects");
 
@@ -77,7 +77,7 @@ namespace AllinOne.Update
 
             if (MenuVar.ShowRoshanTimer)
             {
-                ShowMeMore.Roshan();
+                Methods.ShowMeMore.Roshan();
             }
 
             #region Runes
@@ -155,37 +155,19 @@ namespace AllinOne.Update
 
             #region Towers
 
-            if (!Var.TowerLoad)
+            if (!Towers.TowerLoad)
             {
                 Buildings.GetBuildings();
-                Var.TowerLoad = true;
-            }
-            if (MenuVar.EnemiesTowers)
-            {
-                Towers.UpdateDicTowers(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList());
+                Towers.TowerLoad = true;
             }
             else
             {
-                foreach (var x in Var.EnemyTowerRange.Values.ToList())
-                {
-                    x.Dispose();
-                }
-                Var.EnemyTowerRange.Clear();
-            }
-            if (MenuVar.OwnTowers)
-            {
-                Towers.UpdateDicTowers(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList());
-            }
-            else
-            {
-                foreach (var x in Var.OwnTowerRange.Values.ToList())
-                {
-                    x.Dispose();
-                }
-                Var.OwnTowerRange.Clear();
+                Towers.Load();
             }
 
             #endregion Towers
         }
+
+        #endregion Methods
     }
 }

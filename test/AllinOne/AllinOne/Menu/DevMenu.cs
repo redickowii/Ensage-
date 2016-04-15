@@ -1,10 +1,11 @@
 ﻿namespace AllinOne.Menu
 {
-    using AllinOne.Variables;
     using Ensage.Common.Menu;
 
     internal class DevMenu
     {
+        #region Methods
+
         public static void Load()
         {
             MainMenu.Dev.AddItem(new MenuItem("ON/OFF", "ON/OFF").SetValue(true));
@@ -24,5 +25,7 @@
             MenuVar.ShowInfo = MainMenu.Dev.Item("2").GetValue<bool>();
             MenuVar.ShowErrors = MainMenu.Dev.Item("1").GetValue<bool>();
         }
+
+        #endregion Methods
     }
 }
