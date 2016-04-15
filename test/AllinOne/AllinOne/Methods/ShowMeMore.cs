@@ -21,15 +21,15 @@
         public static readonly ShowMeMoreStruct[] ShowMeMoreEffects =
         {
             new ShowMeMoreStruct("modifier_invoker_sun_strike",
-                "hero_invoker/invoker_sun_strike_team", 175),
+                "hero_invoker/invoker_sun_strike_team", 175 , 1700 -100),
             new ShowMeMoreStruct("modifier_lina_light_strike_array",
-                "hero_lina/lina_spell_light_strike_array_ring_collapse", 225),
+                "hero_lina/lina_spell_light_strike_array_ring_collapse", 225, 500 -100),
             new ShowMeMoreStruct("modifier_kunkka_torrent_thinker",
-                "hero_kunkka/kunkka_spell_torrent_pool", 225),
+                "hero_kunkka/kunkka_spell_torrent_pool", 225, 1600 -100),
             new ShowMeMoreStruct("modifier_leshrac_split_earth_thinker",
-                "hero_leshrac/leshrac_split_earth_b", 225),
+                "hero_leshrac/leshrac_split_earth_b", 225, 350),
             new ShowMeMoreStruct("modifier_skywrath_mage_mystic_flare",
-                "hero_skywrath_mage/skywrath_mage_mystic_flare", 200)
+                "hero_skywrath_mage/skywrath_mage_mystic_flare", 200, 0)
         };
 
         public static Unit _arrowUnit;
@@ -54,11 +54,11 @@
             if (calc < radius)
             {
                 var dodgevector = new Vector3(dodgex, dodgey, Var.Me.Position.Z);
-                var turntime =
-                    (Math.Max(
+                var turntime = Math.Max(
                         Math.Abs(Var.Me.RotationRad - Utils.DegreeToRadian(Common.FindRet(Var.Me.Position, dodgevector))) -
-                        0.69, 0) / (0.6 * (1 / 0.03)));
-                if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay)
+                        0.69, 0) / (0.6 * (1 / 0.03));
+                Common.Print(delay.ToString());
+                if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay && !NothingCanCast())
                 {
                     UseSpell();
                 }
@@ -83,7 +83,8 @@
             {
                 foreach (var spell in SpellRadius)
                 {
-                    AoeDodge(spell.Value.Position, spell.Value.GetControlPoint(2).X + 30);
+                    AoeDodge(spell.Value.Position, spell.Value.GetControlPoint(2).X + 30,
+                        ShowMeMoreEffects.First(y => spell.Key.Modifiers.First(x => x.Name != null).Name == y.Modifier).Time);
                 }
                 Common.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
             }
@@ -263,7 +264,7 @@
                     (Math.Max(
                         Math.Abs(Var.Me.RotationRad - Utils.DegreeToRadian(Common.FindRet(Var.Me.Position, dodgevector))) -
                         0.69, 0) / (0.6 * (1 / 0.03)));
-                if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay)
+                if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay && !NothingCanCast())
                 {
                     UseSpell();
                 }
@@ -272,6 +273,11 @@
                     Var.Me.Move(dodgevector);
                 }
             }
+        }
+
+        private static bool NothingCanCast()
+        {
+            return true;
         }
 
         public static void Maphack()

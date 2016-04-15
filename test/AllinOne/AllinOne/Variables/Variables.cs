@@ -14,16 +14,18 @@
         public readonly string Effect;
         public readonly string Modifier;
         public readonly int Range;
+        public readonly float Time;
 
         #endregion Fields
 
         #region Constructors
 
-        public ShowMeMoreStruct(string modifier, string effect, int range)
+        public ShowMeMoreStruct(string modifier, string effect, int range, float time)
         {
             Modifier = modifier;
             Effect = effect;
             Range = range;
+            Time = time;
         }
 
         #endregion Constructors
