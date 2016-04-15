@@ -233,9 +233,9 @@
                         if (MenuVar.ShowTopOverlayEnemyHp)
                         {
                             if (MenuVar.ShowTopOverlayEnemy)
-                                return new Vector2(1, 15 + MenuVar.HealthHeightAlly);
+                                return new Vector2(1, 15 + MenuVar.HealthHeightEnemy);
                             else
-                                return new Vector2(1, 2 + MenuVar.HealthHeightAlly);
+                                return new Vector2(1, 2 + MenuVar.HealthHeightEnemy);
                         }
                         else
                         {
