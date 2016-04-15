@@ -57,7 +57,6 @@
                 var turntime = Math.Max(
                         Math.Abs(Var.Me.RotationRad - Utils.DegreeToRadian(Common.FindRet(Var.Me.Position, dodgevector))) -
                         0.69, 0) / (0.6 * (1 / 0.03));
-                Common.Print(delay.ToString());
                 if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay && !NothingCanCast())
                 {
                     UseSpell();
