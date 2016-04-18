@@ -24,96 +24,32 @@
                 "hero_invoker/invoker_sun_strike_team", 175 , 1700 -100),
             new ShowMeMoreStruct("modifier_lina_light_strike_array",
                 "hero_lina/lina_spell_light_strike_array_ring_collapse", 225, 500 -100),
-            new ShowMeMoreStruct("modifier_kunkka_torrent_thinker",
+            new ShowMeMoreStruct( "modifier_kunkka_torrent_thinker",
                 "hero_kunkka/kunkka_spell_torrent_pool", 225, 1600 -100),
-            new ShowMeMoreStruct("modifier_leshrac_split_earth_thinker",
+            new ShowMeMoreStruct( "modifier_leshrac_split_earth_thinker",
                 "hero_leshrac/leshrac_split_earth_b", 225, 350),
-            new ShowMeMoreStruct("modifier_skywrath_mage_mystic_flare",
+            new ShowMeMoreStruct( "modifier_skywrath_mage_mystic_flare",
                 "hero_skywrath_mage/skywrath_mage_mystic_flare", 200, 0)
         };
 
-        public static Unit _arrowUnit;
-        public static Dictionary<Unit, ParticleEffect> EffectForSpells = new Dictionary<Unit, ParticleEffect>();
+        private static Unit _arrowUnit;
+        public static Dictionary<Ability, ParticleEffect> EffectForSpells = new Dictionary<Ability, ParticleEffect>();
         public static double RoshanMinutes;
         public static double RoshanSeconds;
         public static float RoshdeathTime;
         public static bool RoshIsAlive;
-        public static Dictionary<Unit, ParticleEffect> SpellRadius = new Dictionary<Unit, ParticleEffect>();
+        public static List<AoeSpellStruct> SpellRadius = new List<AoeSpellStruct>();
         private static Vector3 _arrowPos;
 
         #endregion Fields
 
         #region Methods
 
-        public static void AoeDodge(Vector3 pos, float radius, float delay = 0)
-        {
-            var calc =
-                Math.Floor(Math.Sqrt(Math.Pow(pos.X - Var.Me.Position.X, 2) + Math.Pow(pos.Y - Var.Me.Position.Y, 2)));
-            var dodgex = (float) (pos.X + (radius / calc) * (Var.Me.Position.X - pos.X));
-            var dodgey = (float) (pos.Y + (radius / calc) * (Var.Me.Position.Y - pos.Y));
-            if (calc < radius)
-            {
-                var dodgevector = new Vector3(dodgex, dodgey, Var.Me.Position.Z);
-                var turntime = Math.Max(
-                        Math.Abs(Var.Me.RotationRad - Utils.DegreeToRadian(Common.FindRet(Var.Me.Position, dodgevector))) -
-                        0.69, 0) / (0.6 * (1 / 0.03));
-                if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay && !NothingCanCast())
-                {
-                    UseSpell();
-                }
-                else
-                {
-                    Var.Me.Move(dodgevector);
-                }
-            }
-        }
-
         public static void ClearEffectsVisible()
         {
             if (Effects.Count == 0) return;
             Effects.ForEach(x => x.Value.ForceDispose());
             Effects.Clear();
-        }
-
-        public static void Dodge()
-        {
-            if (!Common.SleepCheck("DodgeWait")) return;
-            if (SpellRadius.Count(x => !x.Value.IsDestroyed) > 0)
-            {
-                foreach (var spell in SpellRadius)
-                {
-                    AoeDodge(spell.Value.Position, spell.Value.GetControlPoint(2).X + 30,
-                        ShowMeMoreEffects.First(y => spell.Key.Modifiers.First(x => x.Name != null).Name == y.Modifier).Time);
-                }
-                Common.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
-            }
-            if (EffectForSpells.Count(x => !x.Value.IsDestroyed) > 0)
-            {
-                foreach (var effect in EffectForSpells)
-                {
-                    var pos1 = effect.Value.GetControlPoint(1);
-                    var pos2 = effect.Value.GetControlPoint(2);
-                    switch (effect.Key.ClassID)
-                    {
-                        case ClassID.CDOTA_Unit_Hero_Pudge:
-                            LineDodge(pos1, pos2, 100 + Var.Me.HullRadius + 30, 1600);
-                            break;
-
-                        case ClassID.CDOTA_Unit_Hero_Windrunner:
-                            LineDodge(pos1, pos2, 125 + Var.Me.HullRadius + 30, 3000, 600);
-                            break;
-
-                        case ClassID.CDOTA_Unit_Hero_Mirana:
-                            LineDodge(pos1, pos2, 100 + Var.Me.HullRadius + 30, 857);
-                            break;
-
-                        case ClassID.CDOTA_Unit_Hero_Puck:
-                            LineDodge(pos1, pos2, 225 + Var.Me.HullRadius + 30, 650);
-                            break;
-                    }
-                }
-                Common.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
-            }
         }
 
         public static void DrawShowMeMoreSpells(Hero hero)
@@ -124,45 +60,45 @@
                     if (Prediction.IsTurning(hero)) return;
                     var spell = hero.Spellbook.Spell2;
                     if (spell == null || spell.CanBeCasted()) return;
-                    var cd = Math.Floor(spell.Cooldown / spell.GetCooldown(spell.Level - 1) * 1000);
+                    var cd = Math.Floor(spell.Cooldown / Common.GetCooldown(hero, spell) * 1000);
                     if (cd < 980)
                     {
-                        if (!EffectForSpells.ContainsKey(hero) && cd > 800)
+                        if (!EffectForSpells.ContainsKey(spell) && cd > 800)
                         {
                             var effect = new ParticleEffect(Particles.Partlist[83], hero.Position);
                             effect.SetControlPoint(1, hero.Position);
                             effect.SetControlPoint(2, Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius));
-                            EffectForSpells.Add(hero, effect);
+                            EffectForSpells.Add(spell, effect);
                         }
-                        else if ((!hero.IsAlive || cd <= 800) && EffectForSpells.ContainsKey(hero))
+                        else if ((!hero.IsAlive || cd <= 800) && EffectForSpells.ContainsKey(spell))
                         {
-                            EffectForSpells[hero].ForceDispose();
-                            EffectForSpells.Remove(hero);
+                            EffectForSpells[spell].ForceDispose();
+                            EffectForSpells.Remove(spell);
                         }
                     }
                     break;
 
                 case ClassID.CDOTA_Unit_Hero_Mirana:
+                    spell = hero.Spellbook.Spell2;
+                    if (spell == null) return;
                     if (_arrowUnit != null && !Common.SleepCheck("DrawArrrow") && Common.SleepCheck("arrrowwait"))
                     {
-                        spell = hero.Spellbook.Spell2;
-                        if (spell == null || spell.CanBeCasted()) return;
                         if (_arrowUnit.IsValid && _arrowUnit.IsVisible)
                         {
-                            if (!EffectForSpells.ContainsKey(hero))
+                            if (!EffectForSpells.ContainsKey(spell))
                             {
                                 var effect = new ParticleEffect(Particles.Partlist[83], _arrowUnit.Position);
                                 effect.SetControlPoint(1, _arrowUnit.Position);
                                 effect.SetControlPoint(2,
                                     Common.FindVector(_arrowPos, Common.FindRet(_arrowPos, _arrowUnit.Position), 3000 - _arrowUnit.Speed * _arrowUnit.CreateTime));
-                                EffectForSpells.Add(hero, effect);
+                                EffectForSpells.Add(spell, effect);
                             }
                         }
                     }
-                    else if (Common.SleepCheck("DrawArrrow") && EffectForSpells.ContainsKey(hero))
+                    else if (Common.SleepCheck("DrawArrrow") && EffectForSpells.ContainsKey(spell))
                     {
-                        EffectForSpells[hero].ForceDispose();
-                        EffectForSpells.Remove(hero);
+                        EffectForSpells[spell].ForceDispose();
+                        EffectForSpells.Remove(spell);
                     }
                     break;
 
@@ -170,20 +106,20 @@
                     if (Prediction.IsTurning(hero)) return;
                     spell = hero.Spellbook.Spell1;
                     if (spell == null || spell.CanBeCasted()) return;
-                    cd = Math.Floor(spell.Cooldown / spell.GetCooldown(spell.Level - 1) * 1000);
+                    cd = Math.Floor(spell.Cooldown / Common.GetCooldown(hero, spell) * 1000);
                     if (cd < 990)
                     {
-                        if (!EffectForSpells.ContainsKey(hero) && cd > 900)
+                        if (!EffectForSpells.ContainsKey(spell) && cd > 900)
                         {
                             var effect = new ParticleEffect(Particles.Partlist[83], hero.Position);
                             effect.SetControlPoint(1, hero.Position);
                             effect.SetControlPoint(2, Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius + 100));
-                            EffectForSpells.Add(hero, effect);
+                            EffectForSpells.Add(spell, effect);
                         }
-                        else if ((!hero.IsAlive || cd <= 900) && EffectForSpells.ContainsKey(hero))
+                        else if ((!hero.IsAlive || cd <= 900) && EffectForSpells.ContainsKey(spell))
                         {
-                            EffectForSpells[hero].ForceDispose();
-                            EffectForSpells.Remove(hero);
+                            EffectForSpells[spell].ForceDispose();
+                            EffectForSpells.Remove(spell);
                         }
                     }
                     break;
@@ -193,20 +129,94 @@
                     spell = hero.Spellbook.Spell1;
                     var spell4 = hero.Spellbook.Spell4;
                     if (spell == null || spell.CanBeCasted()) return;
-                    cd = Math.Floor(spell.Cooldown / spell.GetCooldown(spell.Level - 1) * 1000);
+                    cd = Math.Floor(spell.Cooldown / Common.GetCooldown(hero, spell) * 1000);
                     if (cd < 995)
                     {
-                        if (!EffectForSpells.ContainsKey(hero) && spell4.IsActivated)
+                        if (!EffectForSpells.ContainsKey(spell) && spell4.IsActivated)
                         {
                             var effect = new ParticleEffect(Particles.Partlist[83], hero.Position);
                             effect.SetControlPoint(1, hero.Position);
-                            effect.SetControlPoint(2, Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius));
-                            EffectForSpells.Add(hero, effect);
+                            effect.SetControlPoint(2, Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius + 225));
+                            EffectForSpells.Add(spell, effect);
                         }
-                        else if ((!hero.IsAlive || !spell4.IsActivated) && EffectForSpells.ContainsKey(hero))
+                        else if ((!hero.IsAlive || !spell4.IsActivated || cd < 700) && EffectForSpells.ContainsKey(spell))
                         {
-                            EffectForSpells[hero].ForceDispose();
-                            EffectForSpells.Remove(hero);
+                            EffectForSpells[spell].ForceDispose();
+                            EffectForSpells.Remove(spell);
+                        }
+                    }
+                    break;
+
+                case ClassID.CDOTA_Unit_Hero_Jakiro:
+                    spell = hero.Spellbook.Spell2;
+                    if (spell != null)
+                    {
+                        if (spell.IsInAbilityPhase)
+                        {
+                            if (!EffectForSpells.ContainsKey(spell) && spell.CanBeCasted() &&
+                                Common.Wait(220, 500, "wait_ice_path"))
+                            {
+                                var effect = new ParticleEffect(Particles.Partlist[81], hero.Position);
+                                effect.SetControlPoint(1, hero.Position);
+                                effect.SetControlPoint(2,
+                                    Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius + 150));
+                                EffectForSpells.Add(spell, effect);
+                            }
+                        }
+                        else if (!hero.IsAlive || EffectForSpells.ContainsKey(spell))
+                        {
+                            EffectForSpells[spell].ForceDispose();
+                            EffectForSpells.Remove(spell);
+                        }
+                    }
+                    spell = hero.Spellbook.Spell4;
+                    if (spell != null)
+                    {
+                        if (spell.IsInAbilityPhase || (spell.Cooldown > 0 && spell.GetCooldown(spell.Level - 1) - spell.Cooldown <= 10))
+                        {
+                            if (!EffectForSpells.ContainsKey(spell) && Common.Wait(220, 500, "wait_macropyre"))
+                            {
+                                var effect = new ParticleEffect(Particles.Partlist[81], hero.Position);
+                                effect.SetControlPoint(1, hero.Position);
+                                effect.SetControlPoint(2,
+                                    Common.FindVector(hero.Position, hero.Rotation, spell.GetCastRange() + hero.HullRadius + 240));
+                                EffectForSpells.Add(spell, effect);
+                            }
+                            else if (EffectForSpells.ContainsKey(spell) && Common.GetCooldown(hero, spell) - spell.Cooldown > 10)
+                            {
+                                EffectForSpells[spell].ForceDispose();
+                                EffectForSpells.Remove(spell);
+                            }
+                        }
+                        else if (!hero.IsAlive || EffectForSpells.ContainsKey(spell))
+                        {
+                            EffectForSpells[spell].ForceDispose();
+                            EffectForSpells.Remove(spell);
+                        }
+                    }
+
+                    break;
+
+                case ClassID.CDOTA_Unit_Hero_Kunkka:
+                    spell = hero.Spellbook.Spell4;
+                    if (spell != null)
+                    {
+                        if (spell.IsInAbilityPhase)
+                        {
+                            if (!SpellRadius.Any(x => x.ContainsHero(hero)) && spell.CanBeCasted() &&
+                                Common.Wait(220, 500, "wait_ship"))
+                            {
+                                var effect = new ParticleEffect(@"particles\ui_mouseactions\drag_selected_ring.vpcf",
+                                    Common.FindVector(hero.Position, hero.Rotation, 1000));
+                                effect.SetControlPoint(1, new Vector3(255, 0, 0));
+                                effect.SetControlPoint(2, new Vector3(425, 255, 0));
+                                SpellRadius.Add(new AoeSpellStruct(hero, Common.FindVector(hero.Position, hero.Rotation, 1000), "", effect, 425, 310 + 80));
+                            }
+                        }
+                        else if (SpellRadius.Any(x => x.ContainsHero(hero)) && (Common.GetCooldown(hero, spell) - spell.Cooldown) * 100 > 310)
+                        {
+                            SpellRadius.First(x => x.ContainsHero(hero)).Effect.ForceDispose();
+                            SpellRadius.RemoveAt(SpellRadius.FindIndex(x => x.ContainsHero(hero)));
                         }
                     }
                     break;
@@ -214,12 +224,12 @@
             try
             {
                 var temp = SpellRadius;
-                foreach (var x in temp.Where(x => x.Value.IsDestroyed))
+                foreach (var x in temp.Where(x => x.Effect.IsDestroyed))
                 {
-                    SpellRadius.Remove(x.Key);
+                    SpellRadius.RemoveAt(SpellRadius.FindIndex(e => e.Effect.IsDestroyed));
                 }
-                temp = EffectForSpells;
-                foreach (var x in temp.Where(x => x.Value.IsDestroyed))
+                var temp2 = EffectForSpells;
+                foreach (var x in temp2.Where(x => x.Value.IsDestroyed))
                 {
                     EffectForSpells.Remove(x.Key);
                 }
@@ -228,55 +238,6 @@
             {
                 //
             }
-        }
-
-        public static void LineDodge(Vector3 pos1, Vector3 pos2, float radius, float speed, float delay = 0)
-        {
-            var calc1 =
-                Math.Floor(Math.Sqrt(Math.Pow(pos2.X - Var.Me.Position.X, 2) + Math.Pow(pos2.Y - Var.Me.Position.Y, 2)));
-            var calc2 =
-                Math.Floor(Math.Sqrt(Math.Pow(pos1.X - Var.Me.Position.X, 2) + Math.Pow(pos1.Y - Var.Me.Position.Y, 2)));
-            var calc4 = Math.Floor(Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2)));
-
-            var perpendicular =
-                Math.Floor(
-                    Math.Abs((pos2.X - pos1.X) * (pos1.Y - Var.Me.Position.Y) -
-                             (pos1.X - Var.Me.Position.X) * (pos2.Y - pos1.Y)) /
-                    Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2)));
-            var k = ((pos2.Y - pos1.Y) * (Var.Me.Position.X - pos1.X) - (pos2.X - pos1.X) * (Var.Me.Position.Y - pos1.Y)) /
-                    (Math.Pow(pos2.Y - pos1.Y, 2) + Math.Pow(pos2.X - pos1.X, 2));
-            var x4 = Var.Me.Position.X - k * (pos2.Y - pos1.Y);
-            var z4 = Var.Me.Position.Y + k * (pos2.X - pos1.X);
-            var calc3 =
-                (Math.Floor(Math.Sqrt(Math.Pow(x4 - Var.Me.Position.X, 2) + Math.Pow(z4 - Var.Me.Position.Y, 2))));
-            var dodgex = x4 + (radius / calc3) * (Var.Me.Position.X - x4);
-            var dodgey = z4 + (radius / calc3) * (Var.Me.Position.Y - z4);
-
-            if (perpendicular < radius && calc1 < calc4 && calc2 < calc4)
-            {
-                var dodgevector = new Vector3((float) dodgex, (float) dodgey, Var.Me.Position.Z);
-                var dodgevector2 = new Vector3((float) (x4 + (radius / 5 / calc3) * (Var.Me.Position.X - x4)),
-                    (float) (z4 + (radius / 5 / calc3) * (Var.Me.Position.Y - z4)), Var.Me.Position.Z);
-
-                delay = Var.Me.Distance2D(pos1) / speed * 1000 + delay;
-                var turntime =
-                    (Math.Max(
-                        Math.Abs(Var.Me.RotationRad - Utils.DegreeToRadian(Common.FindRet(Var.Me.Position, dodgevector))) -
-                        0.69, 0) / (0.6 * (1 / 0.03)));
-                if ((turntime + Var.Me.Distance2D(dodgevector) / Var.Me.MovementSpeed) * 1000 + Game.Ping > delay && !NothingCanCast())
-                {
-                    UseSpell();
-                }
-                else if (Var.Me.Distance2D(dodgevector) > 5)
-                {
-                    Var.Me.Move(dodgevector);
-                }
-            }
-        }
-
-        private static bool NothingCanCast()
-        {
-            return true;
         }
 
         public static void Maphack()
@@ -330,12 +291,12 @@
                             {
                                 var mod = p.HasModifier(show.Modifier);
                                 if (!mod) continue;
-                                if (!SpellRadius.ContainsKey(p))
+                                if (!SpellRadius.Any(x => x.ContainsHero(p)))
                                 {
                                     var effect = p.AddParticleEffect(@"particles\ui_mouseactions\drag_selected_ring.vpcf");
                                     effect.SetControlPoint(1, new Vector3(255, 0, 0));
                                     effect.SetControlPoint(2, new Vector3(show.Range, 255, 0));
-                                    SpellRadius.Add(p, effect);
+                                    SpellRadius.Add(new AoeSpellStruct(p, p.Position, show.Modifier, effect, show.Range, show.Time));
                                 }
                             }
                         }
@@ -386,20 +347,6 @@
                 effect.Dispose();
                 Effects.Remove(unit);
             }
-        }
-
-        public static void UseSpell()
-        {
-            var ability = MyHeroInfo.GetAbilities();
-            var listitems = MyHeroInfo.GetItems();
-            //if (ability.Any(x => AllAbilities.Selfcast.Contains(x.Name)))
-            //{
-            //    ability.First(x => AllAbilities.Selfcast.Contains(x.Name)).UseAbility();
-            //}
-            //else if (listitems.Any(x => Allitems.SelfItems.Contains(x.Name)))
-            //{
-            //    listitems.First(x => Allitems.SelfItems.Contains(x.Name)).UseAbility(Var.Me);
-            //}
         }
 
         #endregion Methods

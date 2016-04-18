@@ -65,7 +65,7 @@
             EnemyHeroes.Update();
             AllyHeroes.Update();
 
-            if (MenuVar.Maphack)
+            if (MenuVar.Maphack || MenuVar.DodgeEnable)
                 Methods.ShowMeMore.Maphack();
 
             MenuVar.TestEffectMenu = MainMenu.Menu.Item("effects");

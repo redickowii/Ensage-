@@ -46,7 +46,7 @@
 
             if (MenuVar.DodgeEnable)
             {
-                Methods.ShowMeMore.Dodge();
+                Dodge.Check();
             }
 
             foreach (var hero in EnemyHeroes.Heroes)

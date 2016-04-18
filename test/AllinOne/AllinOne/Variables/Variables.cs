@@ -31,6 +31,44 @@
         #endregion Constructors
     }
 
+    public class AoeSpellStruct
+    {
+        #region Fields
+
+        public readonly Entity Hero;
+        public readonly Vector3 Position;
+        public readonly ParticleEffect Effect;
+        public readonly string Modifier;
+        public readonly int Range;
+        public float Time;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public AoeSpellStruct(Entity hero, Vector3 position, string modifier, ParticleEffect effect, int range, float time)
+        {
+            Hero = hero;
+            Position = position;
+            Modifier = modifier;
+            Effect = effect;
+            Range = range;
+            Time = time;
+        }
+
+        public bool ContainsHero(Entity hero)
+        {
+            return hero.Handle == Hero.Handle;
+        }
+
+        public bool ContainsModifier(string modifier)
+        {
+            return modifier == Modifier;
+        }
+
+        #endregion Constructors
+    }
+
     public class DictionarySleep
     {
         #region Properties

@@ -161,7 +161,7 @@
             if (delta.X > 0)
                 Draw.DrawLine(pos + new Vector2(0, size.Y), new Vector2(delta.X, height), colorF);
             if (delta.X > 0 && delta.X < size.X - 1)
-                Draw.DrawLine(pos + new Vector2(delta.X, size.Y), new Vector2(2, height), Color.Black);
+                Draw.DrawLine(pos + new Vector2(delta.X, size.Y), new Vector2(1, height), Color.Black);
         }
 
         private static void DrawVisionChecker(Hero hero, Vector2 pos, Vector2 size, int height = 4)

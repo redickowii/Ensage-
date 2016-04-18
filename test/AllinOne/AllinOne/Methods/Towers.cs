@@ -23,51 +23,51 @@
 
         public static void Load()
         {
-            if (MenuVar.EnemiesTowers)
+            if (MenuVar.EnemiesTowers && Buildings.Towers.Any(x => x.Team != Var.Me.Team))
             {
-                Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(), 0,
+                DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
                     1350 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(178, 34, 34));
-                Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(), 0,
+                DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
                     850 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(178, 34, 34));
                 if (MenuVar.TrueSight)
                 {
-                    Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(), 1,
+                    DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
                         1200 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(30, 144, 255));
-                    Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(), 1,
+                    DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
                         900 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(30, 144, 255));
                 }
                 else
                 {
-                    Towers.TowerDisposeTruesight(Var.Me.GetEnemyTeam());
+                    TowerDisposeTruesight(Var.Me.GetEnemyTeam());
                 }
             }
             else
             {
-                Towers.TowerDisposeEffects(Var.Me.GetEnemyTeam());
+                TowerDisposeEffects(Var.Me.GetEnemyTeam());
             }
-            if (MenuVar.OwnTowers)
+            if (MenuVar.OwnTowers && Buildings.Towers.Any(x => x.Team == Var.Me.Team))
             {
-                Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(), 0,
+                DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
                     1350 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(178, 34, 34));
 
-                Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(), 0,
+                DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
                     850 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(178, 34, 34));
                 if (MenuVar.TrueSight)
                 {
-                    Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(), 1,
+                    DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
                         1200 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(30, 144, 255));
 
-                    Towers.DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(), 1,
+                    DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
                         900 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(30, 144, 255));
                 }
                 else
                 {
-                    Towers.TowerDisposeTruesight(Var.Me.Team);
+                    TowerDisposeTruesight(Var.Me.Team);
                 }
             }
             else
             {
-                Towers.TowerDisposeEffects(Var.Me.Team);
+                TowerDisposeEffects(Var.Me.Team);
             }
         }
 
@@ -81,7 +81,7 @@
             }
         }
 
-        private static void DrawTowerRange(List<Entity> buildings, int index, float range, ClassID classId, Vector3 colour)
+        private static void DrawTowerRange(List<Unit> buildings, float range, ClassID classId, Vector3 colour)
         {
             foreach (var building in buildings.Where(x => x.ClassID == classId))
             {

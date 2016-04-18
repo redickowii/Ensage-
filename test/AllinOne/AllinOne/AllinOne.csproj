@@ -96,6 +96,7 @@
     <Compile Include="Menu\SettingsMenu.cs" />
     <Compile Include="Menu\ShowMenu.cs" />
     <Compile Include="Methods\Common.cs" />
+    <Compile Include="Methods\Dodge.cs" />
     <Compile Include="Methods\Jungle.cs" />
     <Compile Include="Methods\Lasthit.cs" />
     <Compile Include="Methods\ShowMeMore.cs" />

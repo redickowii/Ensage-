@@ -8,7 +8,7 @@
     {
         #region Fields
 
-        public static List<Entity> Towers;
+        public static List<Unit> Towers;
 
         #endregion Fields
 
@@ -16,7 +16,7 @@
 
         public static void GetBuildings()
         {
-            Towers = ObjectManager.GetEntities<Entity>().Where(x => x.IsAlive && (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
+            Towers = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
                 x.ClassID == ClassID.CDOTA_Unit_Fountain))
             .ToList();
 

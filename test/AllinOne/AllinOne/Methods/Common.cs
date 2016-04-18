@@ -199,6 +199,26 @@
             }
         }
 
+        public static bool Wait(float wait, float timereset, string text)
+        {
+            if (Var.SleepDic.Any(x => x.Text == text))
+            {
+                var sleep = Var.SleepDic.First(x => x.Text == text);
+                if (Math.Abs(DateTime.UtcNow.ToFileTime() - sleep.Time) >= sleep.Period)
+                {
+                    if (Math.Abs(DateTime.UtcNow.ToFileTime() - sleep.Time) >= timereset)
+                        Var.SleepDic.Remove(sleep);
+                    return true;
+                }
+                return false;
+            }
+            else
+            {
+                Sleep(wait, text);
+                return false;
+            }
+        }
+
         public static void UpdateAttackableSummons()
         {
             try
@@ -212,7 +232,8 @@
                          x.Modifiers.Any(m => m.Name == "modifier_dominated") ||
                          x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo ||
                          x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
-                         x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar) &&
+                         x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
+                         x.IsIllusion) &&
                         (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
                          x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
                          x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
@@ -245,7 +266,8 @@
                          x.Modifiers.Any(m => m.Name == "modifier_dominated") ||
                          x.ClassID == ClassID.CDOTA_Unit_Hero_Meepo ||
                          x.ClassID == ClassID.CDOTA_Unit_SpiritBear ||
-                         x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar) &&
+                         x.ClassID == ClassID.CDOTA_Unit_VisageFamiliar ||
+                         x.IsIllusion) &&
                         (x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Neutral ||
                          x.ClassID == ClassID.CDOTA_BaseNPC_Creep ||
                          x.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane ||
