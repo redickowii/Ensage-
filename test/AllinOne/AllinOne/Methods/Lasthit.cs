@@ -661,6 +661,11 @@ namespace AllinOne.Methods
                             bonusdamage2 = physDamage * ((Var.E.Level - 1) * 0.5 + 0.25);
                     break;
 
+                case ClassID.CDOTA_Unit_Hero_Clinkz:
+                    if (Var.W.Level > 0 && Var.W.IsAutoCastEnabled && unit.Team != Var.Me.Team)
+                        bonusdamage2 = (Var.W.Level - 1) * 10 + 30;
+                    break;
+
                 case ClassID.CDOTA_Unit_Hero_SkeletonKing:
                     if (Var.E.Level > 0)
                         if (Var.Me.NetworkActivity == NetworkActivity.Crit)
