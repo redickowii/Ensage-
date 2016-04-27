@@ -23,51 +23,58 @@
 
         public static void Load()
         {
-            if (MenuVar.EnemiesTowers && Buildings.Towers.Any(x => x.Team != Var.Me.Team))
+            try
             {
-                DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
-                    1350 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(178, 34, 34));
-                DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
-                    850 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(178, 34, 34));
-                if (MenuVar.TrueSight)
+                if (MenuVar.EnemiesTowers && Buildings.Towers.Any(x => x.Team != Var.Me.Team))
                 {
                     DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
-                        1200 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(30, 144, 255));
+                        1350 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(178, 34, 34));
                     DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
-                        900 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(30, 144, 255));
+                        850 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(178, 34, 34));
+                    if (MenuVar.TrueSight)
+                    {
+                        DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
+                            1200 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(30, 144, 255));
+                        DrawTowerRange(Buildings.Towers.Where(x => x.Team != Var.Me.Team).ToList(),
+                            900 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(30, 144, 255));
+                    }
+                    else
+                    {
+                        TowerDisposeTruesight(Var.Me.GetEnemyTeam());
+                    }
                 }
                 else
                 {
-                    TowerDisposeTruesight(Var.Me.GetEnemyTeam());
+                    TowerDisposeEffects(Var.Me.GetEnemyTeam());
                 }
-            }
-            else
-            {
-                TowerDisposeEffects(Var.Me.GetEnemyTeam());
-            }
-            if (MenuVar.OwnTowers && Buildings.Towers.Any(x => x.Team == Var.Me.Team))
-            {
-                DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
-                    1350 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(178, 34, 34));
-
-                DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
-                    850 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(178, 34, 34));
-                if (MenuVar.TrueSight)
+                if (MenuVar.OwnTowers && Buildings.Towers.Any(x => x.Team == Var.Me.Team))
                 {
                     DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
-                        1200 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(30, 144, 255));
+                        1350 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(178, 34, 34));
 
                     DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
-                        900 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(30, 144, 255));
+                        850 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(178, 34, 34));
+                    if (MenuVar.TrueSight)
+                    {
+                        DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
+                            1200 + Var.Me.HullRadius + 50, ClassID.CDOTA_Unit_Fountain, new Vector3(30, 144, 255));
+
+                        DrawTowerRange(Buildings.Towers.Where(x => x.Team == Var.Me.Team).ToList(),
+                            900 + Var.Me.HullRadius + 50, ClassID.CDOTA_BaseNPC_Tower, new Vector3(30, 144, 255));
+                    }
+                    else
+                    {
+                        TowerDisposeTruesight(Var.Me.Team);
+                    }
                 }
                 else
                 {
-                    TowerDisposeTruesight(Var.Me.Team);
+                    TowerDisposeEffects(Var.Me.Team);
                 }
             }
-            else
+            catch (Exception)
             {
-                TowerDisposeEffects(Var.Me.Team);
+                //
             }
         }
 
