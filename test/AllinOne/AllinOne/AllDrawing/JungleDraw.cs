@@ -45,8 +45,8 @@
                 if (position.Y < 840 && position.Y > 43)
                 {
                     if (!MenuVar.MoreFps)
-                        Draw.RoundedRectangle(position, new Vector2(30, 30), 10, new Color(100, 100 + alpha3, 100 - alpha3));
-                    Draw.DrawShadowText(text, (int) position.X + 5, (int) position.Y - 4, color, Fonts.StackFont);
+                        Draw.RoundedRectangle(position.X, position.Y, 30, 30, 10, new Color(100, 100 + alpha3, 100 - alpha3));
+                    Draw.DrawShadowText(text, (int) position.X + 7, (int) position.Y + 3, color, Fonts.StackFont);
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿namespace AllinOne.ObjectManager
+﻿using AllinOne.Variables;
+
+namespace AllinOne.ObjectManager
 {
     using Ensage;
     using System.Collections.Generic;
@@ -10,20 +12,26 @@
 
         public static List<Unit> Towers;
 
+        public static Unit AllyFountain;
+
+        public static Unit EnemyFountain;
+
         #endregion Fields
 
         #region Methods
 
         public static void GetBuildings()
         {
-            Towers = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && (x.ClassID == ClassID.CDOTA_BaseNPC_Tower ||
-                x.ClassID == ClassID.CDOTA_Unit_Fountain))
-            .ToList();
+            Towers = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && (x.ClassID == ClassID.CDOTA_BaseNPC_Tower)).ToList();
 
-            foreach (var tower in Towers)
-            {
-                Methods.Towers.TowerRange.Add(tower, new List<ParticleEffect>());
-            }
+            AllyFountain = ObjectManager.GetEntities<Unit>().First(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team == Var.Me.Team);
+
+            EnemyFountain = ObjectManager.GetEntities<Unit>().First(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team != Var.Me.Team);
+
+            //foreach (var tower in Towers)
+            //{
+            //    Methods.Towers.TowerRange.Add(tower, new List<ParticleEffect>());
+            //}
         }
 
         #endregion Methods

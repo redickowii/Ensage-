@@ -1,4 +1,7 @@
-﻿namespace AllinOne.Update
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
+
+namespace AllinOne.Update
 {
     using AllinOne.AllDrawing;
     using AllinOne.Menu;
@@ -51,19 +54,23 @@
         {
             if (!CanUpdate()) return;
 
-            if (MenuVar.LastHitEnable)
-            {
-                if (Var.Summons.Count > 0 && Var.Summons.Any(x => !x.Key.IsAlive))
-                {
-                    foreach (var summon in Var.Summons.Where(x => !x.Key.IsAlive))
-                    {
-                        Var.Summons.Remove(summon.Key);
-                    }
-                }
-            }
+            //var tempSummonlist = Var.Summons;
+            //if (MenuVar.LastHitEnable)
+            //{
+            //    if (Var.Summons.Count > 0 && Var.Summons.Any(x => !x.Key.IsAlive))
+            //    {
+            //        //foreach (var summon in Var.Summons.Where(x => !x.Key.IsAlive))
+            //        //{
+            //        //    tempSummonlist.Remove(summon.Key);
+            //        //}
+            //        //Var.Summons.Clear();
+            //        //Var.Summons = tempSummonlist;
+            //    }
+            //}
 
             EnemyHeroes.Update();
             AllyHeroes.Update();
+            Couriers.Update();
 
             if (MenuVar.Maphack || MenuVar.DodgeEnable)
                 Methods.ShowMeMore.Maphack();
@@ -72,8 +79,8 @@
 
             MenuVar.CameraDistance = MainMenu.MenuSettings.Item("cameradistance");
 
-            if (!Common.SleepCheck("tick")) return;
-            Common.Sleep(500, "tick");
+            if (!Utils.SleepCheck("tick")) return;
+            Utils.Sleep(500, "tick");
 
             if (MenuVar.ShowRoshanTimer)
             {
@@ -160,10 +167,10 @@
                 Buildings.GetBuildings();
                 Towers.TowerLoad = true;
             }
-            else
-            {
-                Towers.Load();
-            }
+            //else
+            //{
+            //    Towers.Load();
+            //}
 
             #endregion Towers
         }

@@ -70,9 +70,9 @@
         {
             switch (args.GameEvent.Name)
             {
-                case "dota_tower_kill":
-                    Towers.TowerDestroyed();
-                    break;
+                //case "dota_tower_kill":
+                //    Towers.TowerDestroyed();
+                //    break;
 
                 case "dota_roshan_kill":
                     ShowMeMore.RoshanKill();

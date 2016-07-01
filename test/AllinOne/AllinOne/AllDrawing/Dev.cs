@@ -56,9 +56,9 @@
                         EffectsLine.Remove(Var.Me);
                     }
                 }
-                if (Var.Summons.Count != 0)
+                if (Var.Summons.Count != 0 && Var.Summons.Any(x => x.Key.IsAlive))
                 {
-                    foreach (var unit in Var.Summons)
+                    foreach (var unit in Var.Summons.Where(x => x.Key.IsAlive))
                     {
                         var firstOrDefault = unit.Value.FirstOrDefault();
                         if (firstOrDefault != null)

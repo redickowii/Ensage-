@@ -1,4 +1,6 @@
-﻿namespace AllinOne.AllDrawing
+﻿using Ensage.Common;
+
+namespace AllinOne.AllDrawing
 {
     using AllinOne.Menu;
     using AllinOne.Methods;
@@ -169,7 +171,7 @@
             if (args.Entity.Name == "CDOTA_BaseNPC" &&
                 args.Entity.Team != Var.Me.Team)
             {
-                Common.Sleep(300, "CDOTA_BaseNPC");
+                Utils.Sleep(300, "CDOTA_BaseNPC");
             }
         }
 
@@ -231,7 +233,7 @@
                     }
                 }
             }
-            Draw.DrawShadowText(Methods.ShowMeMore.RoshIsAlive ? "Roshan alive" : Methods.ShowMeMore.RoshdeathTime == 0 ? "Roshan death" : text, 217, 10,
+            Draw.DrawShadowTextDX9(Methods.ShowMeMore.RoshIsAlive ? "Roshan alive" : Methods.ShowMeMore.RoshdeathTime == 0 ? "Roshan death" : text, 217, 10,
                 Methods.ShowMeMore.RoshIsAlive ? Color.Green : Color.Red, Fonts.RoshanFont);
         }
     }

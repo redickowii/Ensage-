@@ -35,11 +35,11 @@
                 .ValueChanged += (sender, arg) => { AllDrawing.ShowMeMore.ShowHeroEffect(arg.GetNewValue<StringList>().SelectedIndex); };
             MainMenu.ShowMeMore.AddSubMenu(subMenu);
 
-            subMenu = new Menu("Tower Range", "towerrange", false);
-            subMenu.AddItem(new MenuItem("owntowers", "My Towers").SetValue(false).SetTooltip("Show your tower range."));
-            subMenu.AddItem(new MenuItem("enemytowers", "Enemies Towers").SetValue(false).SetTooltip("Show the enemies towers range."));
-            subMenu.AddItem(new MenuItem("truesight", "Truesight").SetValue(false));
-            MainMenu.ShowMeMore.AddSubMenu(subMenu);
+            //subMenu = new Menu("Tower Range", "towerrange", false);
+            //subMenu.AddItem(new MenuItem("owntowers", "My Towers").SetValue(false).SetTooltip("Show your tower range."));
+            //subMenu.AddItem(new MenuItem("enemytowers", "Enemies Towers").SetValue(false).SetTooltip("Show the enemies towers range."));
+            //subMenu.AddItem(new MenuItem("truesight", "Truesight").SetValue(false));
+            //MainMenu.ShowMeMore.AddSubMenu(subMenu);
         }
 
         public static void Update()
@@ -55,9 +55,9 @@
             MenuVar.VisiblebyEnemy = MainMenu.ShowMeMore.Item("visible").GetValue<bool>();
             MenuVar.MiniScale = MainMenu.ShowMeMore.Item("scalemini").GetValue<Slider>().Value;
 
-            MenuVar.OwnTowers = MainMenu.ShowMeMore.Item("owntowers").GetValue<bool>();
-            MenuVar.EnemiesTowers = MainMenu.ShowMeMore.Item("enemytowers").GetValue<bool>();
-            MenuVar.TrueSight = MainMenu.ShowMeMore.Item("truesight").GetValue<bool>();
+            //MenuVar.OwnTowers = MainMenu.ShowMeMore.Item("owntowers").GetValue<bool>();
+            //MenuVar.EnemiesTowers = MainMenu.ShowMeMore.Item("enemytowers").GetValue<bool>();
+            //MenuVar.TrueSight = MainMenu.ShowMeMore.Item("truesight").GetValue<bool>();
         }
 
         #endregion Methods

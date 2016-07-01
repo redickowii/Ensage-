@@ -1,4 +1,6 @@
-﻿namespace AllinOne.Methods
+﻿using Ensage.Common;
+
+namespace AllinOne.Methods
 {
     using AllinOne.Variables;
     using Ensage;
@@ -92,7 +94,7 @@
             foreach (var camp in Var.Camps.Where(x => x.Stacked && x.Unit != null))
             {
                 var unit = camp.Unit;
-                if (!Common.SleepCheck("stack" + unit.Handle)) continue;
+                if (!Utils.SleepCheck("stack" + unit.Handle)) continue;
                 var time =
                     (int) (camp.Starttime - unit.Distance2D(camp.WaitPosition) / unit.MovementSpeed - 5 + Game.Ping / 1000);
                 switch (camp.State)
@@ -101,7 +103,7 @@
                         if (Var.Seconds < time) continue;
                         unit.Move(camp.WaitPosition);
                         camp.State = 1;
-                        Common.Sleep(500, "stack" + unit.Handle);
+                        Utils.Sleep(500, "stack" + unit.Handle);
                         break;
 
                     case 1:
@@ -118,7 +120,7 @@
                         if (unit.Distance2D(camp.WaitPosition) < 10)
                             camp.State = 2;
                         unit.Move(camp.WaitPosition);
-                        Common.Sleep(500, "stack" + unit.Handle);
+                        Utils.Sleep(500, "stack" + unit.Handle);
                         break;
 
                     case 2:
@@ -139,7 +141,7 @@
                             camp.State = 3;
                             unit.Move(PositionCalc(unit, _closestNeutral));
                         }
-                        Common.Sleep(500, "stack" + unit.Handle);
+                        Utils.Sleep(500, "stack" + unit.Handle);
                         break;
 
                     case 3:
@@ -153,13 +155,13 @@
                             }
                             var tWait = (distance + unit.SecondsPerAttack - unit.BaseAttackTime / 3) * 1000 + Game.Ping;
                             unit.Attack(_closestNeutral);
-                            Common.Sleep(tWait, "twait" + unit.Handle);
+                            Utils.Sleep(tWait, "twait" + unit.Handle);
                             camp.State = 4;
                         }
                         break;
 
                     case 4:
-                        if (unit.Distance2D(_closestNeutral) <= 150 || Common.SleepCheck("twait" + unit.Handle))
+                        if (unit.Distance2D(_closestNeutral) <= 150 || Utils.SleepCheck("twait" + unit.Handle))
                         {
                             unit.Stop();
                             unit.Move(camp.StackPosition);
@@ -173,7 +175,7 @@
                             unit.Move(camp.WaitPositionN);
                             camp.State = 0;
                         }
-                        Common.Sleep(1000, "stack" + unit.Handle);
+                        Utils.Sleep(1000, "stack" + unit.Handle);
                         break;
                 }
             }

@@ -21,11 +21,11 @@
 
         public static float AttackRange()
         {
-            if (!Common.SleepCheck("MyHeroInfo.AttackRange"))
+            if (!Utils.SleepCheck("MyHeroInfo.AttackRange"))
             {
                 return _attackRange;
             }
-            Common.Sleep(1000, "MyHeroInfo.AttackRange");
+            Utils.Sleep(1000, "MyHeroInfo.AttackRange");
 
             if (Var.Me.ClassID == ClassID.CDOTA_Unit_Hero_TrollWarlord)
                 _attackRange = Var.Q.IsToggled ? 128 : Var.Me.GetAttackRange();

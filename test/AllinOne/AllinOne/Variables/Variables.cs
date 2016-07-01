@@ -316,8 +316,8 @@
                     Drawing.Direct3DDevice9,
             new FontDescription
             {
-                FaceName = "Monospace",
-                Height = 35,
+                FaceName = "Tahoma",
+                Height = 23,
                 OutputPrecision = FontPrecision.Default,
                 Quality = FontQuality.ClearType
             });
@@ -326,7 +326,7 @@
             Drawing.Direct3DDevice9,
             new FontDescription
             {
-                FaceName = "Monospace",
+                FaceName = "Tahoma",
                 Height = 20,
                 OutputPrecision = FontPrecision.Outline,
                 Quality = FontQuality.ClearType
@@ -336,8 +336,18 @@
                     Drawing.Direct3DDevice9,
             new FontDescription
             {
-                FaceName = "Monospace",
+                FaceName = "Tahoma",
                 Height = 12,
+                OutputPrecision = FontPrecision.Outline,
+                Quality = FontQuality.ClearType
+            });
+
+        public static Font HelpFont = new Font(
+            Drawing.Direct3DDevice9,
+            new FontDescription
+            {
+                FaceName = "Tahoma",
+                Height = 14,
                 OutputPrecision = FontPrecision.Outline,
                 Quality = FontQuality.ClearType
             });

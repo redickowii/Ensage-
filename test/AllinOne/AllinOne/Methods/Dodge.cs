@@ -53,7 +53,7 @@
 
         public static void Check()
         {
-            if (!Common.SleepCheck("DodgeWait")) return;
+            if (!Utils.SleepCheck("DodgeWait")) return;
             if (ShowMeMore.SpellRadius.Count(x => !x.Effect.IsDestroyed) > 0)
             {
                 foreach (AoeSpellStruct t in ShowMeMore.SpellRadius)
@@ -61,7 +61,7 @@
                     AoeDodge(t.Position, t.Range + Var.Me.HullRadius + 30, t.Time);
                     t.Time -= MenuVar.DodgeFrequency;
                 }
-                Common.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
+                Utils.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
             }
             if (ShowMeMore.EffectForSpells.Count(x => !x.Value.IsDestroyed) > 0)
             {
@@ -96,7 +96,7 @@
                             break;
                     }
                 }
-                Common.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
+                Utils.Sleep(MenuVar.DodgeFrequency, "DodgeWait");
             }
         }
 

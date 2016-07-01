@@ -15,6 +15,7 @@
         public static Menu MenuStack;
         public static Menu Overlay;
         public static Menu ShowMeMore;
+        public static Menu Courier;
 
         #endregion Fields
 
@@ -25,25 +26,23 @@
             Menu = new Menu("AllinOne", "AllinOne", true);
             MenuLastHit = new Menu(" LastHit", "lasthit", false, "item_quelling_blade", true);
             MenuStack = new Menu(" Jungle Stack ", "stack", false, "item_helm_of_the_dominator", true);
+            Courier = new Menu(" Courier ", "courier", false, "item_courier", true);
             Overlay = new Menu(" Overlay ", "overlay", false, "item_ward_observer", true);
             ShowMeMore = new Menu(" ShowMeMore ", "showmemore", false, "item_gem", true);
             MenuSettings = new Menu(" Settings ", "settings", false, "item_refresher", true);
             Dev = new Menu(" Dev Menu ", "dev", false, "doom_bringer_doom", true);
 
             OverlayMenu.Load();
-
             ShowMenu.Load();
-
+            CourierMenu.Load();
             JungleStackMenu.Load();
-
             LastHitMenu.Load();
-
             SettingsMenu.Load();
-
             DevMenu.Load();
 
             Menu.AddSubMenu(Overlay);
             Menu.AddSubMenu(ShowMeMore);
+            Menu.AddSubMenu(Courier);
             Menu.AddSubMenu(MenuLastHit);
             Menu.AddSubMenu(MenuStack);
             Menu.AddSubMenu(MenuSettings);
@@ -67,6 +66,7 @@
         {
             OverlayMenu.Update();
             ShowMenu.Update();
+            CourierMenu.Update();
             JungleStackMenu.Update();
             LastHitMenu.Update();
             SettingsMenu.Update();
@@ -184,5 +184,18 @@
         public static bool ShowInfo;
 
         #endregion Dev
+
+        #region Courier
+
+        public static bool CouAvoidEnemy;
+        public static int CouAvoidEnemyRange;
+        public static bool CouBurst;
+        public static bool CouAbuse;
+        public static uint CouAbuseKey;
+        public static bool CouForced;
+        public static bool CouLock;
+        public static int CouCd;
+
+        #endregion Courier
     }
 }

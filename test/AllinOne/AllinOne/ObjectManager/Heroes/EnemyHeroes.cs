@@ -4,6 +4,7 @@
     using AllinOne.Methods;
     using AllinOne.Variables;
     using Ensage;
+    using Ensage.Common;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -26,22 +27,22 @@
 
         public static void Update()
         {
-            if (Common.SleepCheck("getheroes"))
+            if (Utils.SleepCheck("getheroes"))
             {
                 UpdateHeroes();
-                Common.Sleep(1000, "getheroes");
+                Utils.Sleep(1000, "getheroes");
             }
-            if (Common.SleepCheck("getillu"))
+            if (Utils.SleepCheck("getillu"))
             {
                 UpdateIllusions();
-                Common.Sleep(100, "getillu");
+                Utils.Sleep(100, "getillu");
             }
             Illusions = Illusions.Where(x => x.IsValid).ToList();
             Heroes = Heroes.Where(x => x.IsValid).ToList();
             UsableHeroes = Heroes.Where(x => x.Health > 0 && x.IsAlive && x.IsVisible).ToArray();
-            if (Common.SleepCheck("enemyHeroesCheckValid") || UsableHeroes.Any(x => !ItemDictionary.ContainsKey(x.Handle)))
+            if (Utils.SleepCheck("enemyHeroesCheckValid") || UsableHeroes.Any(x => !ItemDictionary.ContainsKey(x.Handle)))
             {
-                Common.Sleep(2000, "enemyHeroesCheckValid");
+                Utils.Sleep(2000, "enemyHeroesCheckValid");
                 foreach (var hero in UsableHeroes)
                 {
                     var handle = hero.Handle;

@@ -51,8 +51,8 @@
             }
             Var.Me = ObjectManager.LocalHero;
             Var.RadiusHeroParticleEffect = new Dictionary<string, ParticleEffect>();
-            Towers.TowerRange = new Dictionary<Entity, List<ParticleEffect>>();
-            Towers.TowerLoad = false;
+            //Towers.TowerRange = new Dictionary<Entity, List<ParticleEffect>>();
+            //Towers.TowerLoad = false;
             Var.Target = null;
             Var.Loaded = true;
             Methods.ShowMeMore.RoshIsAlive = true;

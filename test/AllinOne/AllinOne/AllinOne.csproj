@@ -56,16 +56,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ensage">
-      <HintPath>C:\%$Windows_temp%\555\System\Ensage.dll</HintPath>
+      <HintPath>D:\PlaySharp\System\Ensage.dll</HintPath>
     </Reference>
     <Reference Include="Ensage.Common">
-      <HintPath>C:\%$Windows_temp%\555\System\Ensage.Common.dll</HintPath>
+      <HintPath>D:\PlaySharp\System\Ensage.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\%$Windows_temp%\555\System\SharpDX.dll</HintPath>
+      <HintPath>D:\PlaySharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\%$Windows_temp%\555\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>D:\PlaySharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -88,6 +88,7 @@
     <Compile Include="AllinOneMain.cs" />
     <Compile Include="AllEvents\AllEvents.cs" />
     <Compile Include="CameraDistance\Zoom.cs" />
+    <Compile Include="Menu\CourierMenu.cs" />
     <Compile Include="Menu\DevMenu.cs" />
     <Compile Include="Menu\JungleStackMenu.cs" />
     <Compile Include="Menu\LastHitMenu.cs" />
@@ -96,11 +97,13 @@
     <Compile Include="Menu\SettingsMenu.cs" />
     <Compile Include="Menu\ShowMenu.cs" />
     <Compile Include="Methods\Common.cs" />
+    <Compile Include="Methods\CourierAbuse.cs" />
     <Compile Include="Methods\Dodge.cs" />
     <Compile Include="Methods\Jungle.cs" />
     <Compile Include="Methods\Lasthit.cs" />
     <Compile Include="Methods\ShowMeMore.cs" />
     <Compile Include="Methods\Towers.cs" />
+    <Compile Include="ObjectManager\Couriers.cs" />
     <Compile Include="ObjectManager\Heroes\AllyHeroes.cs" />
     <Compile Include="ObjectManager\Heroes\EnemyHeroes.cs" />
     <Compile Include="ObjectManager\MyHeroInfo.cs" />
@@ -126,7 +129,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

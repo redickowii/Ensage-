@@ -1,4 +1,6 @@
-﻿namespace AllinOne.ObjectManager
+﻿using Ensage.Common;
+
+namespace AllinOne.ObjectManager
 {
     using AllinOne.Methods;
     using Ensage;
@@ -97,9 +99,9 @@
 
         public static void Update()
         {
-            if (Common.SleepCheck("RuneSlow"))
+            if (Utils.SleepCheck("RuneSlow"))
             {
-                Common.Sleep(10000, "RuneSlow");
+                Utils.Sleep(10000, "RuneSlow");
                 TopRune = null;
                 BotRune = null;
             }

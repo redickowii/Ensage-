@@ -1,4 +1,7 @@
-﻿namespace AllinOne.AllDrawing
+﻿using Ensage;
+using Ensage.Common;
+
+namespace AllinOne.AllDrawing
 {
     using AllinOne.Menu;
     using AllinOne.Methods;
@@ -91,27 +94,6 @@
 
             #endregion ShowMeMore
 
-            #region DevInfo
-
-            if (MenuVar.ShowInfo)
-            {
-                Dev.DevInfo();
-            }
-            else
-            {
-                Dev.DevInfoDispose();
-            }
-
-            #endregion DevInfo
-        }
-
-        public static void Drawing_OnEndScene(EventArgs args)
-        {
-            if (Ensage.Drawing.Direct3DDevice9 == null ||
-                Ensage.Drawing.Direct3DDevice9.IsDisposed ||
-                !OnUpdate.CanUpdate())
-                return;
-
             #region Top ovellay
 
             if (MenuVar.ShowTopOverlayEnemyHp)
@@ -140,6 +122,11 @@
             if (MenuVar.ShowTopOverlayAlly)
                 Overlay.DrawTopOverlay(AllyHeroes.Heroes);
 
+            Overlay.DrawTopHelpOverlay(EnemyHeroes.Heroes, 
+                new Color(MenuVar.OverlayHealthEnemyRed, MenuVar.OverlayHealthEnemyGreen, MenuVar.OverlayHealthEnemyBlue, MenuVar.OverlayAlpha));
+            Overlay.DrawTopHelpOverlay(AllyHeroes.Heroes, 
+                new Color(MenuVar.OverlayHealthAllyRed, MenuVar.OverlayHealthAllyGreen, MenuVar.OverlayHealthAllyBlue, MenuVar.OverlayAlpha));
+
             #endregion Top ovellay
 
             #region JungleStack
@@ -149,10 +136,6 @@
                 JungleDraw.DrawCamp();
             }
 
-            if (MenuVar.ShowRoshanTimer)
-            {
-                ShowMeMore.RoshanTimer();
-            }
             //foreach (var x in ShowMeMore.Courier)
             //{
             //    try
@@ -167,13 +150,52 @@
             //    }
             //}
 
-            //if (Common.SleepCheck("111"))
+            //if (Utils.SleepCheck("111"))
             //{
             //    ShowMeMore.Courier.Clear();
-            //    Common.Sleep(3000, "111");
+            //    Utils.Sleep(3000, "111");
             //}
 
             #endregion JungleStack
+
+            #region CouInfo
+
+            if (MenuVar.CouForced)
+                Overlay.DrawCouForce();
+           
+            if (MenuVar.CouAbuse)
+                Overlay.DrawCouAbuse();
+                
+            if (MenuVar.CouLock)
+                Overlay.DrawCouLock();
+
+            #endregion CouInfo
+
+            #region DevInfo
+
+            if (MenuVar.ShowInfo)
+            {
+                Dev.DevInfo();
+            }
+            else
+            {
+                Dev.DevInfoDispose();
+            }
+
+            #endregion DevInfo
+        }
+
+        public static void Drawing_OnEndScene(EventArgs args)
+        {
+            if (Ensage.Drawing.Direct3DDevice9 == null ||
+                Ensage.Drawing.Direct3DDevice9.IsDisposed ||
+                !OnUpdate.CanUpdate())
+                return;
+
+            if (MenuVar.ShowRoshanTimer)
+            {
+                ShowMeMore.RoshanTimer();
+            }
         }
 
         public static void Drawing_OnPostReset(EventArgs args)
@@ -190,69 +212,75 @@
 
         public static void DrawLine(Vector2 xy, Vector2 wh, Color color)
         {
-            var vLine = new Vector2[2];
+            Ensage.Drawing.DrawRect(xy, wh, color);
 
-            Line.GLLines = true;
-            Line.Antialias = false;
-            Line.Width = wh.X;
+            //var vLine = new Vector2[2];
 
-            vLine[0].X = xy.X + wh.X / 2;
-            vLine[0].Y = xy.Y;
-            vLine[1].X = xy.X + wh.X / 2;
-            vLine[1].Y = xy.Y + wh.Y;
+            //Line.GLLines = true;
+            //Line.Antialias = false;
+            //Line.Width = wh.X;
 
-            Line.Begin();
-            Line.Draw(vLine, color);
-            Line.End();
+            //vLine[0].X = xy.X + wh.X / 2;
+            //vLine[0].Y = xy.Y;
+            //vLine[1].X = xy.X + wh.X / 2;
+            //vLine[1].Y = xy.Y + wh.Y;
+
+            //Line.Begin();
+            //Line.Draw(vLine, color);
+            //Line.End();
+        }
+
+        public static void DrawShadowTextDX9(string stext, int x, int y, Color color, Font f)
+        {
+                f.DrawText(null, stext, x + 1, y + 1, Color.Black);
+                f.DrawText(null, stext, x, y, color);
         }
 
         public static void DrawShadowText(string stext, int x, int y, Color color, Font f)
         {
-            f.DrawText(null, stext, x + 1, y + 1, Color.Black);
-            f.DrawText(null, stext, x, y, color);
+            Ensage.Drawing.DrawText(stext, f.Description.FaceName, new Vector2(x+1, y+1), new Vector2(f.Description.Height, 0), Color.Black, FontFlags.Outline);
+            Ensage.Drawing.DrawText(stext, f.Description.FaceName, new Vector2(x, y), new Vector2(f.Description.Height, 0), color, FontFlags.Outline);
         }
-
+        
         public static void DrawText(string stext, int x, int y, Color color, Font f)
         {
-            f.DrawText(null, stext, x, y, color);
+            Ensage.Drawing.DrawText(stext, f.Description.FaceName, new Vector2(x, y), new Vector2(f.Description.Height, 0), color, FontFlags.Outline);
         }
 
-        public static void RoundedRectangle(Vector2 xy, Vector2 wh, int iSmooth, Color color)
+        public static void RoundedRectangle(float x, float y, float w, float h, int iSmooth, Color color)
         {
             var pt = new Vector2[4];
-            var vLine = new Vector2[2];
 
-            pt[0].X = xy.X + (wh.X - iSmooth);
-            pt[0].Y = xy.Y + (wh.Y - iSmooth);
+            // Get all corners 
+            pt[0].X = x + (w - iSmooth);
+            pt[0].Y = y + (h - iSmooth);
 
-            pt[1].X = xy.X + iSmooth;
-            pt[1].Y = xy.Y + (wh.Y - iSmooth);
+            pt[1].X = x + iSmooth;
+            pt[1].Y = y + (h - iSmooth);
 
-            pt[2].X = xy.X + iSmooth;
-            pt[2].Y = xy.Y + iSmooth;
+            pt[2].X = x + iSmooth;
+            pt[2].Y = y + iSmooth;
 
-            pt[3].X = xy.X + wh.X - iSmooth;
-            pt[3].Y = xy.Y + iSmooth;
+            pt[3].X = x + w - iSmooth;
+            pt[3].Y = y + iSmooth;
 
-            DrawLine(xy + new Vector2(1, iSmooth), wh - new Vector2(1, iSmooth * 2), color);
-            DrawLine(xy + new Vector2(iSmooth, 1), wh - new Vector2(iSmooth * 2, 1), color);
+            // Draw cross 
+            Ensage.Drawing.DrawRect(new Vector2(x, y + iSmooth), new Vector2(w, h - (iSmooth * 2)), color);
+
+            Ensage.Drawing.DrawRect(new Vector2(x + iSmooth, y), new Vector2(w - (iSmooth * 2), h), color);
+
             float fDegree = 0;
-            Line.Width = 1;
+
             for (var i = 0; i < 4; i++)
             {
-                for (var k = fDegree; k < fDegree + Math.PI * 2 / 4f; k += (float) (1 * (Math.PI / 180.0f)))
+                for (var k = fDegree; k < fDegree + ((Math.PI * 2) / 4f); k += (float)(1 * (Math.PI / 180.0f)))
                 {
-                    vLine[0].X = pt[i].X;
-                    vLine[0].Y = pt[i].Y;
-                    vLine[1].X = pt[i].X + (float) (Math.Cos(k) * iSmooth);
-                    vLine[1].Y = pt[i].Y + (float) (Math.Sin(k) * iSmooth);
-
-                    Line.Begin();
-                    Line.Draw(vLine, color);
-                    Line.End();
+                    Ensage.Drawing.DrawLine(
+                        new Vector2(pt[i].X, pt[i].Y),
+                        new Vector2(pt[i].X + (float)(Math.Cos(k) * iSmooth), pt[i].Y + (float)(Math.Sin(k) * iSmooth)),
+                        color);
                 }
-
-                fDegree += (float) (Math.PI * 2) / 4;
+                fDegree += (float)(Math.PI * 2) / 4; 
             }
         }
 

@@ -1,4 +1,6 @@
-﻿namespace AllinOne.AllDrawing
+﻿using System.Runtime.CompilerServices;
+
+namespace AllinOne.AllDrawing
 {
     using AllinOne.Menu;
     using AllinOne.Methods;
@@ -22,6 +24,24 @@
 
         #region Methods
 
+        public static void DrawCouAbuse()
+        {
+            Draw.RoundedRectangle((int)HUDInfo.ScreenSizeX() / 2 - 95, 100, 190, 28, 5, Color.DarkSlateGray);
+            Drawing.DrawText("BOTTLE ABUSE", new Vector2((int)HUDInfo.ScreenSizeX() / 2 - 85, 100), new Vector2(26, 26), Color.Cyan, FontFlags.AntiAlias | FontFlags.DropShadow | FontFlags.Outline);
+        }
+
+        public static void DrawCouForce()
+        {
+            Draw.RoundedRectangle((int)HUDInfo.ScreenSizeX() / 2 - 120, 130, 250, 28, 5, Color.DarkSlateGray);
+            Drawing.DrawText("ANTIREUSE DELIVER", new Vector2((int)HUDInfo.ScreenSizeX() / 2 - 110, 130), new Vector2(26, 26), Color.Red, FontFlags.AntiAlias | FontFlags.DropShadow | FontFlags.Outline);
+        }
+
+        public static void DrawCouLock()
+        {
+            Draw.RoundedRectangle((int)HUDInfo.ScreenSizeX() / 2 - 90, 70, 180, 28, 5, Color.DarkSlateGray);
+            Drawing.DrawText("LOCK AT BASE", new Vector2((int)HUDInfo.ScreenSizeX() / 2 - 80, 70), new Vector2(26, 26), Color.White, FontFlags.AntiAlias | FontFlags.DropShadow | FontFlags.Outline);
+        }
+
         public static void DrawTopOverlay(List<Hero> heroes)
         {
             foreach (var hero in heroes.Where(x => x.IsAlive))
@@ -40,7 +60,7 @@
                 var size = GetTopPanelSize(hero);
                 var colorE = new Color(102, 0, 0, (int) colorF.A);
                 var healthdelta = new Vector2(hero.Health * size.X / hero.MaximumHealth, 0);
-                DrawTopPanel(position, size, healthdelta, colorF, colorE, height);
+                DrawTopPanel(position, size, healthdelta, colorF, colorE, height);  
             }
         }
 
@@ -152,6 +172,21 @@
                     Draw.DrawText(text, (int) (position.X + r), (int) (position.Y + 23), colortext, Fonts.UltFont);
                 }
             }
+        }
+
+        public static void DrawTopHelpOverlay(List<Hero> heroes, Color colorH)
+        {
+            foreach (var hero in heroes)
+            {
+                if (Utils.IsUnderRectangle(Game.MouseScreenPosition, Overlay.GetTopPanelPosition(hero).X, Overlay.GetTopPanelPosition(hero).Y, 40,40))
+                    DrawMoreTopPanel(Game.MouseScreenPosition, colorH, hero.Health);
+            }
+        }
+
+        private static void DrawMoreTopPanel(Vector2 pos, Color colorH, uint i)
+        {
+            Draw.RoundedRectangle(pos.X + 30, pos.Y + 30, 50,50,5, Color.Black);
+            Draw.DrawShadowText("HP:"+ i, (int)pos.X + 31, (int)pos.Y + 40, colorH, Fonts.HelpFont);
         }
 
         private static void DrawTopPanel(Vector2 pos, Vector2 size, Vector2 delta, Color colorF, Color colorE, int height = 4)

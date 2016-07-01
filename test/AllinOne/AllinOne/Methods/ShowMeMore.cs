@@ -81,7 +81,7 @@
                 case ClassID.CDOTA_Unit_Hero_Mirana:
                     spell = hero.Spellbook.Spell2;
                     if (spell == null) return;
-                    if (_arrowUnit != null && !Common.SleepCheck("DrawArrrow") && Common.SleepCheck("arrrowwait"))
+                    if (_arrowUnit != null && !Utils.SleepCheck("DrawArrrow") && Utils.SleepCheck("arrrowwait"))
                     {
                         if (_arrowUnit.IsValid && _arrowUnit.IsVisible)
                         {
@@ -95,7 +95,7 @@
                             }
                         }
                     }
-                    else if (Common.SleepCheck("DrawArrrow") && EffectForSpells.ContainsKey(spell))
+                    else if (Utils.SleepCheck("DrawArrrow") && EffectForSpells.ContainsKey(spell))
                     {
                         EffectForSpells[spell].ForceDispose();
                         EffectForSpells.Remove(spell);
@@ -242,7 +242,7 @@
 
         public static void Maphack()
         {
-            if (!Common.SleepCheck("CDOTA_BaseNPC"))
+            if (!Utils.SleepCheck("CDOTA_BaseNPC"))
             {
                 try
                 {
@@ -256,12 +256,12 @@
                     {
                         foreach (var hero in EnemyHeroes.Heroes)
                         {
-                            if (hero.Name == "npc_dota_hero_mirana" && Common.SleepCheck("miranaarrow"))
+                            if (hero.Name == "npc_dota_hero_mirana" && Utils.SleepCheck("miranaarrow"))
                             {
                                 if (p.ClassID == ClassID.CDOTA_BaseNPC && p.DayVision == 650)
                                 {
-                                    Common.Sleep(3000 / 857 * 1000 + 400 + Game.Ping, "DrawArrrow");
-                                    Common.Sleep(100 + Game.Ping, "arrrowwait");
+                                    Utils.Sleep(3000 / 857 * 1000 + 400 + Game.Ping, "DrawArrrow");
+                                    Utils.Sleep(100 + Game.Ping, "arrrowwait");
                                     _arrowPos = p.Position;
                                     _arrowUnit = p;
                                 }
@@ -269,7 +269,7 @@
                                     AllDrawing.ShowMeMore.Mapicon.Add(hero, p.Position);
                                 else
                                     AllDrawing.ShowMeMore.Mapicon[hero] = p.Position;
-                                Common.Sleep(10000, "miranaarrow");
+                                Utils.Sleep(10000, "miranaarrow");
                             }
                             else if (p.Owner != null && Equals(p.Owner, hero) && p.Name == "npc_dota_thinker" ||
                                         p.Name == "npc_dota_units_base")

@@ -55,7 +55,7 @@ namespace AllinOne.Methods
                     Var.CreepsDic.Add(new DictionaryUnit { Unit = creep, Ht = new List<Ht>() });
                 }
             }
-            //if (Common.SleepCheck("Test"))
+            //if (Utils.SleepCheck("Test"))
             //{
             //    foreach (var creep in Var.CreepsDic)
             //    {
@@ -65,7 +65,7 @@ namespace AllinOne.Methods
             //            Console.WriteLine("Health - time : {0} - {1} - {2}", ht.Health, ht.Time, ht.ACreeps);
             //        }
             //    }
-            //    Common.Sleep(2000, "Test");
+            //    Utils.Sleep(2000, "Test");
             //}
             Clear();
         }
@@ -103,12 +103,12 @@ namespace AllinOne.Methods
 
         private static void Clear()
         {
-            if (!Common.SleepCheck("Clear")) return;
+            if (!Utils.SleepCheck("Clear")) return;
             var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive).ToList();
             Var.CreepsDic = (from creep in creeps
                              where Var.CreepsDic.Any(x => x.Unit.Handle == creep.Handle)
                              select Var.CreepsDic.Find(x => x.Unit.Handle == creep.Handle)).ToList();
-            Common.Sleep(10000, "Clear");
+            Utils.Sleep(10000, "Clear");
         }
 
         private static void UpdateCreeps()
@@ -222,7 +222,7 @@ namespace AllinOne.Methods
 
         public static void Farm()
         {
-            if (!Common.SleepCheck("cast")) return;
+            if (!Utils.SleepCheck("cast")) return;
             if (!Var.DisableAaKeyPressed)
             {
                 Common.Autoattack(0);
@@ -232,7 +232,7 @@ namespace AllinOne.Methods
             Var.CreeptargetH = KillableCreep(Var.Me, false, false, 99);
             if (Var.CreeptargetH != null && Var.CreeptargetH.IsValid && Var.CreeptargetH.IsVisible && Var.CreeptargetH.IsAlive)
             {
-                if (MenuVar.UseSpell && Common.SleepCheck("cooldown"))
+                if (MenuVar.UseSpell && Utils.SleepCheck("cooldown"))
                     SpellCast();
                 Orbwalking.Orbwalk(Var.CreeptargetH);
             }
@@ -276,7 +276,7 @@ namespace AllinOne.Methods
 
         public static void LastHit()
         {
-            if (!Common.SleepCheck("cast")) return;
+            if (!Utils.SleepCheck("cast")) return;
             if (!Var.DisableAaKeyPressed)
             {
                 Common.Autoattack(0);
@@ -284,7 +284,7 @@ namespace AllinOne.Methods
                 Var.AutoAttackTypeDef = false;
             }
             Var.CreeptargetH = KillableCreep(Var.Me, false, false, 2);
-            if (MenuVar.UseSpell && Common.SleepCheck("cooldown"))
+            if (MenuVar.UseSpell && Utils.SleepCheck("cooldown"))
                 SpellCast();
             if (Var.CreeptargetH != null && Var.CreeptargetH.IsValid &&
                 Var.CreeptargetH.IsVisible && Var.CreeptargetH.IsAlive)
@@ -304,17 +304,17 @@ namespace AllinOne.Methods
                             Var.Me.Attack(Var.CreeptargetH);
                     }
                     else if (Var.CreeptargetH.Health < getDamage * 2 && Var.CreeptargetH.Health >= getDamage &&
-                             Var.CreeptargetH.Team != Var.Me.Team && Common.SleepCheck("stop"))
+                             Var.CreeptargetH.Team != Var.Me.Team && Utils.SleepCheck("stop"))
                     {
                         Var.Me.Hold();
                         Var.Me.Attack(Var.CreeptargetH);
-                        Common.Sleep((float) Var.HeroAPoint / 2 + Game.Ping, "stop");
+                        Utils.Sleep((float) Var.HeroAPoint / 2 + Game.Ping, "stop");
                     }
                 }
-                else if (Var.Me.Distance2D(Var.CreeptargetH) >= MyHeroInfo.AttackRange() && Common.SleepCheck("walk"))
+                else if (Var.Me.Distance2D(Var.CreeptargetH) >= MyHeroInfo.AttackRange() && Utils.SleepCheck("walk"))
                 {
                     Var.Me.Move(Var.CreeptargetH.Position);
-                    Common.Sleep(100 + Game.Ping, "walk");
+                    Utils.Sleep(100 + Game.Ping, "walk");
                 }
             }
             else
@@ -332,24 +332,24 @@ namespace AllinOne.Methods
                 Var.CreeptargetS = KillableCreep(summon.Key, false, true, 99);
 
                 if (Var.CreeptargetS != null && Var.CreeptargetS.IsValid && Var.CreeptargetS.IsVisible &&
-                    Var.CreeptargetS.IsAlive && Common.SleepCheck(summon.Key.Handle + "attack"))
+                    Var.CreeptargetS.IsAlive && Utils.SleepCheck(summon.Key.Handle + "attack"))
                 {
                     summon.Key.Attack(Var.CreeptargetS);
-                    Common.Sleep(summon.Key.SecondsPerAttack * 300 + Game.Ping, summon.Key.Handle + "attack");
+                    Utils.Sleep(summon.Key.SecondsPerAttack * 300 + Game.Ping, summon.Key.Handle + "attack");
                 }
             }
         }
 
         public static void SummonLastHit()
         {
-            if (Var.Summons.Count == 0) return;
+            if (Var.Summons.Count == 0 || Var.Summons.All(x => !x.Key.IsAlive)) return;
             if (!Var.SummonsDisableAaKeyPressed)
             {
                 Common.AutoattackSummons(0);
                 Var.SummonsDisableAaKeyPressed = true;
                 Var.SummonsAutoAttackTypeDef = false;
             }
-            foreach (var summon in Var.Summons)
+            foreach (var summon in Var.Summons.Where((x => x.Key.IsAlive)))
             {
                 var attackRange = summon.Key.AttackRange;
                 Var.CreeptargetS = KillableCreep(summon.Key, false, true, 3);
@@ -363,29 +363,29 @@ namespace AllinOne.Methods
                         if (Var.CreeptargetS.Health < getDamage)
                         {
                             if (summon.Key.NetworkActivity != NetworkActivity.Attack &&
-                                Common.SleepCheck(summon.Key.Handle + "attack") ||
-                                !Common.SleepCheck(summon.Key.Handle + "harass"))
+                                Utils.SleepCheck(summon.Key.Handle + "attack") ||
+                                !Utils.SleepCheck(summon.Key.Handle + "harass"))
                                 summon.Key.Attack(Var.CreeptargetS);
-                            Common.Sleep(summon.Key.SecondsPerAttack * 1000 + Game.Ping, summon.Key.Handle + "attack");
+                            Utils.Sleep(summon.Key.SecondsPerAttack * 1000 + Game.Ping, summon.Key.Handle + "attack");
                         }
-                        else if (Var.CreeptargetS.Health > getDamage && Common.SleepCheck(summon.Key.Handle + "stop"))
+                        else if (Var.CreeptargetS.Health > getDamage && Utils.SleepCheck(summon.Key.Handle + "stop"))
                         {
                             summon.Key.Hold();
-                            Common.Sleep(300 + Game.Ping, summon.Key.Handle + "stop");
+                            Utils.Sleep(300 + Game.Ping, summon.Key.Handle + "stop");
                         }
                     }
                     else if (summon.Key.Distance2D(Var.CreeptargetS) >= attackRange &&
-                                Common.SleepCheck(summon.Key.Handle + "walk"))
+                                Utils.SleepCheck(summon.Key.Handle + "walk"))
                     {
                         summon.Key.Move(Var.CreeptargetS.Position);
-                        Common.Sleep(300 + Game.Ping, summon.Key.Handle + "walk");
+                        Utils.Sleep(300 + Game.Ping, summon.Key.Handle + "walk");
                     }
                 }
                 else if (MenuVar.SummonsHarass && summon.Key.Distance2D(Var.Target) < 1000 &&
-                            Common.SleepCheck(summon.Key.Handle + "harass"))
+                            Utils.SleepCheck(summon.Key.Handle + "harass"))
                 {
                     summon.Key.Attack(Var.Target);
-                    Common.Sleep(1000 + Game.Ping, summon.Key.Handle + "harass");
+                    Utils.Sleep(1000 + Game.Ping, summon.Key.Handle + "harass");
                 }
             }
         }
@@ -521,8 +521,8 @@ namespace AllinOne.Methods
                             .First(x => x.ClassID == ClassID.CDOTA_Unit_Hero_Bloodseeker)
                             .Spellbook.Spell1.Level - 1) * 0.05 + 1.25;
             }
-            if (Var.Summons != null && Var.Summons.Count > 1 && Var.Summons.Any(x => x.Key.Handle != unit.Handle) &&
-                Var.CreeptargetS != null)
+            if (Var.Summons != null && Var.Summons.Count > 1 && Var.Summons.Any(x => x.Key.IsAlive) && 
+                Var.Summons.Any(x => x.Key.Handle != unit.Handle) && Var.CreeptargetS != null)
             {
                 if (Var.CreeptargetH == null ||
                     (Var.CreeptargetH.Handle != Var.CreeptargetS.Handle && Var.Me.Handle != unit.Handle))
@@ -857,8 +857,8 @@ namespace AllinOne.Methods
                                 if (damage > creep.Health)
                                 {
                                     Var.Q.UseAbility(creep);
-                                    Common.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Common.Sleep(Var.Q.GetCooldown(Var.Q.Level) * 1000 + 50 + Game.Ping, "cooldown");
+                                    Utils.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
+                                    Utils.Sleep(Var.Q.GetCooldown(Var.Q.Level) * 1000 + 50 + Game.Ping, "cooldown");
                                 }
                             }
                             break;
@@ -882,8 +882,8 @@ namespace AllinOne.Methods
                                 if (damage > creep.Health && Var.W.CastRange > Var.Me.Distance2D(creep))
                                 {
                                     Var.W.UseAbility();
-                                    Common.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Common.Sleep(Var.W.GetCooldown(Var.W.Level) * 1000 + 50 + Game.Ping, "cooldown");
+                                    Utils.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "cast");
+                                    Utils.Sleep(Var.W.GetCooldown(Var.W.Level) * 1000 + 50 + Game.Ping, "cooldown");
                                 }
                             }
                             break;
@@ -897,8 +897,8 @@ namespace AllinOne.Methods
                                 if (damage > creep.Health)
                                 {
                                     Var.Q.UseAbility(creep);
-                                    Common.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Common.Sleep(6 * 1000 + Game.Ping, "cooldown");
+                                    Utils.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
+                                    Utils.Sleep(6 * 1000 + Game.Ping, "cooldown");
                                 }
                             }
                             break;
@@ -913,13 +913,13 @@ namespace AllinOne.Methods
                                     if (damage > creep.Health && !Var.W.IsToggled && Var.Me.IsAttacking())
                                     {
                                         Var.W.ToggleAbility();
-                                        Common.Sleep(200 + Game.Ping, "cooldown");
+                                        Utils.Sleep(200 + Game.Ping, "cooldown");
                                     }
                                 }
                                 if (Var.W.IsToggled)
                                 {
                                     Var.W.ToggleAbility();
-                                    Common.Sleep((float) Var.HeroAPoint + Game.Ping, "cooldown");
+                                    Utils.Sleep((float) Var.HeroAPoint + Game.Ping, "cooldown");
                                 }
                             }
                             break;

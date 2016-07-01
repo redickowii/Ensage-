@@ -3,6 +3,8 @@
     using AllinOne.Methods;
     using AllinOne.Variables;
     using Ensage;
+    using Ensage.Common;
+    using Ensage.Common.Extensions;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -24,15 +26,15 @@
 
         public static void Update()
         {
-            if (Common.SleepCheck("getallyheroes"))
+            if (Utils.SleepCheck("getallyheroes"))
             {
                 UpdateHeroes();
-                Common.Sleep(1000, "getallyheroes");
+                Utils.Sleep(1000, "getallyheroes");
             }
             Heroes = Heroes.Where(x => x.IsValid).ToList();
             UsableHeroes = Heroes.Where(x => x.Health > 0 && x.IsAlive && x.IsVisible).ToArray();
-            if (!Common.SleepCheck("allyHeroesCheckValid")) return;
-            Common.Sleep(2000, "allyHeroesCheckValid");
+            if (!Utils.SleepCheck("allyHeroesCheckValid")) return;
+            Utils.Sleep(2000, "allyHeroesCheckValid");
             foreach (var hero in UsableHeroes)
             {
                 var handle = hero.Handle;
@@ -56,8 +58,7 @@
 
         public static void UpdateHeroes()
         {
-            var list = ObjectManager.GetEntities<Hero>().Where(x => x.Team == Var.Me.Team && x.IsValid && !x.IsIllusion && x.IsVisible).ToList();
-            //if (list.Count < Heroes.Count) Heroes.Clear();
+            var list =  ObjectManager.GetEntities<Hero>().Where(x => x.Team == Var.Me.Team && x.IsValid && !x.IsIllusion && x.IsVisible).ToList();
             var herolist = new List<Hero>(Heroes);
             foreach (var hero in list)
             {
