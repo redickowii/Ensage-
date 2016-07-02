@@ -127,7 +127,7 @@ namespace AllinOne.Methods
 
                     Utils.Sleep(MenuVar.CouCd, "Courier_rate");
                 }
-                else
+                else if (Following)
                 {
                     courier.Spellbook.SpellQ.UseAbility();
                     Following = false;
