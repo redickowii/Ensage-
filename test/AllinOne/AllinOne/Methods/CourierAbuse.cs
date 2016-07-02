@@ -1,6 +1,5 @@
 ﻿using System;
 using AllinOne.ObjectManager;
-using static Ensage.ObjectMgr;
 
 namespace AllinOne.Methods
 {
@@ -58,9 +57,6 @@ namespace AllinOne.Methods
                 {
                     if (Var.Me.Inventory.StashItems.Any())
                     {
-                        var burst = courierfontain.Spellbook.SpellR;
-                        if (MenuVar.CouBurst && courierfontain.IsFlying && burst.CanBeCasted())
-                            burst.UseAbility();
                         courierfontain.Spellbook.SpellD.UseAbility();
                     }
                     else if (courier.Inventory.Items.Any())

@@ -32,6 +32,7 @@
             //    }
             //    Utils.Sleep(900, "sleepprint");
             //}
+
             if (MenuVar.VisiblebyEnemy)
             {
                 foreach (var hero in AllyHeroes.Heroes)
