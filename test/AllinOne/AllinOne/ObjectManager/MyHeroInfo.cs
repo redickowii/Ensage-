@@ -42,7 +42,12 @@
 
         public static List<Item> GetItems()
         {
-            return AllyHeroes.ItemDictionary[Var.Me.Handle].Where(x => x.CanBeCasted()).ToList();
+            return AllyHeroes.ItemDictionary[Var.Me.Handle];
+        }
+
+        public static Item GetItem(string name)
+        {
+            return GetItems().FirstOrDefault(x => x.Name == name);
         }
 
         public static float GetProjectileSpeed(Entity unit)

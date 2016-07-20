@@ -1,9 +1,9 @@
-﻿using Ensage.Common;
-
-namespace AllinOne.Methods
+﻿namespace AllinOne.Methods
 {
+    using AllinOne.Menu;
     using AllinOne.Variables;
     using Ensage;
+    using Ensage.Common;
     using Ensage.Common.Extensions;
     using SharpDX;
     using System;
@@ -82,7 +82,8 @@ namespace AllinOne.Methods
                 }
                 catch (Exception)
                 {
-                    //Console.WriteLine("Error GetClosestCamp");
+                    if (MenuVar.ShowErrors)
+                        Common.PrintError("Error GetClosestCamp");
                 }
             }
         }
@@ -94,7 +95,7 @@ namespace AllinOne.Methods
             foreach (var camp in Var.Camps.Where(x => x.Stacked && x.Unit != null))
             {
                 var unit = camp.Unit;
-                if (!Utils.SleepCheck("stack" + unit.Handle)) continue;
+                if (!Utils.SleepCheck("JungleStack." + unit.Handle)) continue;
                 var time =
                     (int) (camp.Starttime - unit.Distance2D(camp.WaitPosition) / unit.MovementSpeed - 5 + Game.Ping / 1000);
                 switch (camp.State)
@@ -103,7 +104,7 @@ namespace AllinOne.Methods
                         if (Var.Seconds < time) continue;
                         unit.Move(camp.WaitPosition);
                         camp.State = 1;
-                        Utils.Sleep(500, "stack" + unit.Handle);
+                        Utils.Sleep(500, "JungleStack." + unit.Handle);
                         break;
 
                     case 1:
@@ -120,7 +121,7 @@ namespace AllinOne.Methods
                         if (unit.Distance2D(camp.WaitPosition) < 10)
                             camp.State = 2;
                         unit.Move(camp.WaitPosition);
-                        Utils.Sleep(500, "stack" + unit.Handle);
+                        Utils.Sleep(500, "JungleStack." + unit.Handle);
                         break;
 
                     case 2:
@@ -141,7 +142,7 @@ namespace AllinOne.Methods
                             camp.State = 3;
                             unit.Move(PositionCalc(unit, _closestNeutral));
                         }
-                        Utils.Sleep(500, "stack" + unit.Handle);
+                        Utils.Sleep(500, "JungleStack." + unit.Handle);
                         break;
 
                     case 3:
@@ -155,13 +156,13 @@ namespace AllinOne.Methods
                             }
                             var tWait = (distance + unit.SecondsPerAttack - unit.BaseAttackTime / 3) * 1000 + Game.Ping;
                             unit.Attack(_closestNeutral);
-                            Utils.Sleep(tWait, "twait" + unit.Handle);
+                            Utils.Sleep(tWait, "JungleStack.Wait" + unit.Handle);
                             camp.State = 4;
                         }
                         break;
 
                     case 4:
-                        if (unit.Distance2D(_closestNeutral) <= 150 || Utils.SleepCheck("twait" + unit.Handle))
+                        if (unit.Distance2D(_closestNeutral) <= 150 || Utils.SleepCheck("JungleStack.Wait" + unit.Handle))
                         {
                             unit.Stop();
                             unit.Move(camp.StackPosition);
@@ -175,7 +176,7 @@ namespace AllinOne.Methods
                             unit.Move(camp.WaitPositionN);
                             camp.State = 0;
                         }
-                        Utils.Sleep(1000, "stack" + unit.Handle);
+                        Utils.Sleep(1000, "JungleStack." + unit.Handle);
                         break;
                 }
             }

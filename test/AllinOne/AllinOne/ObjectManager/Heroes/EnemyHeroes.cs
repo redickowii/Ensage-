@@ -27,22 +27,22 @@
 
         public static void Update()
         {
-            if (Utils.SleepCheck("getheroes"))
+            if (Utils.SleepCheck("EnemyHeroes.Get"))
             {
                 UpdateHeroes();
-                Utils.Sleep(1000, "getheroes");
+                Utils.Sleep(1000, "EnemyHeroes.Get");
             }
-            if (Utils.SleepCheck("getillu"))
+            if (Utils.SleepCheck("EnemyHeroes.GetIllu"))
             {
                 UpdateIllusions();
-                Utils.Sleep(100, "getillu");
+                Utils.Sleep(100, "EnemyHeroes.GetIllu");
             }
             Illusions = Illusions.Where(x => x.IsValid).ToList();
             Heroes = Heroes.Where(x => x.IsValid).ToList();
             UsableHeroes = Heroes.Where(x => x.Health > 0 && x.IsAlive && x.IsVisible).ToArray();
-            if (Utils.SleepCheck("enemyHeroesCheckValid") || UsableHeroes.Any(x => !ItemDictionary.ContainsKey(x.Handle)))
+            if (Utils.SleepCheck("EnemyHeroes.CheckValid") || UsableHeroes.Any(x => !ItemDictionary.ContainsKey(x.Handle)))
             {
-                Utils.Sleep(2000, "enemyHeroesCheckValid");
+                Utils.Sleep(2000, "EnemyHeroes.CheckValid");
                 foreach (var hero in UsableHeroes)
                 {
                     var handle = hero.Handle;
@@ -115,7 +115,7 @@
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Update Illusions Error");
+                    Common.PrintError("Update Illusions Error");
             }
         }
 

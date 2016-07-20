@@ -52,7 +52,7 @@
             Var.Me = ObjectManager.LocalHero;
             Var.RadiusHeroParticleEffect = new Dictionary<string, ParticleEffect>();
             //Towers.TowerRange = new Dictionary<Entity, List<ParticleEffect>>();
-            //Towers.TowerLoad = false;
+            Towers.TowerLoad = false;
             Var.Target = null;
             Var.Loaded = true;
             Methods.ShowMeMore.RoshIsAlive = true;
@@ -88,8 +88,8 @@
             Orbwalking.Load();
             Draw.OnLoad();
             Zoom.Load();
-            Game.PrintMessage("<font color='#3366cc'>AllinOne </font><font color='#00cc00'>Loaded</font>", MessageType.LogMessage);
-            Common.PrintEncolored("AllinOne Loaded", ConsoleColor.DarkGreen);
+            Game.PrintMessage("<font color='#3366cc'>AllinOne Loaded</font>", MessageType.LogMessage);
+            Common.PrintEncolored("AllinOne Loaded", ConsoleColor.Yellow);
         }
 
         #endregion Methods

@@ -56,16 +56,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ensage">
-      <HintPath>D:\PlaySharp\System\Ensage.dll</HintPath>
+      <HintPath>D:\PlaySharp\References\Ensage.dll</HintPath>
     </Reference>
     <Reference Include="Ensage.Common">
-      <HintPath>D:\PlaySharp\System\Ensage.Common.dll</HintPath>
+      <HintPath>D:\PlaySharp\References\Ensage.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>D:\PlaySharp\System\SharpDX.dll</HintPath>
+      <HintPath>D:\PlaySharp\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>D:\PlaySharp\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>D:\PlaySharp\References\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -96,6 +96,7 @@
     <Compile Include="Menu\OverlayMenu.cs" />
     <Compile Include="Menu\SettingsMenu.cs" />
     <Compile Include="Menu\ShowMenu.cs" />
+    <Compile Include="Methods\AutoUse.cs" />
     <Compile Include="Methods\Common.cs" />
     <Compile Include="Methods\CourierAbuse.cs" />
     <Compile Include="Methods\Dodge.cs" />

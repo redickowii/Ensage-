@@ -1,4 +1,6 @@
-﻿namespace AllinOne.AllDrawing
+﻿using AllinOne.Methods;
+
+namespace AllinOne.AllDrawing
 {
     using AllinOne.Menu;
     using AllinOne.Variables;
@@ -85,7 +87,7 @@
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Draw Line Stack Error");
+                    Common.PrintError("Draw Line Stack Error");
             }
         }
 

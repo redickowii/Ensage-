@@ -557,6 +557,23 @@
         #endregion Fields
     }
 
+    internal class Allitems
+    {
+        public static readonly Dictionary<string, bool> list_of_items = new Dictionary<string, bool>
+            {
+                {"item_bottle",true},
+                {"item_phase_boots",true},
+                {"item_arcane_boots",true},
+                {"item_sphere",true},
+                {"item_cheese",true},
+                {"item_magic_stick",true},
+                {"item_magic_wand",true},
+                {"item_dust",true},
+                {"item_hand_of_midas",true}
+            };
+    }
+
+
     internal class Var
     {
         #region Fields

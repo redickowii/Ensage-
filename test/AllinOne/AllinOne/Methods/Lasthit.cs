@@ -35,7 +35,7 @@ namespace AllinOne.Methods
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Attack Count Error");
+                    Common.PrintError("Attack Count Error");
             }
             return count;
         }
@@ -95,7 +95,7 @@ namespace AllinOne.Methods
                 catch (Exception)
                 {
                     if (MenuVar.ShowErrors)
-                        Console.WriteLine("Health predict Error");
+                        Common.PrintError("Health predict Error");
                 }
             }
             return 0;
@@ -103,12 +103,12 @@ namespace AllinOne.Methods
 
         private static void Clear()
         {
-            if (!Utils.SleepCheck("Clear")) return;
+            if (!Utils.SleepCheck("Lasthit.Clear")) return;
             var creeps = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive).ToList();
             Var.CreepsDic = (from creep in creeps
                              where Var.CreepsDic.Any(x => x.Unit.Handle == creep.Handle)
                              select Var.CreepsDic.Find(x => x.Unit.Handle == creep.Handle)).ToList();
-            Utils.Sleep(10000, "Clear");
+            Utils.Sleep(10000, "Lasthit.Clear");
         }
 
         private static void UpdateCreeps()
@@ -132,7 +132,7 @@ namespace AllinOne.Methods
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Update Creeps Error");
+                    Common.PrintError("Update Creeps Error");
             }
         }
 
@@ -216,13 +216,13 @@ namespace AllinOne.Methods
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Draw Hpbar Error");
+                    Common.PrintError("Draw Hpbar Error");
             }
         }
 
         public static void Farm()
         {
-            if (!Utils.SleepCheck("cast")) return;
+            if (!Utils.SleepCheck("Lasthit.Cast")) return;
             if (!Var.DisableAaKeyPressed)
             {
                 Common.Autoattack(0);
@@ -232,7 +232,7 @@ namespace AllinOne.Methods
             Var.CreeptargetH = KillableCreep(Var.Me, false, false, 99);
             if (Var.CreeptargetH != null && Var.CreeptargetH.IsValid && Var.CreeptargetH.IsVisible && Var.CreeptargetH.IsAlive)
             {
-                if (MenuVar.UseSpell && Utils.SleepCheck("cooldown"))
+                if (MenuVar.UseSpell && Utils.SleepCheck("Lasthit.Cooldown"))
                     SpellCast();
                 Orbwalking.Orbwalk(Var.CreeptargetH);
             }
@@ -261,7 +261,7 @@ namespace AllinOne.Methods
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("GetNearestCreep Error");
+                    Common.PrintError("GetNearestCreep Error");
             }
             return null;
         }
@@ -276,7 +276,7 @@ namespace AllinOne.Methods
 
         public static void LastHit()
         {
-            if (!Utils.SleepCheck("cast")) return;
+            if (!Utils.SleepCheck("Lasthit.Cast")) return;
             if (!Var.DisableAaKeyPressed)
             {
                 Common.Autoattack(0);
@@ -284,7 +284,7 @@ namespace AllinOne.Methods
                 Var.AutoAttackTypeDef = false;
             }
             Var.CreeptargetH = KillableCreep(Var.Me, false, false, 2);
-            if (MenuVar.UseSpell && Utils.SleepCheck("cooldown"))
+            if (MenuVar.UseSpell && Utils.SleepCheck("Lasthit.Cooldown"))
                 SpellCast();
             if (Var.CreeptargetH != null && Var.CreeptargetH.IsValid &&
                 Var.CreeptargetH.IsVisible && Var.CreeptargetH.IsAlive)
@@ -304,17 +304,17 @@ namespace AllinOne.Methods
                             Var.Me.Attack(Var.CreeptargetH);
                     }
                     else if (Var.CreeptargetH.Health < getDamage * 2 && Var.CreeptargetH.Health >= getDamage &&
-                             Var.CreeptargetH.Team != Var.Me.Team && Utils.SleepCheck("stop"))
+                             Var.CreeptargetH.Team != Var.Me.Team && Utils.SleepCheck("Lasthit.Stop"))
                     {
                         Var.Me.Hold();
                         Var.Me.Attack(Var.CreeptargetH);
-                        Utils.Sleep((float) Var.HeroAPoint / 2 + Game.Ping, "stop");
+                        Utils.Sleep((float) Var.HeroAPoint / 2 + Game.Ping, "Lasthit.Stop");
                     }
                 }
-                else if (Var.Me.Distance2D(Var.CreeptargetH) >= MyHeroInfo.AttackRange() && Utils.SleepCheck("walk"))
+                else if (Var.Me.Distance2D(Var.CreeptargetH) >= MyHeroInfo.AttackRange() && Utils.SleepCheck("Lasthit.Walk"))
                 {
                     Var.Me.Move(Var.CreeptargetH.Position);
-                    Utils.Sleep(100 + Game.Ping, "walk");
+                    Utils.Sleep(100 + Game.Ping, "Lasthit.Walk");
                 }
             }
             else
@@ -332,10 +332,10 @@ namespace AllinOne.Methods
                 Var.CreeptargetS = KillableCreep(summon.Key, false, true, 99);
 
                 if (Var.CreeptargetS != null && Var.CreeptargetS.IsValid && Var.CreeptargetS.IsVisible &&
-                    Var.CreeptargetS.IsAlive && Utils.SleepCheck(summon.Key.Handle + "attack"))
+                    Var.CreeptargetS.IsAlive && Utils.SleepCheck(summon.Key.Handle + "Lasthit.Attack"))
                 {
                     summon.Key.Attack(Var.CreeptargetS);
-                    Utils.Sleep(summon.Key.SecondsPerAttack * 300 + Game.Ping, summon.Key.Handle + "attack");
+                    Utils.Sleep(summon.Key.SecondsPerAttack * 300 + Game.Ping, summon.Key.Handle + "Lasthit.Attack");
                 }
             }
         }
@@ -363,29 +363,29 @@ namespace AllinOne.Methods
                         if (Var.CreeptargetS.Health < getDamage)
                         {
                             if (summon.Key.NetworkActivity != NetworkActivity.Attack &&
-                                Utils.SleepCheck(summon.Key.Handle + "attack") ||
-                                !Utils.SleepCheck(summon.Key.Handle + "harass"))
+                                Utils.SleepCheck("Lasthit.Attack" + summon.Key.Handle) ||
+                                !Utils.SleepCheck("Lasthit.Harass" + summon.Key.Handle))
                                 summon.Key.Attack(Var.CreeptargetS);
-                            Utils.Sleep(summon.Key.SecondsPerAttack * 1000 + Game.Ping, summon.Key.Handle + "attack");
+                            Utils.Sleep(summon.Key.SecondsPerAttack * 1000 + Game.Ping,"Lasthit.Attack" + summon.Key.Handle);
                         }
-                        else if (Var.CreeptargetS.Health > getDamage && Utils.SleepCheck(summon.Key.Handle + "stop"))
+                        else if (Var.CreeptargetS.Health > getDamage && Utils.SleepCheck("Lasthit.Stop"+ summon.Key.Handle))
                         {
                             summon.Key.Hold();
-                            Utils.Sleep(300 + Game.Ping, summon.Key.Handle + "stop");
+                            Utils.Sleep(300 + Game.Ping, "Lasthit.Stop" + summon.Key.Handle);
                         }
                     }
                     else if (summon.Key.Distance2D(Var.CreeptargetS) >= attackRange &&
-                                Utils.SleepCheck(summon.Key.Handle + "walk"))
+                                Utils.SleepCheck("Lasthit.Walk" + summon.Key.Handle))
                     {
                         summon.Key.Move(Var.CreeptargetS.Position);
-                        Utils.Sleep(300 + Game.Ping, summon.Key.Handle + "walk");
+                        Utils.Sleep(300 + Game.Ping, "Lasthit.Walk" + summon.Key.Handle);
                     }
                 }
                 else if (MenuVar.SummonsHarass && summon.Key.Distance2D(Var.Target) < 1000 &&
-                            Utils.SleepCheck(summon.Key.Handle + "harass"))
+                            Utils.SleepCheck("Lasthit.Harass" + summon.Key.Handle))
                 {
                     summon.Key.Attack(Var.Target);
-                    Utils.Sleep(1000 + Game.Ping, summon.Key.Handle + "harass");
+                    Utils.Sleep(1000 + Game.Ping, "Lasthit.Harass" + summon.Key.Handle);
                 }
             }
         }
@@ -748,7 +748,7 @@ namespace AllinOne.Methods
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("GetLowestHpCreep Error");
+                    Common.PrintError("GetLowestHpCreep Error");
             }
             return null;
         }
@@ -777,7 +777,7 @@ namespace AllinOne.Methods
             }
             catch (Exception)
             {
-                Console.WriteLine("Error GetAllLowestHpCreep");
+                Common.PrintError("Error GetAllLowestHpCreep");
             }
             return null;
         }
@@ -857,8 +857,8 @@ namespace AllinOne.Methods
                                 if (damage > creep.Health)
                                 {
                                     Var.Q.UseAbility(creep);
-                                    Utils.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Utils.Sleep(Var.Q.GetCooldown(Var.Q.Level) * 1000 + 50 + Game.Ping, "cooldown");
+                                    Utils.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "Lasthit.Cast");
+                                    Utils.Sleep(Var.Q.GetCooldown(Var.Q.Level) * 1000 + 50 + Game.Ping, "Lasthit.Cooldown");
                                 }
                             }
                             break;
@@ -882,8 +882,8 @@ namespace AllinOne.Methods
                                 if (damage > creep.Health && Var.W.CastRange > Var.Me.Distance2D(creep))
                                 {
                                     Var.W.UseAbility();
-                                    Utils.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Utils.Sleep(Var.W.GetCooldown(Var.W.Level) * 1000 + 50 + Game.Ping, "cooldown");
+                                    Utils.Sleep(Var.W.GetCastPoint(Var.W.Level) * 1000 + 50 + Game.Ping, "Lasthit.Cast");
+                                    Utils.Sleep(Var.W.GetCooldown(Var.W.Level) * 1000 + 50 + Game.Ping, "Lasthit.Cooldown");
                                 }
                             }
                             break;
@@ -897,8 +897,8 @@ namespace AllinOne.Methods
                                 if (damage > creep.Health)
                                 {
                                     Var.Q.UseAbility(creep);
-                                    Utils.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "cast");
-                                    Utils.Sleep(6 * 1000 + Game.Ping, "cooldown");
+                                    Utils.Sleep(Var.Q.GetCastPoint(Var.Q.Level) * 1000 + 50 + Game.Ping, "Lasthit.Cast");
+                                    Utils.Sleep(6 * 1000 + Game.Ping, "Lasthit.Cooldown");
                                 }
                             }
                             break;
@@ -913,13 +913,13 @@ namespace AllinOne.Methods
                                     if (damage > creep.Health && !Var.W.IsToggled && Var.Me.IsAttacking())
                                     {
                                         Var.W.ToggleAbility();
-                                        Utils.Sleep(200 + Game.Ping, "cooldown");
+                                        Utils.Sleep(200 + Game.Ping, "Lasthit.Cooldown");
                                     }
                                 }
                                 if (Var.W.IsToggled)
                                 {
                                     Var.W.ToggleAbility();
-                                    Utils.Sleep((float) Var.HeroAPoint + Game.Ping, "cooldown");
+                                    Utils.Sleep((float) Var.HeroAPoint + Game.Ping, "Lasthit.Cooldown");
                                 }
                             }
                             break;

@@ -1,4 +1,6 @@
-﻿namespace AllinOne.AllDrawing
+﻿using AllinOne.Methods;
+
+namespace AllinOne.AllDrawing
 {
     using AllinOne.Variables;
     using Ensage;
@@ -90,7 +92,7 @@
             }
             catch (Exception)
             {
-                Console.WriteLine("ShowInfo Error");
+                Common.PrintError("ShowInfo Error");
             }
         }
 

@@ -81,7 +81,7 @@
                 case ClassID.CDOTA_Unit_Hero_Mirana:
                     spell = hero.Spellbook.Spell2;
                     if (spell == null) return;
-                    if (_arrowUnit != null && !Utils.SleepCheck("DrawArrrow") && Utils.SleepCheck("arrrowwait"))
+                    if (_arrowUnit != null && !Utils.SleepCheck("ShowMeMore.Mirana.Draw") && Utils.SleepCheck("ShowMeMore.Mirana.Wait"))
                     {
                         if (_arrowUnit.IsValid && _arrowUnit.IsVisible)
                         {
@@ -95,7 +95,7 @@
                             }
                         }
                     }
-                    else if (Utils.SleepCheck("DrawArrrow") && EffectForSpells.ContainsKey(spell))
+                    else if (Utils.SleepCheck("ShowMeMore.Mirana.Draw") && EffectForSpells.ContainsKey(spell))
                     {
                         EffectForSpells[spell].ForceDispose();
                         EffectForSpells.Remove(spell);
@@ -154,7 +154,7 @@
                         if (spell.IsInAbilityPhase)
                         {
                             if (!EffectForSpells.ContainsKey(spell) && spell.CanBeCasted() &&
-                                Common.Wait(220, 500, "wait_ice_path"))
+                                Common.Wait(220, 500, "ShowMeMore.Jakiro.Wait.2"))
                             {
                                 var effect = new ParticleEffect(Particles.Partlist[81], hero.Position);
                                 effect.SetControlPoint(1, hero.Position);
@@ -174,7 +174,7 @@
                     {
                         if (spell.IsInAbilityPhase || (spell.Cooldown > 0 && spell.GetCooldown(spell.Level - 1) - spell.Cooldown <= 10))
                         {
-                            if (!EffectForSpells.ContainsKey(spell) && Common.Wait(220, 500, "wait_macropyre"))
+                            if (!EffectForSpells.ContainsKey(spell) && Common.Wait(220, 500, "ShowMeMore.Jakiro.Wait.4"))
                             {
                                 var effect = new ParticleEffect(Particles.Partlist[81], hero.Position);
                                 effect.SetControlPoint(1, hero.Position);
@@ -204,7 +204,7 @@
                         if (spell.IsInAbilityPhase)
                         {
                             if (!SpellRadius.Any(x => x.ContainsHero(hero)) && spell.CanBeCasted() &&
-                                Common.Wait(220, 500, "wait_ship"))
+                                Common.Wait(220, 500, "ShowMeMore.Kunkka.Wait.4"))
                             {
                                 var effect = new ParticleEffect(@"particles\ui_mouseactions\drag_selected_ring.vpcf",
                                     Common.FindVector(hero.Position, hero.Rotation, 1000));
@@ -256,12 +256,12 @@
                     {
                         foreach (var hero in EnemyHeroes.Heroes)
                         {
-                            if (hero.Name == "npc_dota_hero_mirana" && Utils.SleepCheck("miranaarrow"))
+                            if (hero.Name == "npc_dota_hero_mirana" && Utils.SleepCheck("ShowMeMore.Mirana.Wait2"))
                             {
                                 if (p.ClassID == ClassID.CDOTA_BaseNPC && p.DayVision == 650)
                                 {
-                                    Utils.Sleep(3000 / 857 * 1000 + 400 + Game.Ping, "DrawArrrow");
-                                    Utils.Sleep(100 + Game.Ping, "arrrowwait");
+                                    Utils.Sleep(3000 / 857 * 1000 + 400 + Game.Ping, "ShowMeMore.Mirana.Draw");
+                                    Utils.Sleep(100 + Game.Ping, "ShowMeMore.Mirana.Wait");
                                     _arrowPos = p.Position;
                                     _arrowUnit = p;
                                 }
@@ -269,7 +269,7 @@
                                     AllDrawing.ShowMeMore.Mapicon.Add(hero, p.Position);
                                 else
                                     AllDrawing.ShowMeMore.Mapicon[hero] = p.Position;
-                                Utils.Sleep(10000, "miranaarrow");
+                                Utils.Sleep(10000, "ShowMeMore.Mirana.Wait2");
                             }
                             else if (p.Owner != null && Equals(p.Owner, hero) && p.Name == "npc_dota_thinker" ||
                                         p.Name == "npc_dota_units_base")
@@ -277,14 +277,10 @@
                                 if (!AllDrawing.ShowMeMore.Mapicon.ContainsKey(hero))
                                 {
                                     AllDrawing.ShowMeMore.Mapicon.Add(hero, p.Position);
-                                    //Console.WriteLine("1");
-                                    //Game.ExecuteCommand("cl_particles_dumplist");
                                 }
                                 else if (AllDrawing.ShowMeMore.Mapicon[hero] != p.Position)
                                 {
                                     AllDrawing.ShowMeMore.Mapicon[hero] = p.Position;
-                                    //Game.ExecuteCommand("cl_particles_dumplist");
-                                    //Console.WriteLine("2");
                                 }
                             }
                             foreach (var show in ShowMeMoreEffects)

@@ -23,15 +23,7 @@
 
             Var.Seconds = (int) Game.GameTime % 60;
 
-            //if (Utils.SleepCheck("sleepprint"))
-            //{
-            //    Console.WriteLine("--------------------");
-            //    foreach (var d in Var.SleepDic)
-            //    {
-            //        Console.WriteLine("Text:[{0}]  Period:[{1}]", d.Text, d.Period / 10000);
-            //    }
-            //    Utils.Sleep(900, "sleepprint");
-            //}
+            AutoUse.AutoUseMain();
 
             if (MenuVar.VisiblebyEnemy)
             {
@@ -50,11 +42,11 @@
                 Dodge.Check();
             }
 
-            CourierAbuse.Main2();
+            CourierAbuse.CourierMain();
 
             foreach (var hero in EnemyHeroes.Heroes)
             {
-                Methods.ShowMeMore.DrawShowMeMoreSpells(hero);
+                ShowMeMore.DrawShowMeMoreSpells(hero);
             }
 
             if (MenuVar.ShowRunesChat /*&& (int) Game.GameTime / 60 % 2 == 0*/)

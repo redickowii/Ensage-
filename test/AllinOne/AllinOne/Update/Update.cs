@@ -79,8 +79,8 @@ namespace AllinOne.Update
 
             MenuVar.CameraDistance = MainMenu.MenuSettings.Item("cameradistance");
 
-            if (!Utils.SleepCheck("tick")) return;
-            Utils.Sleep(500, "tick");
+            if (!Utils.SleepCheck("Update.sleep")) return;
+            Utils.Sleep(500, "Update.sleep");
 
             if (MenuVar.ShowRoshanTimer)
             {

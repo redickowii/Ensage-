@@ -145,7 +145,7 @@ namespace AllinOne.AllDrawing
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Draw Illusions");
+                    Common.PrintError("Draw Illusions");
             }
         }
 

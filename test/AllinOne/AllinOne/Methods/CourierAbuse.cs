@@ -16,9 +16,9 @@ namespace AllinOne.Methods
     {
         public static bool Following;
 
-        public static void Main2()
+        public static void CourierMain()
         {
-            if (!Utils.SleepCheck("Courier_rate") || 
+            if (!Utils.SleepCheck("CourierAbuse.Rate") || 
                 Couriers.AllyCouriers == null ||
                 Buildings.AllyFountain == null)
                 return;
@@ -44,7 +44,7 @@ namespace AllinOne.Methods
                         }
                     }
                 }
-                Utils.Sleep(MenuVar.CouCd, "Courier_rate");
+                Utils.Sleep(MenuVar.CouCd, "CourierAbuse.Rate");
             }
 
             #endregion Avoid enemy
@@ -65,7 +65,7 @@ namespace AllinOne.Methods
                         courier.Spellbook.SpellQ.UseAbility(true);
                     }
                 }
-                Utils.Sleep(MenuVar.CouCd, "Courier_rate");
+                Utils.Sleep(MenuVar.CouCd, "CourierAbuse.Rate");
             }
 
             #endregion Anti reuse
@@ -77,7 +77,7 @@ namespace AllinOne.Methods
                 if (MenuVar.CouLock && !MenuVar.CouForced && !MenuVar.CouAbuse)
                     courier.Spellbook.SpellQ.UseAbility();
 
-                Utils.Sleep(MenuVar.CouCd, "Courier_rate");
+                Utils.Sleep(MenuVar.CouCd, "CourierAbuse.Rate");
             }
 
             #endregion lock at base
@@ -125,7 +125,7 @@ namespace AllinOne.Methods
                         Following = false;
                     }
 
-                    Utils.Sleep(MenuVar.CouCd, "Courier_rate");
+                    Utils.Sleep(MenuVar.CouCd, "CourierAbuse.Rate");
                 }
                 else if (Following)
                 {

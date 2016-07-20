@@ -105,7 +105,7 @@
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("Error GetCooldown for " + ability.Name);
+                    Common.PrintError("Error GetCooldown for " + ability.Name);
             }
             return 0;
         }
@@ -139,6 +139,12 @@
         {
             if (true)
                 Game.PrintMessage("[AllinOne]: " + s, chatMessage);
+        }
+
+        public static void PrintError(string s)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine("[AllinOne]: " + s);
         }
 
         public static void PrintEncolored(string text, ConsoleColor color, params object[] arguments)
@@ -180,7 +186,7 @@
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("SleepCheck Error");
+                    Common.PrintError("SleepCheck Error");
             }
             return true;
         }
@@ -283,7 +289,7 @@
             catch (Exception)
             {
                 if (MenuVar.ShowErrors)
-                    Console.WriteLine("UpdateSummons Error");
+                    Common.PrintError("UpdateSummons Error");
             }
         }
 

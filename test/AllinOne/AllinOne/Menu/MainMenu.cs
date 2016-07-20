@@ -169,6 +169,21 @@
 
         #region Settings
 
+        public static double PercentStickUse;
+        public static double PercentCheeseUse;
+        public static double PercentArcaneUse;
+
+        public static bool ItemBottleUse;
+        public static bool ItemPhaseBootsUse;
+        public static bool ItemArcaneBootsUse;
+        public static bool ItemSphereUse;
+        public static bool ItemCheeseUse;
+        public static bool ItemMagicStickUse;
+        public static bool ItemMagicWandUse;
+        public static bool ItemDustUse;
+        public static bool ItemHandOfMidasUse;
+        public static bool MidasAllUse;
+
         public static MenuItem CameraDistance;
         public static bool DodgeEnable;
         public static int DodgeFrequency;

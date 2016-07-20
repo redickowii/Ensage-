@@ -24,9 +24,11 @@ namespace AllinOne.ObjectManager
         {
             Towers = ObjectManager.GetEntities<Unit>().Where(x => x.IsAlive && (x.ClassID == ClassID.CDOTA_BaseNPC_Tower)).ToList();
 
-            AllyFountain = ObjectManager.GetEntities<Unit>().First(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team == Var.Me.Team);
+            if (ObjectManager.GetEntities<Unit>().Any(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team == Var.Me.Team))
+                AllyFountain = ObjectManager.GetEntities<Unit>().First(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team == Var.Me.Team);
 
-            EnemyFountain = ObjectManager.GetEntities<Unit>().First(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team != Var.Me.Team);
+            if (ObjectManager.GetEntities<Unit>().Any(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team != Var.Me.Team))
+                EnemyFountain = ObjectManager.GetEntities<Unit>().First(x => x.ClassID == ClassID.CDOTA_Unit_Fountain && x.Team != Var.Me.Team);
 
             //foreach (var tower in Towers)
             //{

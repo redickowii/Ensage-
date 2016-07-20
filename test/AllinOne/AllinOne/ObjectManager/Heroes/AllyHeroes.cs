@@ -1,4 +1,6 @@
-﻿namespace AllinOne.ObjectManager.Heroes
+﻿using System;
+
+namespace AllinOne.ObjectManager.Heroes
 {
     using AllinOne.Methods;
     using AllinOne.Variables;
@@ -26,15 +28,15 @@
 
         public static void Update()
         {
-            if (Utils.SleepCheck("getallyheroes"))
+            if (Utils.SleepCheck("AllyHeroes.Get"))
             {
                 UpdateHeroes();
-                Utils.Sleep(1000, "getallyheroes");
+                Utils.Sleep(1000, "AllyHeroes.Get");
             }
             Heroes = Heroes.Where(x => x.IsValid).ToList();
             UsableHeroes = Heroes.Where(x => x.Health > 0 && x.IsAlive && x.IsVisible).ToArray();
-            if (!Utils.SleepCheck("allyHeroesCheckValid")) return;
-            Utils.Sleep(2000, "allyHeroesCheckValid");
+            if (!Utils.SleepCheck("AllyHeroes.CheckValid")) return;
+            Utils.Sleep(2000, "AllyHeroes.CheckValid");
             foreach (var hero in UsableHeroes)
             {
                 var handle = hero.Handle;
